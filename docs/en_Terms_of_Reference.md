@@ -81,7 +81,7 @@ TBD
 
 TBD
 
-# !0.  Generating a card with settings
+# 10.  Generating a card with settings
 
 TBD
 
