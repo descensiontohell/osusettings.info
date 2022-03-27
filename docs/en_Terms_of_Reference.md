@@ -22,6 +22,7 @@ The system has the following main components:
 - Functionality for keeping track of each player's settings history
 - Functionality for automatic update of the players' ranks in the database
 - Functionality for viewing the page of a particular player and the history of their settings
+
 Extras:
 - Functionality for authorization with osu!auth for players, so they can change their data without the participation of the administrator
 - The ability to generate a card with the data about the player and their settings as an image that can be placed in the userpage, stream description or anywhere else.
