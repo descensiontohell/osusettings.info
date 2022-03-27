@@ -64,23 +64,24 @@ The system is designed to record the following data:
 - If the device is a tablet:
    - TBD
 
-# 6. Updating the ranks of players in the system
+# 7. Updating the ranks of players in the system
    
 For the time being, there is no functionality for player authorization in the system:
 - The script gets the information from osu!api and updates it in the database one by one for each player in the database
+
 After the authorization functionality is implemented:
 - For players with a global rank of 1-10000 there is an automatic update of rank and performance points. The script gets information from osu!api and updates it in the database
 - For players with a rank below 10000 the updating of a rank and points of productivity happens only when they log in
 
-# 7. Tracking history of player settings
+# 8. Tracking history of player settings
 
 TBD
 
-# 8.  Authorized Users Features
+# 9.  Authorized Users Features
 
 TBD
 
-# 9.  Generating a card with settings
+# !0.  Generating a card with settings
 
 TBD
 
