@@ -62,7 +62,12 @@ The system is designed to record the following data:
    - keyboard model
    - keyboard switch
 - If the device is a tablet:
-   - TBD
+   - tablet area
+   - raw input
+   - resolution 
+   - tablet model
+   - keyboard model
+   - keyboard switch
 
 # 7. Updating the ranks of players in the system
    
@@ -73,16 +78,17 @@ After the authorization functionality is implemented:
 - For players with a global rank of 1-10000 there is an automatic update of rank and performance points. The script gets information from osu!api and updates it in the database
 - For players with a rank below 10000 the updating of a rank and points of productivity happens only when they log in
 
-# 8. Tracking history of player settings
+# 8. Tracking Player Settings History
 
-TBD
+For each player, there is a view of the settings history available. To do this, each time you update your settings, the update date is set, and the previous entry is added to the "past settings", which are sorted by date
 
-# 9.  Authorized Users Features
+# 9. Authorized Users Capabilities
 
-TBD
+After implementing authorization with osu!auth, users have the ability to change any of their settings themselves. This saves old data in the settings history. The user can also generate an image of his settings data that can be shared later.
 
-# 10.  Generating a card with settings
+# 10. Generating a MAP
 
-TBD
+When generating a settings card, user can select what settings they want to add to it. The structure of the image is determined by the preset HTML / CSS style.
+
 
 
