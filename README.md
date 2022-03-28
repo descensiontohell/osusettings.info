@@ -1,1 +1,1 @@
-# mouse_players.info
+# osusettings.info
