@@ -86,7 +86,7 @@ For each player, there is a view of the settings history available. To do this, 
 
 After implementing authorization with osu!auth, users have the ability to change any of their settings themselves. This saves old data in the settings history. The user can also generate an image of his settings data that can be shared later.
 
-# 10. Generating a MAP
+# 10. Generating a settings card
 
 When generating a settings card, user can select what settings they want to add to it. The structure of the image is determined by the preset HTML / CSS style.
 
