@@ -1,40 +1,29 @@
 import typing
-import gino
 from typing import Optional
-from gino.api import Gino
-from backend.app.store.database.db_gino import db
-from sqlalchemy.engine.url import URL
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 if typing.TYPE_CHECKING:
     from backend.app.web.app import Application
 
 
 class Database:
-    db: Gino
 
     def __init__(self, app: "Application"):
         self.app = app
-        self.db: Optional[Gino] = None
+        self.db: Optional[AsyncSession] = None
 
     async def connect(self, *_, **kw):
-        self._engine = await gino.create_engine(
-            URL(
-                drivername="asyncpg",
-                host=self.app.config.database.host,
-                database=self.app.config.database.database,
-                username=self.app.config.database.user,
-                password=self.app.config.database.password,
-                port=self.app.config.database.port,
-            ),
-            min_size=1,
-            max_size=1,
-        )
-        self.db = db
-        self.db.bind = self._engine
+        try:
+            self._engine = create_async_engine(
+                f"postgresql+asyncpg://elle_dev:dev_elle_pass@localhost:5432/dev_osu"
+            )
+        except Exception as e:
+            self.app.logger.error("Exception", exc_info=e)
+        self.db = AsyncSession(self._engine)
 
     async def disconnect(self, *_, **kw):
         if self.db:
             await self.db.pop_bind().close()
             self._engine = None
-            self.db: Optional[Gino] = None
+            self.db: Optional[AsyncSession] = None
 

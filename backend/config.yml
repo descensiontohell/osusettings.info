@@ -1,12 +1,14 @@
 session:
   key: PfJ4Hkf_glFG_S08LlxjmJMgHNhMSHY8LO7bxOP11bo=
 superuser:
-  login:
-  password:
+  login: elle
+  password: 12345
 database:
   host: 127.0.0.1
   port: 5432
   user: elle_dev
   password: dev_elle_pass
   database: dev_osu
-
+redis:
+  host: localhost
+  port: 6379
