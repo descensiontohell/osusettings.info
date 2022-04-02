@@ -10,6 +10,7 @@ from aiohttp_session import setup as setup_session
 from aioredis.client import Redis
 from aiohttp_session.redis_storage import RedisStorage
 
+from backend.app.web.middlewares import setup_middlewares
 from backend.app.web.redis import setup_redis
 from backend.app.web.logger import setup_logging
 from backend.app.store import setup_store, Store
@@ -30,6 +31,7 @@ class Application(AiohttpApplication):
 class Request(AiohttpRequest):
     player_name: Optional[str] = None
     player_id: Optional[int] = None
+    superuser: Optional[str] = None
 
     @property
     def app(self) -> "Application":
@@ -45,6 +47,10 @@ class View(AiohttpView):
     def store(self) -> Store:
         return self.request.app.store
 
+    @property
+    def data(self) -> dict:
+        return self.request.get("data", {})
+
 
 app = Application()
 
@@ -56,7 +62,7 @@ def setup_app(config_path: str) -> Application:
     setup_redis(app)
     setup_session(app, RedisStorage(app.redis))
     setup_aiohttp_apispec(app, title="osusettings", url="/api/docs/json", swagger_path="/api/docs")
- #   setup_middlewares(app)
+    setup_middlewares(app)
     setup_store(app)
     return app
 

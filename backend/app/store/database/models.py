@@ -1,21 +1,14 @@
-import datetime
-
 from sqlalchemy.sql import func
-
-import typing
-from dataclasses import dataclass
-from typing import Optional, List
 
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, MetaData, DateTime, Float
 from sqlalchemy.orm import declarative_base, relationship
 
+from backend.app.store.players.dataclasses import Playstyle, Mouse, Tablet, Keyboard, Switch, Player, Settings
+
+from backend.app.store.service_api.dataclasses import Superuser, Admin
+
 meta = MetaData()
 Base = declarative_base(meta)
-
-
-@dataclass
-class Playstyle:
-    name: str
 
 
 class PlaystyleModel(Base):
@@ -27,17 +20,6 @@ class PlaystyleModel(Base):
 
     def to_dc(self):
         return Playstyle(name=self.name)
-
-
-@dataclass
-class Mouse:
-    brand: str
-    model: str
-    width: int
-    height: int
-    length: int
-    weight: int
-    sensor: str
 
 
 class MouseModel(Base):
@@ -65,11 +47,6 @@ class MouseModel(Base):
         )
 
 
-@dataclass
-class Tablet:
-    name: str
-
-
 class TabletModel(Base):
     __tablename__ = "tablet"
     id = Column(Integer(), primary_key=True)
@@ -79,12 +56,6 @@ class TabletModel(Base):
 
     def to_dc(self):
         return Tablet(name=self.name)
-
-
-@dataclass
-class Keyboard:
-    brand: str
-    model: str
 
 
 class KeyboardModel(Base):
@@ -99,11 +70,6 @@ class KeyboardModel(Base):
         return Keyboard(brand=self.brand, model=self.model)
 
 
-@dataclass
-class Switch:
-    name: str
-
-
 class SwitchModel(Base):
     __tablename__ = 'switch'
     id = Column(Integer(), primary_key=True)
@@ -113,33 +79,6 @@ class SwitchModel(Base):
 
     def to_dc(self):
         return Switch(name=self.name)
-
-
-@dataclass
-class Player:
-    last_updated: datetime.datetime
-    is_admin: bool
-    osu_id: int
-    name: str
-    global_rank: int
-    performance: int
-    is_mouse: bool
-    playstyle: Optional[Playstyle]
-    mouse_edpi: int
-    tablet_area_width: int
-    tablet_area_height: int
-    dpi: int
-    os_sens: int
-    os_accel: bool
-    multiplier: float
-    res_width: int
-    res_height: int
-    refresh_rate: int
-    raw_input: bool
-    mouse: Optional[Mouse]
-    tablet: Optional[Tablet]
-    keyboard: Optional[Keyboard]
-    switch: Optional[Switch]
 
 
 class PlayerModel(Base):
@@ -226,29 +165,6 @@ class PlayerModel(Base):
         )
 
 
-@dataclass
-class Settings:
-    last_updated: datetime.datetime
-    osu_id: int
-    is_mouse: bool
-    playstyle: Optional[Playstyle]
-    mouse_edpi: int
-    tablet_area_width: int
-    tablet_area_height: int
-    dpi: int
-    os_sens: str
-    os_accel: bool
-    multiplier: float
-    res_width: int
-    res_height: int
-    refresh_rate: int
-    raw_input: bool
-    mouse: Optional[Mouse]
-    tablet: Optional[Tablet]
-    keyboard: Optional[Keyboard]
-    switch: Optional[Switch]
-
-
 class SettingsModel(Base):
     __tablename__ = "previous_settings"
     id = Column(Integer(), primary_key=True)
@@ -325,3 +241,20 @@ class SettingsModel(Base):
             switch=switch,
         )
 
+
+class SuperuserModel(Base):
+    __tablename__ = "superuser"
+    name = Column(String(), primary_key=True)
+    password = Column(String())
+
+    def to_dc(self):
+        return Superuser(name=self.name, password=self.password)
+
+
+class AdminModel(Base):
+    __tablename__ = "admins"
+    osu_id = Column(Integer(), primary_key=True)
+    name = Column(String())
+
+    def to_dc(self):
+        return Admin(osu_id=self.osu_id, name=self.name)

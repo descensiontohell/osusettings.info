@@ -10,7 +10,7 @@ class Store:
     def __init__(self, app: "Application"):
         from backend.app.store.service_api.service_api import ServiceAccessor
 
-        self.api = ServiceAccessor(app)
+        self.service = ServiceAccessor(app)
 
 
 def setup_store(app: "Application"):
