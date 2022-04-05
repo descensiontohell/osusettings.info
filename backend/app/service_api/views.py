@@ -22,3 +22,15 @@ class SuperuserLoginView(View):
         session = await new_session(request=self.request)
         session["superuser"] = superuser.name
         return response
+
+
+class SuperuserGrantAdminView(View):
+    @request_schema
+    @response_schema
+
+
+class SuperuserRevokeAdminView(View):
+    @request_schema
+    @response_schema
+
+
