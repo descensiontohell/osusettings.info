@@ -1,15 +1,19 @@
 import datetime
-from dataclasses import dataclass
+
 from typing import Optional
+
+from attr import dataclass
 
 
 @dataclass
 class Playstyle:
+    id: int
     name: str
 
 
 @dataclass
 class Mouse:
+    id: int
     brand: str
     model: str
     width: int
@@ -17,21 +21,31 @@ class Mouse:
     length: int
     weight: int
     sensor: str
+    switch: str
+
+
+@dataclass
+class Mousepad:
+    id: int
+    name: str
 
 
 @dataclass
 class Tablet:
+    id: int
     name: str
 
 
 @dataclass
 class Keyboard:
+    id: int
     brand: str
     model: str
 
 
 @dataclass
 class Switch:
+    id: int
     name: str
 
 
@@ -54,9 +68,13 @@ class Player:
     multiplier: float
     res_width: int
     res_height: int
+    polling_rate: int
+    play_area_width: int
+    play_area_height: int
     refresh_rate: int
     raw_input: bool
     mouse: Optional[Mouse]
+    mousepad: Optional[Mousepad]
     tablet: Optional[Tablet]
     keyboard: Optional[Keyboard]
     switch: Optional[Switch]
@@ -77,9 +95,13 @@ class Settings:
     multiplier: float
     res_width: int
     res_height: int
+    polling_rate: int
+    play_area_width: int
+    play_area_height: int
     refresh_rate: int
     raw_input: bool
     mouse: Optional[Mouse]
+    mousepad: Optional[Mousepad]
     tablet: Optional[Tablet]
     keyboard: Optional[Keyboard]
     switch: Optional[Switch]

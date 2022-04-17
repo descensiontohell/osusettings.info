@@ -6,7 +6,7 @@ if typing.TYPE_CHECKING:
 
 
 def setup_redis(app: "Application"):
-    redis = aioredis.from_url(f"redis://{app.config.redis.host}:{app.config.redis.port}")
+    redis = aioredis.from_url(f"redis://{app.config.redis.host}")
     app.redis = redis
 
 

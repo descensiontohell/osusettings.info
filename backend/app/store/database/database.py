@@ -15,7 +15,7 @@ class Database:
     async def connect(self, *_, **kw):
         try:
             self._engine = create_async_engine(
-                f"postgresql+asyncpg://elle_dev:dev_elle_pass@localhost:5432/dev_osu"
+                f"postgresql+asyncpg://{self.app.config.database.user}:{self.app.config.database.password}@{self.app.config.database.host}/{self.app.config.database.database}"
             )
         except Exception as e:
             self.app.logger.error("Exception", exc_info=e)
