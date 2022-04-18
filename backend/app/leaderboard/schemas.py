@@ -44,6 +44,7 @@ class PlayerSchema(Schema):
     name = fields.Str(required=True)
     global_rank = fields.Int(required=True)
     performance = fields.Float(required=True)
+    is_mouse = fields.Bool(required=True)
     playstyle = fields.Str(required=True)
     mouse_edpi = fields.Int(required=True)
     dpi = fields.Int(required=True)
@@ -62,5 +63,6 @@ class PlayerSchema(Schema):
 
 
 class LeaderboardSchema(Schema):
+    is_mouse_list = fields.Boolean(required=True)
     players = fields.Nested("PlayerSchema", many=True)
 

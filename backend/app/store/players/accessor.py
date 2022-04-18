@@ -1,7 +1,7 @@
 import typing
 
 from aiohttp.web_exceptions import HTTPBadRequest
-from multidict._multidict import MultiDictProxy
+from multidict import MultiDictProxy
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload, joinedload
 
@@ -19,12 +19,12 @@ class PlayersAccessor(BaseAccessor):
         super().__init__(app, "Players", *args, **kwargs)
         self.app = app
         self.page_size = 50
-        self.filters = ["is_mouse", "playstyle", "page", "name", "country",
+        self.filters = ["order_by", "min_rank", "max_rank", "is_mouse", "playstyle", "page", "name", "country",
                         "min_edpi", "max_edpi", "min_area_width", "min_area_height", "max_area_width",
                         "max_area_height", "mouse", "mousepad", "tablet", "keyboard", "switch"]
-        self.int_filters = ["is_mouse", "playstyle", "page",
-                        "min_edpi", "max_edpi", "min_area_width", "min_area_height", "max_area_width",
-                        "max_area_height"]
+        self.int_filters = ["min_rank", "max_rank", "is_mouse", "playstyle", "page",
+                            "min_edpi", "max_edpi", "min_area_width", "min_area_height", "max_area_width",
+                            "max_area_height"]
 
     def parse_filters(self, query: MultiDictProxy) -> dict:
         result = {}
@@ -35,6 +35,7 @@ class PlayersAccessor(BaseAccessor):
                 is_mouse = False
         except KeyError:
             is_mouse = True
+            result["is_mouse"] = is_mouse
 
         for key in query:
             if key not in self.filters:
@@ -55,7 +56,7 @@ class PlayersAccessor(BaseAccessor):
                     result[key] = int(query[key])
                     continue
                 except ValueError:
-                    raise HTTPBadRequest(reason=f"{key} should contain a single integer")
+                    raise HTTPBadRequest(reason=f"{key} should be a number")
             else:
                 result[key] = query[key]
         for key in query:
@@ -68,6 +69,9 @@ class PlayersAccessor(BaseAccessor):
     async def get_players(
             self,
             is_mouse: bool,
+            order_by: str = None,
+            min_rank: int = None,
+            max_rank: int = None,
             playstyle: list[int] = None,
             page: int = 1,
             name: str = None,
@@ -93,9 +97,27 @@ class PlayersAccessor(BaseAccessor):
         if playstyle is not None:
             query = query.filter(PlayerModel.playstyle_id.in_(playstyle))
 
+        # If name and ranks not specified, set default rank constraints
+        # If name is specified and ranks are not, rank constraints are None
+        # If name and rank constraints are specified, use them
+        if not min_rank and not max_rank and not name:
+            min_rank = self.app.const.min_rank
+            max_rank = self.app.const.max_rank
+
+        if not order_by:
+            order_by = PlayerModel.performance.desc()
+        elif order_by == "pp":
+            order_by = PlayerModel.performance.desc()
+        elif order_by == "-pp":
+            order_by = PlayerModel.performance
+        elif order_by == "edpi":
+            order_by = PlayerModel.mouse_edpi
+        elif order_by == "-edpi":
+            query = query.filter(PlayerModel.mouse_edpi.is_not(None))
+            order_by = PlayerModel.mouse_edpi.desc()
+
         if name is not None:
-            name = f"%{name}%"
-            query = query.filter(PlayerModel.name.ilike(name))
+            query = query.filter(PlayerModel.name.ilike(f"%{name}%"))
 
         if country is not None:
             query = query.filter(PlayerModel.country_code == country)
@@ -104,6 +126,11 @@ class PlayersAccessor(BaseAccessor):
             query = query.filter(PlayerModel.mouse_edpi >= min_edpi)
         if max_edpi is not None:
             query = query.filter(PlayerModel.mouse_edpi <= max_edpi)
+
+        if min_rank is not None:
+            query = query.filter(PlayerModel.global_rank >= min_rank)
+        if max_rank is not None:
+            query = query.filter(PlayerModel.global_rank <= max_rank)
 
         if min_area_width is not None:
             query = query.filter(PlayerModel.tablet_area_width >= min_area_width)
@@ -115,33 +142,32 @@ class PlayersAccessor(BaseAccessor):
             query = query.filter(PlayerModel.tablet_area_height <= max_area_height)
 
         if mouse is not None:
-            mouse = f"%{mouse}%"
-            query = query.join(PlayerModel.mouse).filter(or_(MouseModel.brand.ilike(mouse), MouseModel.model.ilike(mouse)))
+            query = query.join(PlayerModel.mouse).filter(
+                or_(MouseModel.brand.ilike(f"%{mouse}%"), MouseModel.model.ilike(f"%{mouse}%")))
 
         if mousepad is not None:
-            mousepad = f"%{mousepad}%"
-            query = query.join(PlayerModel.mousepad).filter(MousepadModel.name.ilike(mousepad))
+            query = query.join(PlayerModel.mousepad).filter(MousepadModel.name.ilike(f"%{mousepad}%"))
 
         if keyboard is not None:
-            keyboard = f"%{keyboard}%"
-            query = query.join(PlayerModel.keyboard).filter(or_(KeyboardModel.brand.ilike(keyboard), KeyboardModel.model.ilike(keyboard)))
+            query = query.join(PlayerModel.keyboard).filter(
+                or_(KeyboardModel.brand.ilike(f"%{keyboard}%"), KeyboardModel.model.ilike(f"%{keyboard}%")))
 
         if switch is not None:
-            switch = f"%{switch}%"
-            query = query.join(PlayerModel.switch).filter(SwitchModel.name.ilike(switch))
+            query = query.join(PlayerModel.switch).filter(SwitchModel.name.ilike(f"%{switch}%"))
 
         if tablet is not None:
-            tablet = f"%{tablet}%"
-            query = query.join(PlayerModel.tablet).filter(TabletModel.name.ilike(tablet))
+            query = query.join(PlayerModel.tablet).filter(TabletModel.name.ilike(f"%{tablet}%"))
 
         players = (query
-                  .options(selectinload(PlayerModel.mousepad))
-                  .options(selectinload(PlayerModel.mouse))
-                  .options(selectinload(PlayerModel.playstyle))
-                  .options(selectinload(PlayerModel.keyboard))
-                  .options(selectinload(PlayerModel.tablet))
-                  .options(selectinload(PlayerModel.switch))
-                  .limit(self.page_size).offset((page-1)*self.page_size))
+                   .options(selectinload(PlayerModel.mousepad))
+                   .options(selectinload(PlayerModel.mouse))
+                   .options(selectinload(PlayerModel.playstyle))
+                   .options(selectinload(PlayerModel.keyboard))
+                   .options(selectinload(PlayerModel.tablet))
+                   .options(selectinload(PlayerModel.switch))
+                   .order_by(order_by)
+                   .limit(self.page_size)
+                   .offset((page - 1) * self.page_size))
 
         result = await self.app.database.db.execute(players)
 

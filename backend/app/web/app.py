@@ -10,6 +10,7 @@ from aiohttp_session import setup as setup_session
 from aioredis.client import Redis
 from aiohttp_session.redis_storage import RedisStorage
 
+from backend.app.web.const import Const
 from backend.app.web.middlewares import setup_middlewares
 from backend.app.web.redis import setup_redis
 from backend.app.web.logger import setup_logging
@@ -26,12 +27,14 @@ class Application(AiohttpApplication):
     store: Optional[Store] = None
     database: Optional[Database] = None
     redis: Optional[Redis] = None
+    const: Const = Const()
 
 
 class Request(AiohttpRequest):
     player_name: Optional[str] = None
     player_id: Optional[int] = None
-    superuser: Optional[str] = None
+    is_superuser: Optional[bool] = False
+    is_admin: Optional[bool] = False
 
     @property
     def app(self) -> "Application":
