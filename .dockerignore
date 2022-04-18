@@ -1,0 +1,11 @@
+.git
+.idea
+.github
+.pytest_cache
+alembic
+tests
+venv
+.gitignore
+alembic.ini
+pytest.ini
+README.md

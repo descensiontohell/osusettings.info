@@ -1,9 +1,9 @@
 from sqlalchemy.sql import func
 
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, MetaData, DateTime, Float
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, MetaData, DateTime, Float, Date
 from sqlalchemy.orm import declarative_base, relationship
 
-from backend.app.store.players.dataclasses import Playstyle, Mouse, Tablet, Keyboard, Switch, Player, Settings
+from backend.app.store.players.dataclasses import Playstyle, Mouse, Tablet, Keyboard, Switch, Player, Settings, Mousepad
 
 from backend.app.store.service_api.dataclasses import Superuser, Admin
 
@@ -19,7 +19,10 @@ class PlaystyleModel(Base):
     settings = relationship("SettingsModel", back_populates="playstyle")
 
     def to_dc(self):
-        return Playstyle(name=self.name)
+        return Playstyle(
+            id=self.id,
+            name=self.name,
+        )
 
 
 class MouseModel(Base):
@@ -32,11 +35,13 @@ class MouseModel(Base):
     length = Column(Integer(), nullable=True)
     weight = Column(Integer(), nullable=True)
     sensor = Column(String(), nullable=True)
+    switch = Column(String(), nullable=True)
     player = relationship("PlayerModel", back_populates="mouse")
     settings = relationship("SettingsModel", back_populates="mouse")
 
     def to_dc(self):
         return Mouse(
+            id=self.id,
             brand=self.brand,
             model=self.model,
             width=self.width,
@@ -44,6 +49,7 @@ class MouseModel(Base):
             length=self.length,
             weight=self.weight,
             sensor=self.sensor,
+            switch=self.switch,
         )
 
 
@@ -55,7 +61,10 @@ class TabletModel(Base):
     settings = relationship("SettingsModel", back_populates="tablet")
 
     def to_dc(self):
-        return Tablet(name=self.name)
+        return Tablet(
+            id=self.id,
+            name=self.name,
+        )
 
 
 class KeyboardModel(Base):
@@ -67,7 +76,11 @@ class KeyboardModel(Base):
     settings = relationship("SettingsModel", back_populates="keyboard")
 
     def to_dc(self):
-        return Keyboard(brand=self.brand, model=self.model)
+        return Keyboard(
+            id=self.id,
+            brand=self.brand,
+            model=self.model,
+        )
 
 
 class SwitchModel(Base):
@@ -78,15 +91,33 @@ class SwitchModel(Base):
     settings = relationship("SettingsModel", back_populates="switch")
 
     def to_dc(self):
-        return Switch(name=self.name)
+        return Switch(
+            id=self.id,
+            name=self.name,
+        )
+
+
+class MousepadModel(Base):
+    __tablename__ = 'mousepad'
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(), nullable=False)
+    player = relationship("PlayerModel", back_populates="mousepad")
+    settings = relationship("SettingsModel", back_populates="mousepad")
+
+    def to_dc(self):
+        return Mousepad(
+            id=self.id,
+            name=self.name,
+        )
 
 
 class PlayerModel(Base):
     __tablename__ = "players"
-    last_updated = Column(DateTime(), nullable=False, server_default=func.now())
-    is_admin = Column(Boolean(), nullable=False, default=False)
+    last_updated = Column(Date(), nullable=True, server_default=func.now())
+    is_admin = Column(Boolean(), nullable=True, server_default="false")
     osu_id = Column(Integer(), primary_key=True)
     name = Column(String(20), nullable=False)
+    country_code = Column(String())
     global_rank = Column(Integer(), nullable=True)
     performance = Column(Float(10), nullable=True)
     is_mouse = Column(Boolean(), nullable=True)
@@ -101,16 +132,22 @@ class PlayerModel(Base):
     multiplier = Column(Float(), nullable=True)
     res_width = Column(Integer(), nullable=True)
     res_height = Column(Integer(), nullable=True)
+    polling_rate = Column(Integer(), nullable=True)
+    play_area_width = Column(Integer(), nullable=True)
+    play_area_height = Column(Integer(), nullable=True)
     refresh_rate = Column(Integer(), nullable=True)
     raw_input = Column(Boolean(), nullable=True)
     mouse_id = Column(Integer(), ForeignKey("mouse.id"))
     mouse = relationship("MouseModel", back_populates="player")
+    mousepad_id = Column(Integer(), ForeignKey("mousepad.id"))
+    mousepad = relationship("MousepadModel", back_populates="player")
     tablet_id = Column(Integer(), ForeignKey("tablet.id"))
     tablet = relationship("TabletModel", back_populates="player")
     keyboard_id = Column(Integer(), ForeignKey("keyboard.id"))
     keyboard = relationship("KeyboardModel", back_populates="player")
     switch_id = Column(Integer(), ForeignKey("switch.id"))
     switch = relationship("SwitchModel", back_populates="player")
+    updated_by = Column(String(), nullable=False)
 
     def to_dc(self):
         if self.playstyle is not None:
@@ -122,6 +159,11 @@ class PlayerModel(Base):
             mouse = self.mouse.to_dc()
         else:
             mouse = None
+
+        if self.mousepad is not None:
+            mousepad = self.mousepad.to_dc()
+        else:
+            mousepad = None
 
         if self.tablet is not None:
             tablet = self.tablet.to_dc()
@@ -156,9 +198,13 @@ class PlayerModel(Base):
             multiplier=self.multiplier,
             res_width=self.res_width,
             res_height=self.res_height,
+            polling_rate=self.polling_rate,
+            play_area_width=self.play_area_width,
+            play_area_height=self.play_area_height,
             refresh_rate=self.refresh_rate,
             raw_input=self.raw_input,
             mouse=mouse,
+            mousepad=mousepad,
             tablet=tablet,
             keyboard=keyboard,
             switch=switch,
@@ -168,7 +214,7 @@ class PlayerModel(Base):
 class SettingsModel(Base):
     __tablename__ = "previous_settings"
     id = Column(Integer(), primary_key=True)
-    last_updated = Column(DateTime(), nullable=False, server_default=func.now())
+    last_updated = Column(Date(), nullable=True, server_default=func.now())
     osu_id = Column(Integer(), ForeignKey("players.osu_id"), nullable=False)
     is_mouse = Column(Boolean(), nullable=True)
     playstyle = relationship("PlaystyleModel", back_populates="settings")
@@ -182,16 +228,22 @@ class SettingsModel(Base):
     multiplier = Column(Float(), nullable=True)
     res_width = Column(Integer(), nullable=True)
     res_height = Column(Integer(), nullable=True)
+    polling_rate = Column(Integer(), nullable=True)
+    play_area_width = Column(Integer(), nullable=True)
+    play_area_height = Column(Integer(), nullable=True)
     refresh_rate = Column(Integer(), nullable=True)
     raw_input = Column(Boolean(), nullable=True)
     mouse_id = Column(Integer(), ForeignKey("mouse.id"))
     mouse = relationship("MouseModel", back_populates="settings")
+    mousepad_id = Column(Integer(), ForeignKey("mousepad.id"))
+    mousepad = relationship("MousepadModel", back_populates="settings")
     tablet_id = Column(Integer(), ForeignKey("tablet.id"))
     tablet = relationship("TabletModel", back_populates="settings")
     keyboard_id = Column(Integer(), ForeignKey("keyboard.id"))
     keyboard = relationship("KeyboardModel", back_populates="settings")
     switch_id = Column(Integer(), ForeignKey("switch.id"))
     switch = relationship("SwitchModel", back_populates="settings")
+    updated_by = Column(String(), nullable=False)
 
     def to_dc(self):
         if self.playstyle is not None:
@@ -208,6 +260,11 @@ class SettingsModel(Base):
             tablet = self.tablet.to_dc()
         else:
             tablet = None
+
+        if self.mousepad is not None:
+            mousepad = self.mousepad.to_dc()
+        else:
+            mousepad = None
 
         if self.keyboard is not None:
             keyboard = self.keyboard.to_dc()
@@ -233,9 +290,13 @@ class SettingsModel(Base):
             multiplier=self.multiplier,
             res_width=self.res_width,
             res_height=self.res_height,
+            polling_rate=self.polling_rate,
+            play_area_width=self.play_area_width,
+            play_area_height=self.play_area_height,
             refresh_rate=self.refresh_rate,
             raw_input=self.raw_input,
             mouse=mouse,
+            mousepad=mousepad,
             tablet=tablet,
             keyboard=keyboard,
             switch=switch,

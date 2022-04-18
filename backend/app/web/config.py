@@ -22,7 +22,6 @@ class SuperuserConfig:
 @dataclass
 class DatabaseConfig:
     host: str
-    port: int
     user: str
     password: str
     database: str
@@ -31,7 +30,6 @@ class DatabaseConfig:
 @dataclass
 class RedisConfig:
     host: str
-    port: int
 
 
 @dataclass
@@ -56,14 +54,12 @@ def setup_config(app: "Application", config_path: str):
         ),
         database=DatabaseConfig(
             host=raw_config["database"]["host"],
-            port=raw_config["database"]["port"],
             user=raw_config["database"]["user"],
             password=raw_config["database"]["password"],
             database=raw_config["database"]["database"],
         ),
         redis=RedisConfig(
             host=raw_config["redis"]["host"],
-            port=raw_config["redis"]["port"],
         ),
     )
 

@@ -24,13 +24,13 @@ class SuperuserLoginView(View):
         return response
 
 
-class SuperuserGrantAdminView(View):
-    @request_schema
-    @response_schema
-
-
-class SuperuserRevokeAdminView(View):
-    @request_schema
-    @response_schema
+# class SuperuserGrantAdminView(View):
+#     @request_schema
+#     @response_schema
+#
+#
+# class SuperuserRevokeAdminView(View):
+#     @request_schema
+#     @response_schema
 
 
