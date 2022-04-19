@@ -14,8 +14,7 @@ class Playstyle:
 @dataclass
 class Mouse:
     id: int
-    brand: str
-    model: str
+    name: str
     width: int
     height: int
     length: int
@@ -39,8 +38,7 @@ class Tablet:
 @dataclass
 class Keyboard:
     id: int
-    brand: str
-    model: str
+    name: str
 
 
 @dataclass
@@ -57,6 +55,7 @@ class Player:
     name: str
     global_rank: int
     performance: int
+    is_restricted: bool
     is_mouse: bool
     playstyle: Optional[Playstyle]
     mouse_edpi: int
@@ -105,4 +104,3 @@ class Settings:
     tablet: Optional[Tablet]
     keyboard: Optional[Keyboard]
     switch: Optional[Switch]
-

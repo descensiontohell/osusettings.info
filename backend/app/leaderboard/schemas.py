@@ -23,14 +23,12 @@ class TabletSchema(Schema):
 
 class KeyboardSchema(Schema):
     id = fields.Int(required=False)
-    brand = fields.Str(required=True)
-    model = fields.Str(required=True)
+    name = fields.Str(required=True)
 
 
 class MouseSchema(Schema):
     id = fields.Int(required=False)
-    brand = fields.Str(required=True)
-    model = fields.Str(required=True)
+    name = fields.Str(required=True)
     sensor = fields.Str(required=True)
     weight = fields.Int(required=True)
     length = fields.Int(required=True)
@@ -44,6 +42,8 @@ class PlayerSchema(Schema):
     name = fields.Str(required=True)
     global_rank = fields.Int(required=True)
     performance = fields.Float(required=True)
+    is_banned = fields.Bool(required=True)
+    is_restricted = fields.Bool(required=True)
     is_mouse = fields.Bool(required=True)
     playstyle = fields.Str(required=True)
     mouse_edpi = fields.Int(required=True)
@@ -65,4 +65,3 @@ class PlayerSchema(Schema):
 class LeaderboardSchema(Schema):
     is_mouse_list = fields.Boolean(required=True)
     players = fields.Nested("PlayerSchema", many=True)
-
