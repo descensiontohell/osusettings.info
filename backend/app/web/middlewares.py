@@ -1,5 +1,6 @@
 import json
 import typing
+from datetime import datetime
 
 from aiohttp.web_exceptions import HTTPUnprocessableEntity, HTTPException, HTTPNotImplemented, HTTPUnauthorized
 from aiohttp.web_middlewares import middleware
@@ -22,6 +23,15 @@ async def auth_middleware(request: "Request", handler: callable):
         request.is_admin = session.get("is_admin")
     return await handler(request)
 
+
+@middleware
+async def response_time_middleware(request: "Request", handler: callable):
+    start_time = datetime.now()
+    try:
+        response = await handler(request)
+        return response
+    finally:
+        print((datetime.now() - start_time).microseconds / 1000)
 
 HTTP_ERROR_CODES = {
     400: "bad_request",
@@ -77,3 +87,4 @@ def setup_middlewares(app: "Application"):
     app.middlewares.append(auth_middleware)
     app.middlewares.append(error_handling_middleware)
     app.middlewares.append(validation_middleware)
+    app.middlewares.append(response_time_middleware)

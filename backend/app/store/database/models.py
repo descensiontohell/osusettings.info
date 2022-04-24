@@ -1,6 +1,6 @@
 from sqlalchemy.sql import func
 
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, MetaData, DateTime, Float, Date
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, MetaData, Float, Date
 from sqlalchemy.orm import declarative_base, relationship
 
 from backend.app.store.players.dataclasses import Playstyle, Mouse, Tablet, Keyboard, Switch, Player, Settings, Mousepad

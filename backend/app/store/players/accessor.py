@@ -8,7 +8,6 @@ from sqlalchemy.orm import selectinload, joinedload
 from backend.app.store.database.models import PlayerModel, SuperuserModel, MousepadModel, MouseModel, KeyboardModel, \
     SwitchModel, TabletModel
 from backend.app.store.base.base_accessor import BaseAccessor
-from backend.app.store.service_api.dataclasses import Superuser
 
 if typing.TYPE_CHECKING:
     from backend.app.web.app import Application
@@ -101,8 +100,8 @@ class PlayersAccessor(BaseAccessor):
         # If name is specified and ranks are not, rank constraints are None
         # If name and rank constraints are specified, use them
         if not min_rank and not max_rank and not name:
-            min_rank = self.app.const.min_rank
-            max_rank = self.app.const.max_rank
+            min_rank = self.app.const.MIN_RANK
+            max_rank = self.app.const.MAX_RANK
 
         if not order_by:
             order_by = PlayerModel.performance.desc()

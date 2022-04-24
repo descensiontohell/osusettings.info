@@ -4,7 +4,7 @@ superuser:
   login: elle
   password: 12345
 database:
-  host: "localhost:5050"
+  host: db
   user: elle_dev
   password: dev_elle_pass
   database: dev_osu
