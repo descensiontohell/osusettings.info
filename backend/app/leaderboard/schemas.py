@@ -65,3 +65,27 @@ class PlayerSchema(Schema):
 class LeaderboardSchema(Schema):
     is_mouse_list = fields.Boolean(required=True)
     players = fields.Nested("PlayerSchema", many=True)
+
+
+class GetPlayersQuerySchema(Schema):
+    order_by = fields.Str()
+    min_rank = fields.Int()
+    max_rank = fields.Int()
+    is_mouse = fields.Bool()
+    playstyle = fields.List(fields.Int())
+    #playstyle = fields.Str()
+    page = fields.Int()
+    name = fields.Str()
+    country = fields.Str()
+    min_edpi = fields.Int()
+    max_edpi = fields.Int()
+    min_area_width = fields.Int()
+    min_area_height = fields.Int()
+    max_area_width = fields.Int()
+    max_area_height = fields.Int()
+    mouse = fields.Str()
+    mousepad = fields.Str()
+    keyboard = fields.Str()
+    switch = fields.Str()
+    tablet = fields.Str()
+

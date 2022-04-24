@@ -1,4 +1,5 @@
 import json
+import logging
 import typing
 from datetime import datetime
 
@@ -31,7 +32,10 @@ async def response_time_middleware(request: "Request", handler: callable):
         response = await handler(request)
         return response
     finally:
-        print((datetime.now() - start_time).microseconds / 1000)
+        consumed_time = (datetime.now() - start_time).microseconds / 1000
+        logger = logging.getLogger("REQUEST")
+        logger.info(msg=consumed_time)
+
 
 HTTP_ERROR_CODES = {
     400: "bad_request",

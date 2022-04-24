@@ -35,6 +35,7 @@ class ItemsAccessor(BaseAccessor):
         if self.app.const.ENABLE_CACHING:
             pickled_items = await self.app.store.redis.get(item_type)
             if pickled_items:
+                self.logger.info("CACHED")
                 items_list = pickle.loads(pickled_items)
                 return items_list
 

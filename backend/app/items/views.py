@@ -1,7 +1,7 @@
 import json
 
 from aiohttp.web_exceptions import HTTPNotFound
-from aiohttp_apispec import response_schema
+from aiohttp_apispec import response_schema, docs
 
 from backend.app.items.schemas import KeyboardSuggestionsListSchema, MouseSuggestionsListSchema, \
     MousepadSuggestionsListSchema, SwitchSuggestionsListSchema, TabletSuggestionsListSchema
@@ -20,52 +20,33 @@ class GetItemListView(View):
             "tablets": TabletSuggestionsListSchema(),
         }
 
-    @response_schema(
-        schema=TabletSuggestionsListSchema,
-        code=200,
-        description="""
-            Returns tablet list for dropdown suggestions.
-            Only admin added items included.
-            Sorted by relevance and name."""
-    )
-    @response_schema(
-        schema=SwitchSuggestionsListSchema,
-        code=200,
-        description="""
-            Returns switches list for dropdown suggestions.
-            Only admin added items included.
-            Sorted by relevance and name.
-            Common items like "custom", "rubber dome" and "Cherry MX ****" go first."""
-    )
-    @response_schema(
-        schema=MousepadSuggestionsListSchema,
-        code=200,
-        description="""
-            Returns mousepad list for dropdown suggestions.
-            Only admin added items included.
-            Sorted by relevance and name.
-            Common items like "noname", "none/desk" go first."""
-    )
-    @response_schema(
-        schema=MouseSuggestionsListSchema,
-        code=200,
-        description="""
-        Returns mouse list for dropdown suggestions.
-        Only admin added items included.
-        Sorted by relevance and name.
-        Common items like "noname", "OEM mouse" go first.""",
-    )
-    @response_schema(
-        schema=KeyboardSuggestionsListSchema,
-        code=200,
-        description="""
-        Returns keyboards list for dropdown suggestions. 
-        Only admin added items included. 
-        Sorted by relevance and name. 
-        Common items like "Custom", "laptop keyboard", "noname" go first.""",
+    @docs(
+        tags=["Items"],
+        summary="Returns item lists for dropdown suggestions",
+        description="""Returns items list for dropdown suggestions. Only admin added items included. 
+        Sorted by relevance and name. Common items like "Custom", "laptop keyboard", "noname" go first.
+        Available items:
+        
+        keyboards
+        
+        switches
+        
+        tablets
+        
+        mice
+        
+        mousepads
+        """,
+        responses={
+            "200 - 1": {"description": "Ok. Returns list of mice", "schema": MouseSuggestionsListSchema},
+            "200 - 2": {"description": "Ok. Returns list of mousepads", "schema": MousepadSuggestionsListSchema},
+            "200 - 3": {"description": "Ok. Returns list of keyboards", "schema": KeyboardSuggestionsListSchema},
+            "200 - 4": {"description": "Ok. Returns list of switches", "schema": SwitchSuggestionsListSchema},
+            "200 - 5": {"description": "Ok. Returns list of tablets", "schema": TabletSuggestionsListSchema},
+        }
     )
     async def get(self):
-        item_type = self.request.match_info["items"]
+        item_type = self.request.match_info["item_type"]
         if item_type not in self.item_schemas:
             raise HTTPNotFound(reason=f"Requested item {item_type} not found")
 

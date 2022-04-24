@@ -62,10 +62,10 @@ def setup_app(config_path: str = None) -> Application:
     setup_config(app, config_path)
     setup_routes(app)
     setup_redis(app)
-    setup_aiohttp_apispec(app, title="osusettings", url="/api/docs/json", swagger_path="/api/docs")
     setup_store(app)
     setup_session(app, RedisStorage(app.store.redis))
     setup_middlewares(app)
+    setup_aiohttp_apispec(app, title="osusettings", url="/api/docs/json", swagger_path="/api/docs")
     return app
 
 
