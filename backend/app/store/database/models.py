@@ -28,8 +28,8 @@ class PlaystyleModel(Base):
 class MouseModel(Base):
     __tablename__ = "mouse"
     id = Column(Integer(), primary_key=True)
-    brand = Column(String(), nullable=False)
-    model = Column(String(), nullable=False)
+    relevance = Column(Integer(), default=0)
+    name = Column(String(), nullable=False)
     width = Column(Integer(), nullable=True)
     height = Column(Integer(), nullable=True)
     length = Column(Integer(), nullable=True)
@@ -42,8 +42,7 @@ class MouseModel(Base):
     def to_dc(self):
         return Mouse(
             id=self.id,
-            brand=self.brand,
-            model=self.model,
+            name=self.name,
             width=self.width,
             height=self.height,
             length=self.length,
@@ -56,6 +55,7 @@ class MouseModel(Base):
 class TabletModel(Base):
     __tablename__ = "tablet"
     id = Column(Integer(), primary_key=True)
+    relevance = Column(Integer(), default=0)
     name = Column(String(), nullable=False)
     player = relationship("PlayerModel", back_populates="tablet")
     settings = relationship("SettingsModel", back_populates="tablet")
@@ -70,22 +70,22 @@ class TabletModel(Base):
 class KeyboardModel(Base):
     __tablename__ = "keyboard"
     id = Column(Integer(), primary_key=True)
-    brand = Column(String(), nullable=False)
-    model = Column(String(), nullable=False)
+    relevance = Column(Integer(), default=0)
+    name = Column(String(), nullable=False)
     player = relationship("PlayerModel", back_populates="keyboard")
     settings = relationship("SettingsModel", back_populates="keyboard")
 
     def to_dc(self):
         return Keyboard(
             id=self.id,
-            brand=self.brand,
-            model=self.model,
+            name=self.name,
         )
 
 
 class SwitchModel(Base):
     __tablename__ = 'switch'
     id = Column(Integer(), primary_key=True)
+    relevance = Column(Integer(), default=0)
     name = Column(String(), nullable=False)
     player = relationship("PlayerModel", back_populates="switch")
     settings = relationship("SettingsModel", back_populates="switch")
@@ -100,6 +100,7 @@ class SwitchModel(Base):
 class MousepadModel(Base):
     __tablename__ = 'mousepad'
     id = Column(Integer(), primary_key=True)
+    relevance = Column(Integer(), default=0)
     name = Column(String(), nullable=False)
     player = relationship("PlayerModel", back_populates="mousepad")
     settings = relationship("SettingsModel", back_populates="mousepad")
@@ -120,6 +121,8 @@ class PlayerModel(Base):
     country_code = Column(String())
     global_rank = Column(Integer(), nullable=True)
     performance = Column(Float(10), nullable=True)
+    is_banned = Column(Boolean(), nullable=False)
+    is_restricted = Column(Boolean(), nullable=False)
     is_mouse = Column(Boolean(), nullable=True)
     playstyle_id = Column(Integer(), ForeignKey("playstyle.id"))
     playstyle = relationship("PlaystyleModel", back_populates="player")
@@ -187,6 +190,7 @@ class PlayerModel(Base):
             name=self.name,
             global_rank=self.global_rank,
             performance=self.performance,
+            is_restricted=self.is_restricted,
             is_mouse=self.is_mouse,
             playstyle=playstyle,
             mouse_edpi=self.mouse_edpi,
