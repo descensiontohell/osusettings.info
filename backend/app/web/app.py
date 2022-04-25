@@ -5,6 +5,7 @@ from aiohttp.web import (
     View as AiohttpView,
     Request as AiohttpRequest,
 )
+from aiohttp.web_exceptions import HTTPForbidden
 
 from aiohttp_apispec import setup_aiohttp_apispec
 from aiohttp_session import setup as setup_session
@@ -27,6 +28,7 @@ class Application(AiohttpApplication):
     store: Optional[Store] = None
     database: Optional[Database] = None
     const: Const = Const()
+    admins: list[int] = []
 
 
 class Request(AiohttpRequest):
