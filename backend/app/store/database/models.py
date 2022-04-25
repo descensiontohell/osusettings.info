@@ -192,6 +192,7 @@ class PlayerModel(Base):
             performance=self.performance,
             is_restricted=self.is_restricted,
             is_mouse=self.is_mouse,
+            country=self.country_code,
             playstyle=playstyle,
             mouse_edpi=self.mouse_edpi,
             tablet_area_width=self.tablet_area_width,

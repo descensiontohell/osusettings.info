@@ -43,6 +43,7 @@ class GetItemListView(View):
             "200 - 3": {"description": "Ok. Returns list of keyboards", "schema": KeyboardSuggestionsListSchema},
             "200 - 4": {"description": "Ok. Returns list of switches", "schema": SwitchSuggestionsListSchema},
             "200 - 5": {"description": "Ok. Returns list of tablets", "schema": TabletSuggestionsListSchema},
+            "404": {"description": "Requested item not found"}
         }
     )
     async def get(self):
@@ -51,6 +52,7 @@ class GetItemListView(View):
             raise HTTPNotFound(reason=f"Requested item {item_type} not found")
 
         items = await self.store.items.get_items(item_type=item_type)
+
         return json_response(data=self.item_schemas[item_type].dump({item_type: items}))
 
     async def post(self):  # TODO add items view
