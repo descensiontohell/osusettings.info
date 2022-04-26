@@ -5,20 +5,19 @@ from aiohttp_apispec import response_schema, docs
 
 from backend.app.items.schemas import KeyboardSuggestionsListSchema, MouseSuggestionsListSchema, \
     MousepadSuggestionsListSchema, SwitchSuggestionsListSchema, TabletSuggestionsListSchema
+from backend.app.store.database.models import SwitchModel, KeyboardModel, MouseModel, MousepadModel, TabletModel
 from backend.app.web.app import View, Request
 from backend.app.web.response import json_response
 
 
 class GetItemListView(View):
-    def __init__(self, request: Request):
-        super().__init__(request)
-        self.item_schemas = {
-            "switches": SwitchSuggestionsListSchema(),
-            "keyboards": KeyboardSuggestionsListSchema(),
-            "mice": MouseSuggestionsListSchema(),
-            "mousepads": MousepadSuggestionsListSchema(),
-            "tablets": TabletSuggestionsListSchema(),
-        }
+    item_schemas_models = {
+        "switches": [SwitchSuggestionsListSchema(), SwitchModel],
+        "keyboards": [KeyboardSuggestionsListSchema(), KeyboardModel],
+        "mice": [MouseSuggestionsListSchema(), MouseModel],
+        "mousepads": [MousepadSuggestionsListSchema(), MousepadModel],
+        "tablets": [TabletSuggestionsListSchema(), TabletModel],
+    }
 
     @docs(
         tags=["Items"],
@@ -48,12 +47,10 @@ class GetItemListView(View):
     )
     async def get(self):
         item_type = self.request.match_info["item_type"]
-        if item_type not in self.item_schemas:
+        if item_type not in self.item_schemas_models:
             raise HTTPNotFound(reason=f"Requested item {item_type} not found")
-
-        items = await self.store.items.get_items(item_type=item_type)
-
-        return json_response(data=self.item_schemas[item_type].dump({item_type: items}))
+        items = await self.store.items.get_items(item_type=item_type, model=self.item_schemas_models[item_type][1])
+        return json_response(data=self.item_schemas_models[item_type][0].dump({item_type: items}))
 
     async def post(self):  # TODO add items view
         pass

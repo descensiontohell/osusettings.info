@@ -3,8 +3,10 @@ import logging
 import typing
 from datetime import datetime
 
-from aiohttp.web_exceptions import HTTPUnprocessableEntity, HTTPException, HTTPNotImplemented, HTTPUnauthorized
+from aiohttp.web_exceptions import HTTPUnprocessableEntity, HTTPException, HTTPNotImplemented, HTTPUnauthorized, \
+    HTTPFound
 from aiohttp.web_middlewares import middleware
+from aiohttp.web_response import json_response
 from aiohttp_apispec import validation_middleware
 from aiohttp_session import get_session
 
@@ -38,6 +40,7 @@ async def response_time_middleware(request: "Request", handler: callable):
 
 
 HTTP_ERROR_CODES = {
+    302: "http found",
     400: "bad_request",
     401: "unauthorized",
     403: "forbidden",
@@ -53,6 +56,8 @@ async def error_handling_middleware(request: "Request", handler):
     try:
         response = await handler(request)
         return response
+    except HTTPFound as e:
+        raise HTTPFound(location=e.location)
     except HTTPUnprocessableEntity as e:
         return error_json_response(
             http_status=400,
