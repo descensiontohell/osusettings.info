@@ -384,9 +384,9 @@ function noteHandler() {
       let header = $('#headers').children()[0].clientHeight;
       $("#note_container").html(mouseProfile(player));
       let pos_max = $(window).outerHeight() - $('#note_container')[0].clientHeight;
-      let x = pos.left - $("#note_container").width() - scrollLeft - 6;
+      let x = pos.left - $("#note_container").width() - scrollLeft - 6; //warning: arbitrary number
       let y = pos.top - scrollTop + margin;
-      if (x < 0) x = pos.left + $('#'+hover_cell).width() - scrollLeft + 18;
+      if (x < 0) x = pos.left + $('#'+hover_cell).width() - scrollLeft + 18; //warning: arbitrary number
       if (y > pos_max - 10) y = pos_max - 12; //10 is scrollbar width, should probably be a constant
       else if (y < margin + header) y = margin + header;
       $("#note_container").css('left', x); 
