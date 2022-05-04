@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="public/style.css">
+        <script src='public/jquery.js'></script>
+        <script src='public/script.js'></script>
+    </head>
+    <body>
+        <div id="top_container">
+            <div id="main_container" class="hidden">
+                <div id="column_settings" class="scrollable_div"></div>
+                <input id='test_button' type='button' value='Test'>
+                <div class="text_group">
+                    <input id="search_text" type="input" class="text_field" placeholder="Name" name="search_text" id='name' required>
+                    <label for="search_text" class="text_label">Search</label>
+                </div>
+            </div>
+            <div id ="profile_container" class="hidden">
+                <img id="avatar_container" onload="avatarFadeIn()" style="display: none"></img>
+                <div id="username_container"></div>
+                <div id="settings_rank"></div>
+                <div id="settings_container_left"></div>
+                <div id="settings_container_right"></div>
+            </div>
+            <div id="header_container" class="hidden">
+                <div id="header_name"></div>
+            </div>
+        </div>
+        <div id="table_container">
+            <table cellpadding="0" cellspacing="0" width="100%" class="scroll_table">
+                <thead class="fixed_header">
+                    <tr id="headers" class="header_row">
+                    </tr>
+                </thead>
+                <tbody id ="list" class="scroll_body">
+                </tbody>
+            </table>
+            <div id="note_container" class="hidden"></div>
+        </div>
+        <div id="loading_text" class="hidden">Loading...</div>
+        <div id="tab1" class="tab">woa
+            <div class="tab_text">Test Tab 1</div>
+        </div>
+        <div id="tab2" class="tab">wooa
+            <div class="tab_text">Test Tab 2</div>
+        </div>
+    </body>
+</html>
