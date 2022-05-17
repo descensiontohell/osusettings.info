@@ -7,11 +7,28 @@
     <body>
         <div id="top_container">
             <div id="main_container" class="hidden">
-                <div id="column_settings" class="scrollable_div"></div>
-                <input id='test_button' type='button' value='Test'>
+                <div id="filters_container">
+                    <div id="blue_box"></div>
+                    <div id="applied_filters" class="sub_scroll scrollable_div"><span style='color: gray'>&emsp;[none]</span></div>
+                    <input id='remove_filter_button' type='button' value='Delete' class="sub_button_m sub_button" disabled>
+                    <input id='reset_filter_button' type='button' value='Reset' class="sub_button_b sub_button">
+                    <div class="border_title">Filters</div>
+                    <div class="cut_border_l"></div>
+                    <div class="cut_border_b"></div>
+                    <div id="border_r_f" class="cut_border_r"></div>
+                </div>
+                <div id="columns_container">
+                    <div id="blue_box"></div>
+                    <div id="applied_columns" class="sub_scroll scrollable_div"></div>
+                    <input id='column_apply_button' type='button' value='Apply' class="sub_button_m sub_button">
+                    <input id='default_column_button' type='button' value='Default' class="sub_button_b sub_button">
+                    <div class="border_title">Columns</div>  
+                    <div class="cut_border_l"></div>
+                    <div class="cut_border_b"></div>
+                    <div id="border_r_c" class="cut_border_r"></div>
+                </div>
                 <div class="text_group">
-                    <input id="search_text" type="input" class="text_field" placeholder="Name" name="search_text" id='name' required>
-                    <label for="search_text" class="text_label">Search</label>
+                    <input id="search_text" type="input" class="text_input" placeholder="Name" id='name' autocomplete="off">
                 </div>
             </div>
             <div id ="profile_container" class="hidden">
@@ -43,5 +60,6 @@
         <div id="tab2" class="tab">wooa
             <div class="tab_text">Test Tab 2</div>
         </div>
+        <div id="shhh">test</div>
     </body>
 </html>

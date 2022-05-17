@@ -29,6 +29,18 @@ body {
   position: relative;
 }
 
+
+
+
+
+.text_input {
+  background-color: rgb(255, 255, 255, 0.50);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 0px none;
+  outline: none;
+}
+
 .hidden {
   display: none;
 }
@@ -108,18 +120,7 @@ body {
   color: rgb(250, 250, 250, 0.15);
 }
 
-#column_settings {
-  position: fixed;
-  background: rgb(0, 0, 0, 0.50);
-  top: 17px;
-  left: 600px;
-  height: 115px;
-  width: 130px;
-  text-overflow: ellipsis;
-	white-space: nowrap;
-	overflow-x: hidden;
-  border-radius: 4px;
-}
+
 
 #table_container {
 	clear: both;
@@ -131,17 +132,11 @@ body {
 }
 
 .scroll_table thead tr {
-  /*position: relative;*/
   white-space: nowrap;
-  /*overflow-x: scroll;*/
   text-overflow: ellipsis;
 }
 
 .scroll_table thead th {
-  /*position: sticky;
-  top: 0;
-  overflow: auto;
-  /*resize: horizontal;*/
   position: sticky;
   top: 147px;
   background-color: rgb(22, 22, 22, 0.95);
@@ -155,8 +150,6 @@ body {
 }
 
 .scroll_table thead th div{
-  /*position: sticky;
-  top: 0;*/
   resize: horizontal;
   white-space: nowrap;
   overflow: hidden;
@@ -207,9 +200,6 @@ tbody.scroll_body td a:hover {
 
 tbody.scroll_body tr.alt_row td {
 	background-color:rgb(80, 80, 80);
-	/*padding: 2px 3px 3px 4px;
-  font-size: 10;
-  white-space: nowrap;*/
 }
 
 tbody.scroll_body td:first-of-type {
@@ -289,7 +279,9 @@ tbody.scroll_body tr.row:hover td {
 }
 @keyframes pulsate {
   0% { opacity: 0.05; }
+  25% { opacity: 0.8; }
   50% { opacity: 1.0; }
+  75% { opacity: 0.8; }
   100% { opacity: 0.05; }
 }
 
@@ -311,7 +303,50 @@ tbody.scroll_body tr.row:hover td {
   font-size: 48px;
 }
 
+/*
+SUB-MENU SECTION (filters and columns section in header)
+*/
+
+.sub_button {
+  background-image: linear-gradient(to right, rgb(57, 143, 209) 50%, rgb(57, 143, 209, .45));
+  background-color: inherit;
+  color: #FFFFFF;
+  cursor: pointer;
+  padding: 5px 4px 5px;
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+  border: 0px;
+  width: 60px;
+  text-align: right;
+}
+.sub_button:hover:enabled {
+  background-image: linear-gradient(to right, rgb(128, 200, 255), rgb(57, 143, 209) 60%, rgb(57, 143, 209, .45));
+}
+.sub_button:active:enabled {
+  width: 62px;
+  padding: 5px 6px 5px;
+}
+.sub_button:disabled {
+  background-image: none;
+  background-color:rgb(57, 143, 209, .45);
+  color: #999999;
+  cursor: default;
+}
+.sub_button_m {
+  position: absolute;
+  top: 82px;
+  right: 8px;
+}
+.sub_button_b {
+  position: absolute;
+  top: 107px;
+  right: 8px;
+}
+
 .scrollable_div {
+  text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow-x: hidden;
 	overflow-y:auto;
   scroll-behavior: smooth;
   overscroll-behavior: none;
@@ -329,58 +364,103 @@ tbody.scroll_body tr.row:hover td {
 .scrollable_div::-webkit-scrollbar-track {
   background: rgb(0,0,0,0); 
 }
-
-/*.text_group {
-  position: relative;
-  padding: 15px 0 0;
-  margin-top: 10px;
-  width: 50%;
+.sub_scroll {
+  position: absolute;
+  background: rgb(0, 0, 0, 0.50);
+  top: 2px;
+  left: 2px;
+  height: 130px;
+  width: 196px;
 }
-.text_field {
-  font-family: inherit;
+#blue_box {
+  background-color: #398fd1;
+  width: 8px;
+  height: 52px;
+  border-bottom-right-radius: 6px;
+  position: absolute;
+  top: 82px;
+  right: 0px;
+}
+
+.clk_div {
   width: 100%;
-  border: 0;
-  border-bottom: 2px solid #ccc;
-  outline: 0;
-  font-size: 20px;
-  color: #fff;
-  padding: 7px 0;
-  background: transparent;
-  transition: border-color 0.2s;
-} 
-.text_field::placeholder {
-    color: transparent;
-  }
+}
+.clk_div:hover {
+  background-color:rgb(59, 96, 138);
+  text-shadow:0px 0px 1px currentColor, 0px 0px 5px #ccc;
+  transition: all 0.05s ease-in;
+}
 
-.text_field:placeholder-shown ~ .text_label {
-    font-size: 20px;
-    cursor: text;
-    top: 20px;
+#filters_container {
+  position: fixed;
+  top: 12px;
+  left: 290px;
+  height: 130px;
+  width: 200px;
 }
-.text_label {
+
+#columns_container{
+  position: fixed;
+  top: 12px;
+  left: 500px;
+  height: 130px;
+  width: 200px;
+}
+
+.border_title {
   position: absolute;
+  width: 100%;
+  top: -10px;
+  left: 15px;
+}
+.cut_border_b {
+  position: absolute;
+  bottom: -4px;
+  height: 0px;
+  left: 10px;
+  width: 90%;
+  border: solid #FFF;
+  border-width: 0px 0px 2px 0px;
+}
+.cut_border_l {
+  border: solid #FFF;
+  border-width: 2px 0px 2px 2px;
+  position: absolute;
+  pointer-events: none;
+  overflow: hidden;
+  width: 10px;
+  height: 100%;
+  border-bottom-left-radius: 5px;
+  border-top-left-radius: 5px;
+}
+.cut_border_r {
+  border: solid #FFF;
+  border-width: 2px 2px 2px 0px;
+  position: absolute;
+  pointer-events: none;
+  overflow: hidden;
   top: 0px;
-  display: block;
-  transition: 0.2s;
-  font-size: 16px;
-  color: #ccc;
+  right: 0px;
+  height: 130px;
+  border-bottom-right-radius: 5px;
+  border-top-right-radius: 5px;
 }
-.text_field:hover {
-  padding-bottom: 6px;  
-  font-weight: 700;
-  border-width: 3px;
-  border-image: #ccc;
-  border-image-slice: 1;
+#border_r_f {
+  width: 143px;
 }
-.text_field:hover ~ .text_label{
-  position: absolute;
-  top: 0;
-  display: block;
-  transition: 0.2s;
-  font-size: 16px;
-  color: #ccc;
-  font-weight: 700;     
+#border_r_c {
+  width: 128px;
 }
-.text_field:required, .text_field:invalid {
-  box-shadow: none;
-}*/
+
+#shhh {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  bottom: 0px;
+  left: 0px;
+}
+#shhh:hover {
+  background-image: url("https://cdn.discordapp.com/emojis/887218321517346897.webp?size=32&quality=lossless");
+  width: 32px;
+  height: 32px;
+}

@@ -34,7 +34,7 @@ const column = { //how columns are addressed(string), sized(px), and how it addr
   username: {
     locked: true,
     string: "Username",
-    size:{ min:75, default:112, max:250 },
+    size:{ min:75, default:122, max:250 },
     func:function(x){ return linkProfile(x) }},
   playstyle: {
     locked: true,
@@ -181,8 +181,8 @@ $(document).ready(function() {
   loadHeaderOptions();
   refreshHeaders();
   getNewList();
-  $("#test_button").click(function() {
-    let selected = $('#column_settings').children('input:checked');
+  $("#column_apply_button").click(function() {
+    let selected = $('#applied_columns').children('input:checked');
     layout = new Int8Array(locked_layout.length+selected.length);
     let i = 0;
     for (i; i < locked_layout.length; i++) layout[i] = locked_layout[i];
@@ -197,9 +197,6 @@ $(document).ready(function() {
     /*$('body,html').animate({
       'scrollTop': 0,
     }, 750);*/
-  });
-  $('::-webkit-scrollbar-thumb').click(function(e) {
-    console.log('test');
   });
   $('.tab').hover(function(e){
     $('#'+e.target.closest('div[class=tab]').id).stop(true, false).animate({ top: "-2px" }, 250);
@@ -240,12 +237,15 @@ $(document).ready(function() {
   $("#headers").click(function(e) {
     if (e.target.closest('a')) {
       //when a header is clicked and not resized
+      let id = e.target.closest('div').id;
+      console.log('#'+id+' click');
     }
     else if (e.target.closest('div').id != 'table_container') {
       let id = e.target.closest('div').id;
       let index = parseIndex(id);
       //console.log($('#headers').children()[index].children[0]); //this target works
       console.log($('#'+id).children()[0].clientWidth);
+      console.log('#'+id+' resize');
     }
   });
   // optional method to allow live search
@@ -253,7 +253,8 @@ $(document).ready(function() {
     clearTimeout(typing_timer);
     let s = $('#search_text').val();
     if (s !== search_string) {
-        typing_timer = setTimeout(startNameSearch, 750, s);
+      console.log('triggered');
+      typing_timer = setTimeout(startNameSearch, 750, s);
     }
   });
   $(document).scroll(function() {
@@ -279,7 +280,7 @@ function loadHeaderOptions() {
     }
     else locked_layout.push(i);
   }
-  $("#column_settings").html(cb_string);
+  $("#applied_columns").html(cb_string);
 }
 
 
@@ -291,7 +292,7 @@ function chkScroll() {
     getNewPage();
   }
   else {
-    scroll_timer = setTimeout(chkPage, 250);
+    scroll_timer = setTimeout(chkPage, 150);
   }
 }
 function chkPage() {
@@ -308,10 +309,14 @@ function linkProfile(player) {
 }
 
 function getCountryFlag(player, small = true) {
-  if (!player.country) return "";
-  let chars = player.country.split('')
-    .map(char =>  127397 + char.charCodeAt());
-  let file = `${chars[0].toString(16)}-${chars[1].toString(16)}`;
+  let file;
+  let flag;
+  if (!player.country) file = '1f3f4-200d-2620-fe0f';
+  else {
+    let chars = player.country.split('')
+      .map(char =>  127397 + char.charCodeAt());
+    file = `${chars[0].toString(16)}-${chars[1].toString(16)}`;
+  }
   if (small) flag = "flag_small";
   else flag = "flag_medium";
   return `<div class="${flag}" style="background-image: url('https://twemoji.maxcdn.com/v/14.0.2/svg/${file}.svg')"></div>`;
@@ -387,7 +392,7 @@ function noteHandler() {
       let x = pos.left - $("#note_container").width() - scrollLeft - 6; //warning: arbitrary number
       let y = pos.top - scrollTop + margin;
       if (x < 0) x = pos.left + $('#'+hover_cell).width() - scrollLeft + 18; //warning: arbitrary number
-      if (y > pos_max - 10) y = pos_max - 12; //10 is scrollbar width, should probably be a constant
+      if (y > pos_max - 12) y = pos_max - 14; //12 is scrollbar width, should probably be a constant
       else if (y < margin + header) y = margin + header;
       $("#note_container").css('left', x); 
       $("#note_container").css('top', y);
@@ -424,7 +429,7 @@ function headerNameHandler(id) {
   if (id.substring(0,5) === 'headr') {
     let s = headers[layout[parseIndex(id)]].string;
     $('#header_name').removeClass();
-    if (s.length >= 14) {
+    if (s.length > 15) {
       $('#header_name').addClass('header_name_smaller');
     }
     else if (s.length > 10) {
@@ -484,6 +489,9 @@ function peripheralSettings(player) {
 function startNameSearch(str) {
   search_string = str;
   console.log("searching for "+str);
+  api_params.name = str;
+  updateFilterList();
+  getNewList();
 }
 
 /*
@@ -512,6 +520,37 @@ const api_params = {
   country: "", //country code string, how tf am i gonna do this
   page: 1, //int, page 1 default
 }
+const api_filters = [
+  { name: 'Username', value: function() { return api_params.name },
+    string: function() { return `"${this.value()}"` }},
+  { name: 'Playstyle', value: function() { return api_params.playstyle },
+    string: function() { return `"${this.value()}"` }},//
+  { name: 'Minimum eDPI', value: function() { return api_params.min_edpi },
+    string: function() { return  `${this.value} eDPI Min.` }},
+  { name: 'Maximum eDPI', value: function() { return api_params.max_edpi },
+    string: function() { return  `${this.value} eDPI Max.` }},
+  { name: 'Mouse', value: function() { return api_params.mouse},
+    string: function() { return `"${this.value()}"` }},
+  { name: 'Mousepad', value: function() { return api_params.mousepad },
+    string: function() { return `"${this.value()}"` }},
+  { name: 'Keyboard', value: function() { return api_params.keyboard },
+    string: function() { return `"${this.value()}"` }},
+  { name: 'Country', value: function() { return api_params.country },
+    string: function() { return `"${this.value()}"` }},//
+];
+function chkFilter(obj) {
+  if (obj.value() === "") return false;
+  else return true
+}
+function updateFilterList() {
+  let str = "";
+  for (let i = 0; i < api_filters.length; i++) {
+    if (chkFilter(api_filters[i])) str += `<div class='clk_div' value=${i}>&emsp;${api_filters[i].name}:<br>${api_filters[i].string()}</div><br>`;
+  }
+  if (str === "") str = "<span style='color: gray'>&emsp;[none]</span>";
+  $("#applied_filters").html(str);
+}
+
 function setApiPlaystyle(arr) {
   let s = "";
   for (let i = 0; i < arr.length; i++) {
@@ -541,8 +580,8 @@ async function getNewList() {
     page_limit = false;
     players = response.data.players;
     for (let i = 0; i < players.length; i++) initPlayer(i);
+    page_last = players.length;
     if (players.length < page_size) {
-      page_last = players.length;
       page_limit = true;
     }
     addPage();
@@ -564,13 +603,13 @@ async function getNewPage() {
   if (response.status === 'ok') {
     let length = response.data.players.length;
     if (length > 0) {
+      page_last = length;
       let index = loaded_page * page_size;
-      for (let i = 0; i < response.data.players.length; i++) {
+      for (let i = 0; i < length; i++) {
         players.push(response.data.players[i]);
         initPlayer(i+index);
       }
       if (length < page_size) {
-        page_last = length;
         page_limit = true;
       }
       addPage(loaded_page);
@@ -612,12 +651,12 @@ function setLoadMsg(str = '') {
       break;
     case 'bad_request':
       str2 = getApiUrl().substring(api_path.length + 8);
-      $('#loading_text').html(`<span color=red>Error: [${str}] returned. Please tell NixXSkate he's dumb and ${str2}</span>`);
+      $('#loading_text').html(`<span style='color:red'>Error: [${str}] returned. Please tell NixXSkate he's dumb and ${str2}</span>`);
       break;
     default:
-      if (!loaded_page) str2 = "re-applying the search/filters";
-      else "re-scrolling to the bottom";
-      $('#loading_text').html(`<span color=red>Error: [${str}] returned. You can try ${str2} to see if the issue resolves.</span>`);
+      if (!loaded_page) str2 = "re-applying the search/filters or refreshing";
+      else str2 = "re-scrolling to the bottom";
+      $('#loading_text').html(`<span style='color:red'>Error: [${str}] returned. You can try ${str2} to see if the issue resolves.</span>`);
   }
 }
 
@@ -636,7 +675,7 @@ function refreshAll() {
 function refreshHeaders() {
   let header_string = "";
   for (let i = 0; i < layout.length; i++) {
-    header_string += `<th>${sizeStr(i, headers[layout[i]].size)}<a href='#'>${headers[layout[i]].string}</a></div></th>`;
+    header_string += `<th>${sizeStr(i, headers[layout[i]].size)}<a>${headers[layout[i]].string}</a></div></th>`;
   }
   $("#headers").html(header_string);
 }
@@ -689,105 +728,9 @@ function refreshList(page = -1) {
   }
   $("#list").html(margin_top + include_pages.join("") + margin_bottom);
   //$("#table_container").css('margin-top', 147+(offset*1350));
-  if (page_last) $("body").css('height', $('#list').height());
+  if (page_limit) $("body").css('height', $('#list').height());
   else $("body").css('height', ($('#list').height()+46)+'px'); //46px is the space for the Loading text
 }
 
 //currently, $(window).scrollTop for 1 page ranges from 0-1350px, each row is 27px found by $("#list").children()[0].clientHeight
 //should be in a global variable once 
-
-
-
-
-
-/*
-function checkFileAPI() { //temporary shit
-  if (window.File && window.FileReader && window.FileList && window.Blob) {
-      reader = new FileReader();
-      return true;
-  } else {
-      alert('The File APIs are not fully supported by your browser. Fallback required.');
-      return false;
-  }
-}
-
-async function getFile(file) { //temporary shit
-  let output;
-  if (file.files && file.files[0]) {
-    reader.readAsText(file.files[0]);
-    reader.onload = function(e) {
-      output = e.target.result;
-      console.log(output);
-      parse_player_data(output);
-      console.log(players);
-      refreshAll();
-    };
-  }
-}
-
-function parse_player_data(s) { //temporary shit, emulates what would normally be received
-  players = [];
-  let data_array = s.split('\r\n');
-  let data = [];
-  for (let i = 0; i < data_array.length - 1; i++) {
-    data = data_array[i].split('|');
-    let player = {
-      rank: i,
-      global_rank: data[0].substring(1),
-      pp: data[1],
-      username: data[2],
-      playstyle: tempNull(data[3]),
-      dpi: tempNull(data[4].substring(0,data[4].length-3)),
-      edpi: tempNull(data[4].substring(0,data[4].length-3)),
-      os_sens: tempNull(data[5].substring(0,1)),
-      os_accel: tempAccel(data[5]),
-      osu_sens: tempNull(data[6].substring(0,data[6].length-1)),
-      osu_res: tempNull(data[7]),
-      raw_input: tempRaw(data[8]),
-      polling: tempNull(data[9].substring(0,data[9].length-2)),
-      play_area: tempNull(data[10]),
-      mouse: {
-        brand: tempBrand(data[11]),
-        model: tempModel(data[11]),
-        sensor: tempNull(data[13]),
-        weight: tempNull(data[14].substring(0,data[14].length-1)),
-        length: tempNull(data[15].substring(0,data[15].length-2)),
-        width: tempNull(data[16].substring(0,data[16].length-2)),
-        height: tempNull(data[17].substring(0,data[17].length-2)),
-        switch: tempNull(data[18]),
-      },
-      mousepad: tempNull(data[12]),
-      keyboard: tempNull(data[19]),
-      keyboard_switch: tempNull(data[20]),
-      updated: tempNull(data[21]),
-      id: data[22].substring(21),
-      hz: tempNull(''),
-    }
-    players.push(player);
-  }
-}
-
-function tempNull(s) {
-  if (s === '') return null;
-  else return s;
-}
-function tempBrand(s) { //temp
-  let index = s.indexOf(' ');
-  if (index < 0) return null;
-  else return s.slice(0, index);
-}
-function tempModel(s) { //temp
-  let index = s.indexOf(' ');
-  if (index < 0) return null;
-  else return s.substring(index + 1);
-}
-function tempAccel(s) {
-  let data = s.split(' ');
-  if (data.length > 1) return data[1] === "On" ? true : false;
-  else return null;
-}
-function tempRaw(s) {
-  if (s === '') return null;
-  else return s === 'On' ? true : false
-}
-*/
