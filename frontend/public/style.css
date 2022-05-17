@@ -2,21 +2,21 @@
   width: 10px;
   height: 10px;
 }
-
 ::-webkit-scrollbar-track {
   background: rgb(0,0,5,0.3); 
 }
- 
 ::-webkit-scrollbar-thumb {
   background: rgb(128,200,255,0.4)
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(128,200,255,0.75); 
 }
-
 ::-webkit-scrollbar-corner {
   background: rgba(0,0,5,0.3);
+}
+::placeholder {
+  color: #CCC;
+  opacity: 1;
 }
 
 body {
@@ -29,16 +29,24 @@ body {
   position: relative;
 }
 
-
-
-
+#menu_group {
+  position: absolute;
+  width: 260px;
+  height: 147px;
+  text-align: center;
+}
 
 .text_input {
-  background-color: rgb(255, 255, 255, 0.50);
+  color: #FFF;
+  background-color:rgb(80, 80, 80);
   padding: 6px 10px;
   border-radius: 8px;
   border: 0px none;
   outline: none;
+}
+#search_text {
+  position: relative;
+  top: 120px;
 }
 
 .hidden {

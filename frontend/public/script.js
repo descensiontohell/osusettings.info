@@ -23,8 +23,8 @@ const column = { //how columns are addressed(string), sized(px), and how it addr
     func:function(x){ return '#' + (x.rank + 1) }},
   global_rank: {
     string: "Global",
-    size:{ min:30, max:75 },
-    func:function(x){ return '#' + strNull(x.global_rank)}},
+    size:{ min:30, default:40, max:75 },
+    func:function(x){ return chkNull(x.global_rank) ? '#'+x.global_rank : ""}},
   performance: {
     locked: true,
     string: "PP",
@@ -168,35 +168,27 @@ function strEmpty(str, post_str = "") {
 const headers = [ column.rank, column.global_rank, column.performance, column.username, column.playstyle, column.mouse_edpi, column.dpi, column.multiplier,
   column.os_sens, column.osu_res, column.hz, column.raw_input, column.play_area, column.mouse, column.mousepad, column.mouse.sensor, column.mouse.lwh,
   column.keyboard, column.keyboard_switch, column.updated ];
-const default_layout = [ 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 ];
+const default_layout = [ 0,1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19 ];
 let locked_layout;
 let layout = default_layout;
 
 
 
 
-
+//$('body').scrollTop(0);
+    /*$('body,html').animate({
+      'scrollTop': 0,
+    }, 750);*/
 $(document).ready(function() {
   //checkFileAPI();
   loadHeaderOptions();
   refreshHeaders();
   getNewList();
   $("#column_apply_button").click(function() {
-    let selected = $('#applied_columns').children('input:checked');
-    layout = new Int8Array(locked_layout.length+selected.length);
-    let i = 0;
-    for (i; i < locked_layout.length; i++) layout[i] = locked_layout[i];
-    for (let j = 0; j < selected.length; j++) {
-      layout[i] = parseInt(selected[j].id.substring(9));
-      i++;
-    }
-    layout = layout.sort();
-    for (let i = 0; i < pages.length; i++) addPage(i, true);
-    refreshAll();
-    //$('body').scrollTop(0);
-    /*$('body,html').animate({
-      'scrollTop': 0,
-    }, 750);*/
+    applyColumns();
+  });
+  $("#column_default_button").click(function() {
+    defaultColumns();
   });
   $('.tab').hover(function(e){
     $('#'+e.target.closest('div[class=tab]').id).stop(true, false).animate({ top: "-2px" }, 250);
@@ -244,8 +236,7 @@ $(document).ready(function() {
       let id = e.target.closest('div').id;
       let index = parseIndex(id);
       //console.log($('#headers').children()[index].children[0]); //this target works
-      console.log($('#'+id).children()[0].clientWidth);
-      console.log('#'+id+' resize');
+      console.log(`#${id} resize ${$('#'+id).children()[0].clientWidth}px`);
     }
   });
   // optional method to allow live search
@@ -253,7 +244,6 @@ $(document).ready(function() {
     clearTimeout(typing_timer);
     let s = $('#search_text').val();
     if (s !== search_string) {
-      console.log('triggered');
       typing_timer = setTimeout(startNameSearch, 750, s);
     }
   });
@@ -282,7 +272,34 @@ function loadHeaderOptions() {
   }
   $("#applied_columns").html(cb_string);
 }
-
+function applyColumns() {
+  let selected = $('#applied_columns').children('input:checked');
+  layout = new Int8Array(locked_layout.length+selected.length);
+  let i = 0;
+  for (i; i < locked_layout.length; i++) layout[i] = locked_layout[i];
+  for (let j = 0; j < selected.length; j++) {
+    layout[i] = parseInt(selected[j].id.substring(9));
+    i++;
+  }
+  layout = layout.sort();
+  refreshLayout();
+}
+function defaultColumns() {
+  let j = 0;
+  for (let i = 0; i < headers.length; i++) {
+    if (default_layout[j] == i) {
+      if (!headers[i].locked) $(`#header_cb${i}`)[0].checked = true;
+      j++;
+    }
+    else $(`#header_cb${i}`)[0].checked = false;
+  }
+  layout = default_layout;
+  refreshLayout();
+}
+function refreshLayout() {
+  for (let i = 0; i < pages.length; i++) addPage(i, true);
+  refreshAll();
+}
 
 
 function chkScroll() {
@@ -459,7 +476,7 @@ function mouseProfile(player) {
   return str;
 }
 
-function avatarTimeout(id) {
+function avatarTimeout(id) {  //CURRENTLY THERE's A BUG WHEN LOADING THE AVATAR FROM BLANK $List SPACE
   clearTimeout(avatar_timer);
   $("#avatar_container").fadeOut(250);
   avatar_timer = setTimeout(function() {
