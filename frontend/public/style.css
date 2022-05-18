@@ -391,6 +391,7 @@ SUB-MENU SECTION (filters and columns section in header)
 }
 
 .clk_div {
+  cursor: pointer;
   width: 100%;
 }
 .clk_div:hover {

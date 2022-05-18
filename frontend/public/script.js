@@ -6,6 +6,8 @@ let hover_row = "";
 let hover_cell = "";
 let hover_index = -1;
 let avatar_timer;
+let avatar_id;
+let avatar_visible = false;
 let typing_timer;
 let scroll_timer;
 let search_string = "";
@@ -172,13 +174,10 @@ const default_layout = [ 0,1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19 ];
 let locked_layout;
 let layout = default_layout;
 
+/*
+HTML EVENT LISTENER SHIT
+*/
 
-
-
-//$('body').scrollTop(0);
-    /*$('body,html').animate({
-      'scrollTop': 0,
-    }, 750);*/
 $(document).ready(function() {
   //checkFileAPI();
   loadHeaderOptions();
@@ -238,6 +237,9 @@ $(document).ready(function() {
       //console.log($('#headers').children()[index].children[0]); //this target works
       console.log(`#${id} resize ${$('#'+id).children()[0].clientWidth}px`);
     }
+  });
+  $('#applied_filters').click(function(e) {
+    //console.log(e.target.closest('a')); FIX THIS FILTER BUTTON
   });
   // optional method to allow live search
   $('#search_text').keyup(function(){
@@ -394,7 +396,7 @@ function noteHandler() {
   }
   let player = players[parseIndex(hover_cell)];
   switch (hover_cell.substring(0,5)) {
-    case ('mouse'):
+    case ('mouse'): //monkaS all this just to place the stupid note
       if (column.mouse.func(player) === "") {
         $("#note_container").addClass('hidden');
         return;
@@ -419,20 +421,17 @@ function noteHandler() {
 }
 
 function headerHandler(mouseover) {
-  hover_header = "";
-  hover_row = "";
-  hover_cell = "";
-  hover_index = -1;
   $('#main_container').addClass('hidden');
   $('#profile_container').addClass('hidden');
   $('#header_container').addClass('hidden');
-  $("#avatar_container").css('display','none');
   switch (mouseover) {
     case 'main':
+      resetHoverVars();
       $("#note_container").addClass('hidden');
       $('#main_container').removeClass('hidden');
       break;
     case 'headers':
+      resetHoverVars();
       $("#note_container").addClass('hidden');
       $('#header_container').removeClass('hidden');
       break;
@@ -440,6 +439,14 @@ function headerHandler(mouseover) {
       $('#profile_container').removeClass('hidden');
       break;
   }
+}
+function resetHoverVars() {
+  $("#avatar_container").css('display','none');
+  avatar_visible = false;
+  hover_header = "";
+  hover_row = "";
+  hover_cell = "";
+  hover_index = -1;
 }
 
 function headerNameHandler(id) {
@@ -476,16 +483,21 @@ function mouseProfile(player) {
   return str;
 }
 
-function avatarTimeout(id) {  //CURRENTLY THERE's A BUG WHEN LOADING THE AVATAR FROM BLANK $List SPACE
+function avatarTimeout(id) {
   clearTimeout(avatar_timer);
-  $("#avatar_container").fadeOut(250);
+  if (avatar_visible) avatarFadeOut();
   avatar_timer = setTimeout(function() {
     $("#avatar_container").attr("src", "https://a.ppy.sh/" + id);
+    avatar_id = id;
   }, 250);
 }
 
+function avatarFadeOut() {
+  avatar_visible = false;
+  $("#avatar_container").fadeOut(250);
+}
 function avatarFadeIn() {
-  $("#avatar_container").fadeIn(250);
+  $("#avatar_container").fadeIn(250, function() { avatar_visible = true; });
 }
 
 function mouseSensSettings(player) {
@@ -562,7 +574,7 @@ function chkFilter(obj) {
 function updateFilterList() {
   let str = "";
   for (let i = 0; i < api_filters.length; i++) {
-    if (chkFilter(api_filters[i])) str += `<div class='clk_div' value=${i}>&emsp;${api_filters[i].name}:<br>${api_filters[i].string()}</div><br>`;
+    if (chkFilter(api_filters[i])) str += `<a value=${i}><div class='clk_div'>&emsp;${api_filters[i].name}:<br>${api_filters[i].string()}</div><br></a>`;
   }
   if (str === "") str = "<span style='color: gray'>&emsp;[none]</span>";
   $("#applied_filters").html(str);
@@ -750,4 +762,10 @@ function refreshList(page = -1) {
 }
 
 //currently, $(window).scrollTop for 1 page ranges from 0-1350px, each row is 27px found by $("#list").children()[0].clientHeight
-//should be in a global variable once 
+//should be in a global variable once a propet initializer is created
+
+//gonna need this later
+//$('body').scrollTop(0);
+/*$('body,html').animate({
+    'scrollTop': 0,
+  }, 750);*/
