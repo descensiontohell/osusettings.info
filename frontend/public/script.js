@@ -11,6 +11,7 @@ let avatar_visible = false;
 let typing_timer;
 let scroll_timer;
 let search_string = "";
+let selected_filter = -1;
 const column = { //how columns are addressed(string), sized(px), and how it addresses the object(func)
 //column object: must match the player object:
   //locked: column can't be removed in options
@@ -179,7 +180,6 @@ HTML EVENT LISTENER SHIT
 */
 
 $(document).ready(function() {
-  //checkFileAPI();
   loadHeaderOptions();
   refreshHeaders();
   getNewList();
@@ -239,7 +239,16 @@ $(document).ready(function() {
     }
   });
   $('#applied_filters').click(function(e) {
-    //console.log(e.target.closest('a')); FIX THIS FILTER BUTTON
+    if (e.target.closest('a')) {
+      selected_filter = parseIndex(e.target.closest('a').id);
+      $('#filter_delete_button').prop('disabled', false);
+    }
+  });
+  $('#filter_delete_button').click(function(e) {
+    removeFilter(selected_filter);
+  });
+  $('#filter_reset_button').click(function(e) {
+    removeFilter();
   });
   // optional method to allow live search
   $('#search_text').keyup(function(){
@@ -303,6 +312,13 @@ function refreshLayout() {
   refreshAll();
 }
 
+function removeFilter(index = -1) {
+  if (index > -1) api_filters[index].set("");
+  else {
+    for (index = 0; index < api_filters.length; index++) api_filters[index].set("");
+  }
+  getNewList();
+}
 
 function chkScroll() {
   let obj = $(document)[0].scrollingElement;
@@ -396,7 +412,7 @@ function noteHandler() {
   }
   let player = players[parseIndex(hover_cell)];
   switch (hover_cell.substring(0,5)) {
-    case ('mouse'): //monkaS all this just to place the stupid note
+    case ('mouse'): //monkaS all this mess just to place the stupid note
       if (column.mouse.func(player) === "") {
         $("#note_container").addClass('hidden');
         return;
@@ -519,7 +535,6 @@ function startNameSearch(str) {
   search_string = str;
   console.log("searching for "+str);
   api_params.name = str;
-  updateFilterList();
   getNewList();
 }
 
@@ -549,35 +564,58 @@ const api_params = {
   country: "", //country code string, how tf am i gonna do this
   page: 1, //int, page 1 default
 }
-const api_filters = [
-  { name: 'Username', value: function() { return api_params.name },
-    string: function() { return `"${this.value()}"` }},
-  { name: 'Playstyle', value: function() { return api_params.playstyle },
-    string: function() { return `"${this.value()}"` }},//
-  { name: 'Minimum eDPI', value: function() { return api_params.min_edpi },
-    string: function() { return  `${this.value} eDPI Min.` }},
-  { name: 'Maximum eDPI', value: function() { return api_params.max_edpi },
-    string: function() { return  `${this.value} eDPI Max.` }},
-  { name: 'Mouse', value: function() { return api_params.mouse},
-    string: function() { return `"${this.value()}"` }},
-  { name: 'Mousepad', value: function() { return api_params.mousepad },
-    string: function() { return `"${this.value()}"` }},
-  { name: 'Keyboard', value: function() { return api_params.keyboard },
-    string: function() { return `"${this.value()}"` }},
-  { name: 'Country', value: function() { return api_params.country },
-    string: function() { return `"${this.value()}"` }},//
+const api_filters = [ //there's probably a cleaner way to do this
+  { name: 'Username',
+    get: ()=> { return api_params.name }, 
+    string: function() { return `"${this.get()}"` },
+    set: (x)=> {
+      api_params.name = x;
+      if (x === "") $('#search_text').val(""); } },
+  { name: 'Playstyle',
+    get: ()=> { return api_params.playstyle },
+    string: function() { return `"${this.get()}"` }, //change later
+    set: (x)=> { api_params.playstyle = x } },
+  { name: 'Minimum eDPI',
+    get: ()=> { return api_params.min_edpi },
+    string: function() { return  `${this.get()} eDPI Min.` },
+    set: (x)=> { api_params.min_edpi = x } },
+  { name: 'Maximum eDPI',
+    get: ()=> { return api_params.max_edpi },
+    string: function() { return  `${this.get()} eDPI Max.` },
+    set: (x)=> { api_params.max_edpi = x } },
+  { name: 'Mouse', get: ()=> { return api_params.mouse},
+    string: function() { return `"${this.get()}"` },
+    set: (x)=> { api_params.mouse = x } },
+  { name: 'Mousepad',
+    get: ()=> { return api_params.mousepad },
+    string: function() { return `"${this.get()}"` },
+    set: (x)=> { api_params.mousepad = x } },
+  { name: 'Keyboard',
+    get: ()=> { return api_params.keyboard },
+    string: function() { return `"${this.get()}"` },
+    set: (x)=> { api_params.keyboard = x } },
+  { name: 'Country',
+    get: ()=> { return api_params.country },
+    string: function() { return `"${this.get()}"` }, //change later
+    set: (x)=> { api_params.country = x } },
 ];
 function chkFilter(obj) {
-  if (obj.value() === "") return false;
+  if (obj.get() === "") return false;
   else return true
 }
 function updateFilterList() {
   let str = "";
   for (let i = 0; i < api_filters.length; i++) {
-    if (chkFilter(api_filters[i])) str += `<a value=${i}><div class='clk_div'>&emsp;${api_filters[i].name}:<br>${api_filters[i].string()}</div><br></a>`;
+    if (chkFilter(api_filters[i])) str += `<a id='filtr${i}'><div class='clk_div'>&emsp;${api_filters[i].name}:<br>${api_filters[i].string()}</div><br></a>`;
   }
-  if (str === "") str = "<span style='color: gray'>&emsp;[none]</span>";
-  $("#applied_filters").html(str);
+  if (str === "") {
+    $('#filter_reset_button').prop('disabled', true);
+    str = "<span style='color: gray'>&emsp;[none]</span>";
+  }
+  else $('#filter_reset_button').prop('disabled', false);
+  $('#applied_filters').html(str);
+  $('#filter_delete_button').prop('disabled', true);
+  selected_filter = -1;
 }
 
 function setApiPlaystyle(arr) {
@@ -619,6 +657,7 @@ async function getNewList() {
   }
   new_page_queue = false;
   setLoadMsg(response.status);
+  updateFilterList();
 }
 
 async function getNewPage() {
