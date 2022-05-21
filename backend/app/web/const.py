@@ -4,3 +4,5 @@ class Const:
     CACHE_EX = 300
     MIN_RANK: int = 1
     MAX_RANK: int = 10000
+    TOKEN_API_PATH: str = "https://osu.ppy.sh/oauth/token"
+    TOKEN_EXPIRE_HANDICAP: int = 2000
