@@ -1,6 +1,6 @@
 from sqlalchemy.sql import func
 
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, MetaData, DateTime, Float, Date
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, MetaData, Float, Date
 from sqlalchemy.orm import declarative_base, relationship
 
 from backend.app.store.players.dataclasses import Playstyle, Mouse, Tablet, Keyboard, Switch, Player, Settings, Mousepad
@@ -192,6 +192,7 @@ class PlayerModel(Base):
             performance=self.performance,
             is_restricted=self.is_restricted,
             is_mouse=self.is_mouse,
+            country=self.country_code,
             playstyle=playstyle,
             mouse_edpi=self.mouse_edpi,
             tablet_area_width=self.tablet_area_width,

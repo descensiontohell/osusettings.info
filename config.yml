@@ -9,4 +9,4 @@ database:
   password: dev_elle_pass
   database: dev_osu
 redis:
-  host: redis
+  host: "localhost:6379"

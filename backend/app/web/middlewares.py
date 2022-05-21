@@ -1,8 +1,12 @@
 import json
+import logging
 import typing
+from datetime import datetime
 
-from aiohttp.web_exceptions import HTTPUnprocessableEntity, HTTPException, HTTPNotImplemented, HTTPUnauthorized
+from aiohttp.web_exceptions import HTTPUnprocessableEntity, HTTPException, HTTPNotImplemented, HTTPUnauthorized, \
+    HTTPFound
 from aiohttp.web_middlewares import middleware
+from aiohttp.web_response import json_response
 from aiohttp_apispec import validation_middleware
 from aiohttp_session import get_session
 
@@ -23,7 +27,20 @@ async def auth_middleware(request: "Request", handler: callable):
     return await handler(request)
 
 
+@middleware
+async def response_time_middleware(request: "Request", handler: callable):
+    start_time = datetime.now()
+    try:
+        response = await handler(request)
+        return response
+    finally:
+        consumed_time = (datetime.now() - start_time).microseconds / 1000
+        logger = logging.getLogger("REQUEST")
+        logger.info(msg=consumed_time)
+
+
 HTTP_ERROR_CODES = {
+    302: "http found",
     400: "bad_request",
     401: "unauthorized",
     403: "forbidden",
@@ -39,6 +56,8 @@ async def error_handling_middleware(request: "Request", handler):
     try:
         response = await handler(request)
         return response
+    except HTTPFound as e:
+        raise HTTPFound(location=e.location)
     except HTTPUnprocessableEntity as e:
         return error_json_response(
             http_status=400,
@@ -77,3 +96,4 @@ def setup_middlewares(app: "Application"):
     app.middlewares.append(auth_middleware)
     app.middlewares.append(error_handling_middleware)
     app.middlewares.append(validation_middleware)
+    app.middlewares.append(response_time_middleware)

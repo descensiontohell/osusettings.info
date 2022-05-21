@@ -57,6 +57,7 @@ class Player:
     performance: int
     is_restricted: bool
     is_mouse: bool
+    country: str
     playstyle: Optional[Playstyle]
     mouse_edpi: int
     tablet_area_width: int
