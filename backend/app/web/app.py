@@ -12,6 +12,7 @@ from aiohttp_session import setup as setup_session
 from aiohttp_session.redis_storage import RedisStorage
 
 from backend.app.web.const import Const
+from backend.app.web.cors import setup_cors
 from backend.app.web.middlewares import setup_middlewares
 from backend.app.store.redis.redis import setup_redis
 from backend.app.web.logger import setup_logging
@@ -68,6 +69,7 @@ def setup_app(config_path: str = None) -> Application:
     setup_session(app, RedisStorage(app.store.redis))
     setup_middlewares(app)
     setup_aiohttp_apispec(app, title="osusettings", url="/api/docs/json", swagger_path="/api/docs")
+    setup_cors(app)
     return app
 
 

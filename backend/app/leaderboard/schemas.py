@@ -61,6 +61,7 @@ class PlayerSchema(Schema):
     tablet = fields.Nested("TabletSchema", many=False)
     keyboard = fields.Nested("KeyboardSchema", many=False)
     switch = fields.Nested("SwitchSchema", many=False)
+    is_active = fields.Bool(required=True)
 
 
 class LeaderboardSchema(Schema):

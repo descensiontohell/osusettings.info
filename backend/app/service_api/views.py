@@ -2,6 +2,7 @@ from hashlib import sha256
 
 from aiohttp.web_exceptions import HTTPForbidden, HTTPUnauthorized, HTTPFound, HTTPConflict, HTTPNotFound
 from aiohttp_apispec import request_schema, response_schema
+from aiohttp_cors import CorsViewMixin
 from aiohttp_session import new_session
 
 from backend.app.web.app import View
@@ -11,7 +12,7 @@ from backend.app.service_api.schemas import SuperuserLoginRequestSchema, Superus
     SuperuserManageAdminsSchema, ListAdminsSchema
 
 
-class SuperuserLoginView(View):
+class SuperuserLoginView(View, CorsViewMixin):
     @request_schema(SuperuserLoginRequestSchema)
     async def post(self):
         name = self.data["name"]
@@ -26,7 +27,7 @@ class SuperuserLoginView(View):
         return json_response(data=SuperuserLoginResponseSchema().dump({"name": superuser.name}))
 
 
-class SuperuserManageAdminsView(SuperuserRequiredMixin, View):
+class SuperuserManageAdminsView(SuperuserRequiredMixin, View, CorsViewMixin):
     @request_schema(SuperuserManageAdminsSchema)
     @response_schema(ListAdminsSchema, 200)
     async def post(self):
