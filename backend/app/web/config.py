@@ -49,7 +49,6 @@ class Config:
 
 
 def setup_config(app: "Application", config_path: str):
-
     with open(config_path, "r") as f:
         raw_config = yaml.safe_load(f)
     app.config = Config(
