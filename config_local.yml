@@ -10,3 +10,8 @@ database:
   database: dev_osu
 redis:
   host: "localhost:6379"
+credentials:
+  client_id: ""
+  client_secret: ""
+  grant_type: "client_credentials"
+  scope: "public"
