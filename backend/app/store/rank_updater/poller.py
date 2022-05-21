@@ -24,6 +24,8 @@ class RankPoller:
             list_of_ids = await self.app.store.rank_updater.get_players_ids()
 
             for player_id in list_of_ids:
+                if self.app.store.rank_updater.update_token_in == 0:
+                    await self.app.store.rank_updater.get_access_token()
                 stats = await self.app.store.rank_updater.request_player_stats(player_id)
                 await self.app.store.rank_updater.update_player(stats)
                 await asyncio.sleep(1)
