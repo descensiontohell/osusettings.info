@@ -399,6 +399,11 @@ SUB-MENU SECTION (filters and columns section in header)
   text-shadow:0px 0px 1px currentColor, 0px 0px 5px #ccc;
   transition: all 0.05s ease-in;
 }
+.clk_div_selected {
+  cursor: pointer;
+  background-color:rgb(106, 205, 102);
+  text-shadow:0px 0px 1px currentColor, 0px 0px 5px #ccc;
+}
 
 #filters_container {
   position: fixed;

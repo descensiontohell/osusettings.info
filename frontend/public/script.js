@@ -27,7 +27,7 @@ const column = { //how columns are addressed(string), sized(px), and how it addr
   global_rank: {
     string: "Global",
     size:{ min:30, default:40, max:75 },
-    func:function(x){ return chkNull(x.global_rank) ? '#'+x.global_rank : ""}},
+    func:function(x){ return (chkNull(x.global_rank) && x.is_active) ? '#'+x.global_rank : ""}},
   performance: {
     locked: true,
     string: "PP",
@@ -240,7 +240,10 @@ $(document).ready(function() {
   });
   $('#applied_filters').click(function(e) {
     if (e.target.closest('a')) {
-      selected_filter = parseIndex(e.target.closest('a').id);
+      let filter = e.target.closest('div').id;
+      if (selected_filter > -1) highlightSelect(false, `#filtr${selected_filter}`);
+      selected_filter = parseIndex(filter);
+      highlightSelect(true, `#${filter}`)
       $('#filter_delete_button').prop('disabled', false);
     }
   });
@@ -320,6 +323,15 @@ function removeFilter(index = -1) {
   getNewList();
 }
 
+function highlightSelect(highlight, element) {
+  $(element).removeClass();
+  if (highlight) {
+    $(element).addClass('clk_div_selected');
+    console.log('test');
+  }
+  else $(element).addClass('clk_div');
+}
+
 function chkScroll() {
   let obj = $(document)[0].scrollingElement;
   clearTimeout(scroll_timer);
@@ -340,7 +352,8 @@ function chkPage() {
 
 function linkProfile(player) {
   let flag = getCountryFlag(player);
-  return `<a href=https://osu.ppy.sh/u/${player.osu_id}>${player.name}</a> ${flag}`;
+  let color = player.is_active ? "" : "style='color:#a1a1a1' ";
+  return `<a ${color}href=https://osu.ppy.sh/u/${player.osu_id}>${player.name}</a> ${flag}`;
 }
 
 function getCountryFlag(player, small = true) {
@@ -400,7 +413,7 @@ function recolorOS(player, long = false) {
     str2 = "On";
     accel = true;
   }
-  if (player.raw_input) return recolor(str1+str2, "#919191");
+  if (player.raw_input) return recolor(str1+str2, "#a1a1a1");
   else if (accel) return str1 + recolor(str2, "#f00a0a");
   else return str1+str2;
 }
@@ -606,7 +619,7 @@ function chkFilter(obj) {
 function updateFilterList() {
   let str = "";
   for (let i = 0; i < api_filters.length; i++) {
-    if (chkFilter(api_filters[i])) str += `<a id='filtr${i}'><div class='clk_div'>&emsp;${api_filters[i].name}:<br>${api_filters[i].string()}</div><br></a>`;
+    if (chkFilter(api_filters[i])) str += `<a><div id='filtr${i}' class='clk_div'>&emsp;${api_filters[i].name}:<br>${api_filters[i].string()}</div><br></a>`;
   }
   if (str === "") {
     $('#filter_reset_button').prop('disabled', true);
