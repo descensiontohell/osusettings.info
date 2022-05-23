@@ -151,6 +151,7 @@ class PlayerModel(Base):
     switch_id = Column(Integer(), ForeignKey("switch.id"))
     switch = relationship("SwitchModel", back_populates="player")
     updated_by = Column(String(), nullable=False)
+    is_active = Column(Boolean(), nullable=False, server_default="true")
 
     def to_dc(self):
         if self.playstyle is not None:
@@ -161,27 +162,27 @@ class PlayerModel(Base):
         if self.mouse is not None:
             mouse = self.mouse.to_dc()
         else:
-            mouse = None
+            mouse = Mouse()
 
         if self.mousepad is not None:
             mousepad = self.mousepad.to_dc()
         else:
-            mousepad = None
+            mousepad = Mousepad()
 
         if self.tablet is not None:
             tablet = self.tablet.to_dc()
         else:
-            tablet = None
+            tablet = Tablet()
 
         if self.keyboard is not None:
             keyboard = self.keyboard.to_dc()
         else:
-            keyboard = None
+            keyboard = Keyboard()
 
         if self.switch is not None:
             switch = self.switch.to_dc()
         else:
-            switch = None
+            switch = Switch()
 
         return Player(
             last_updated=self.last_updated,
@@ -213,6 +214,7 @@ class PlayerModel(Base):
             tablet=tablet,
             keyboard=keyboard,
             switch=switch,
+            is_active=self.is_active,
         )
 
 
@@ -259,27 +261,27 @@ class SettingsModel(Base):
         if self.mouse is not None:
             mouse = self.mouse.to_dc()
         else:
-            mouse = None
-
-        if self.tablet is not None:
-            tablet = self.tablet.to_dc()
-        else:
-            tablet = None
+            mouse = Mouse()
 
         if self.mousepad is not None:
             mousepad = self.mousepad.to_dc()
         else:
-            mousepad = None
+            mousepad = Mousepad()
+
+        if self.tablet is not None:
+            tablet = self.tablet.to_dc()
+        else:
+            tablet = Tablet()
 
         if self.keyboard is not None:
             keyboard = self.keyboard.to_dc()
         else:
-            keyboard = None
+            keyboard = Keyboard()
 
         if self.switch is not None:
             switch = self.switch.to_dc()
         else:
-            switch = None
+            switch = Switch()
 
         return Settings(
             last_updated=self.last_updated,

@@ -1,4 +1,5 @@
 from aiohttp_apispec import request_schema, response_schema, querystring_schema, docs
+from aiohttp_cors import CorsViewMixin
 
 from backend.app.leaderboard.filter import LeaderboardFilter
 from backend.app.leaderboard.schemas import LeaderboardSchema, GetPlayersQuerySchema
@@ -6,7 +7,7 @@ from backend.app.web.response import json_response, error_json_response
 from backend.app.web.app import View
 
 
-class GetPlayersView(View):
+class GetPlayersView(View, CorsViewMixin):
     @docs(
         tags=["Leaderboard"],
         summary="Get leaderboard with players and their settings",

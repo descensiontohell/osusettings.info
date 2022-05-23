@@ -12,8 +12,10 @@ class Store:
         from backend.app.store.players.accessor import PlayersAccessor
         from backend.app.store.items.accessor import ItemsAccessor
         from backend.app.store.redis.redis import setup_redis
+        from backend.app.store.rank_updater.accessor import RankUpdater
 
         self.redis = setup_redis(app)
+        self.rank_updater = RankUpdater(app)
         self.service = ServiceAccessor(app)
         self.players = PlayersAccessor(app)
         self.items = ItemsAccessor(app)
@@ -21,6 +23,6 @@ class Store:
 
 def setup_store(app: "Application"):
     app.database = Database(app)
+    app.on_startup.append(app.database.connect)
     app.store = Store(app)
     app.on_cleanup.append(app.database.disconnect)
-    app.on_startup.append(app.database.connect)

@@ -4,12 +4,12 @@ superuser:
   login: elle
   password: 12345
 database:
-  host: db
+  host: "localhost:5050"
   user: elle_dev
   password: dev_elle_pass
   database: dev_osu
 redis:
-  host: redis
+  host: "localhost:6379"
 credentials:
   client_id: ""
   client_secret: ""

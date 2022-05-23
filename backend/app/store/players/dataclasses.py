@@ -13,38 +13,38 @@ class Playstyle:
 
 @dataclass
 class Mouse:
-    id: int
-    name: str
-    width: int
-    height: int
-    length: int
-    weight: int
-    sensor: str
-    switch: str
+    id: int = None
+    name: str = None
+    width: int = None
+    height: int = None
+    length: int = None
+    weight: int = None
+    sensor: str = None
+    switch: str = None
 
 
 @dataclass
 class Mousepad:
-    id: int
-    name: str
+    id: int = None
+    name: str = None
 
 
 @dataclass
 class Tablet:
-    id: int
-    name: str
+    id: int = None
+    name: str = None
 
 
 @dataclass
 class Keyboard:
-    id: int
-    name: str
+    id: int = None
+    name: str = None
 
 
 @dataclass
 class Switch:
-    id: int
-    name: str
+    id: int = None
+    name: str = None
 
 
 @dataclass
@@ -78,6 +78,7 @@ class Player:
     tablet: Optional[Tablet]
     keyboard: Optional[Keyboard]
     switch: Optional[Switch]
+    is_active: bool
 
 
 @dataclass
