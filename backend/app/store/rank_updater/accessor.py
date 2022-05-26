@@ -67,7 +67,7 @@ class RankUpdater(BaseAccessor):
             )
 
     async def update_player(self, stats: PlayerStats) -> None:
-        print(stats)
+        self.logger.info(stats)
         if stats.is_restricted:  # if player is restricted
             return await self._set_restricted(stats)
         if stats.performance == 0 and stats.global_rank is None:  # if player is inactive
@@ -87,14 +87,14 @@ class RankUpdater(BaseAccessor):
             await session.commit()
 
     async def _set_new_player_stats(self, stats: PlayerStats) -> None:
-        update_columns = {"is_restricted": False}
+        update_columns = {"is_restricted": False, "is_active": True}
         if stats.name:
             update_columns["name"] = stats.name
         if stats.global_rank:
             update_columns["global_rank"] = stats.global_rank
         if stats.performance:
             update_columns["performance"] = stats.performance
-
+        print(update_columns)
         query = update(PlayerModel).where(PlayerModel.osu_id == stats.osu_id).values(**update_columns)
         async with self.db_session as session:
             await session.execute(query)
