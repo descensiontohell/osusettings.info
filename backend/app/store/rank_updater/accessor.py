@@ -55,47 +55,60 @@ class RankUpdater(BaseAccessor):
             url=self.app.const.PLAYER_STATS_PATH.format(osu_id=osu_id),
             headers={"Authorization": f"Bearer {self.access_token}"}
         ) as resp:
+
+            # If player is restricted
             if resp.status == 404:
                 return PlayerStats(osu_id=osu_id, is_restricted=True)
+
             data = await resp.json()
+            name = data["username"]
+            global_rank = data["statistics"]["global_rank"]
+            performance = round(data["statistics"]["pp"])
+
+            # If player went inactive
+            if global_rank is None and performance == 0:
+                return PlayerStats(osu_id=osu_id, name=name, is_active=False, is_restricted=False)
+
+            # If not restricted and not inactive: update rank, pp and name
             return PlayerStats(
-                name=data["username"],
+                name=name,
                 osu_id=osu_id,
-                global_rank=data["statistics"]["global_rank"],
-                performance=round(data["statistics"]["pp"]),
+                global_rank=global_rank,
+                performance=performance,
                 is_restricted=False,
+                is_active=True,
             )
 
     async def update_player(self, stats: PlayerStats) -> None:
         self.logger.info(stats)
-        if stats.is_restricted:  # if player is restricted
-            return await self._set_restricted(stats)
-        if stats.performance == 0 and stats.global_rank is None:  # if player is inactive
-            return await self._set_inactive(stats)
-        return await self._set_new_player_stats(stats)
-
-    async def _set_inactive(self, stats: PlayerStats) -> None:
-        query = update(PlayerModel).where(PlayerModel.osu_id == stats.osu_id).values(is_active=False, is_restricted=False)
+        query = update(PlayerModel).where(PlayerModel.osu_id == stats.osu_id).values(**stats.to_dict())
         async with self.db_session as session:
             await session.execute(query)
             await session.commit()
 
-    async def _set_restricted(self, stats: PlayerStats) -> None:
-        query = update(PlayerModel).where(PlayerModel.osu_id == stats.osu_id).values(is_restricted=True)
-        async with self.db_session as session:
-            await session.execute(query)
-            await session.commit()
-
-    async def _set_new_player_stats(self, stats: PlayerStats) -> None:
-        update_columns = {"is_restricted": False, "is_active": True}
-        if stats.name:
-            update_columns["name"] = stats.name
-        if stats.global_rank:
-            update_columns["global_rank"] = stats.global_rank
-        if stats.performance:
-            update_columns["performance"] = stats.performance
-        print(update_columns)
-        query = update(PlayerModel).where(PlayerModel.osu_id == stats.osu_id).values(**update_columns)
-        async with self.db_session as session:
-            await session.execute(query)
-            await session.commit()
+#    async def _set_inactive(self, stats: PlayerStats) -> None:
+#        query = update(PlayerModel).where(PlayerModel.osu_id == stats.osu_id).values(is_active=False, is_restricted=False)
+#        async with self.db_session as session:
+#            await session.execute(query)
+#            await session.commit()
+#
+#    async def _set_restricted(self, stats: PlayerStats) -> None:
+#        query = update(PlayerModel).where(PlayerModel.osu_id == stats.osu_id).values(is_restricted=True)
+#        async with self.db_session as session:
+#            await session.execute(query)
+#            await session.commit()
+#
+#    async def _set_new_player_stats(self, stats: PlayerStats) -> None:
+#        update_columns = {"is_restricted": False, "is_active": True}
+#        if stats.name:
+#            update_columns["name"] = stats.name
+#        if stats.global_rank:
+#            update_columns["global_rank"] = stats.global_rank
+#        if stats.performance:
+#            update_columns["performance"] = stats.performance
+#        print(update_columns)
+#        query = update(PlayerModel).where(PlayerModel.osu_id == stats.osu_id).values(**update_columns)
+#        async with self.db_session as session:
+#            await session.execute(query)
+#            await session.commit()
+#
