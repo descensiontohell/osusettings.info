@@ -28,6 +28,9 @@ body {
   font-size: 12px;
   position: relative;
 }
+body a {
+  cursor: pointer;
+}
 
 #menu_group {
   position: absolute;

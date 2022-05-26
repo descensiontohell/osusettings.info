@@ -327,7 +327,6 @@ function highlightSelect(highlight, element) {
   $(element).removeClass();
   if (highlight) {
     $(element).addClass('clk_div_selected');
-    console.log('test');
   }
   else $(element).addClass('clk_div');
 }
@@ -353,7 +352,16 @@ function chkPage() {
 function linkProfile(player) {
   let flag = getCountryFlag(player);
   let color = player.is_active ? "" : "style='color:#a1a1a1' ";
-  return `<a ${color}href=https://osu.ppy.sh/u/${player.osu_id}>${player.name}</a> ${flag}`;
+  //return `<a ${color}href='https://osu.ppy.sh/u/${player.osu_id}' onclick='linkOnClick()'>${player.name}</a> ${flag}`;
+  return `<a ${color}onclick='linkOnClick("https://osu.ppy.sh/u/${player.osu_id}")'>${player.name}</a> ${flag}`;
+}
+function linkOnClick(url) {
+  /* code to add parameter when using a link instead of opening a new tab
+  const url = window.location.href.split('?')[0];
+  let params = new URLSearchParams(window.location.search);
+  params.set('backed', true);
+  window.history.replaceState(null, null, `${url}?${params.toString()}`);*/
+  window.open(url).focus();
 }
 
 function getCountryFlag(player, small = true) {
@@ -557,7 +565,7 @@ SERVER JUNK
 
 let new_page_queue = false;
 let loaded_page = 0;
-const pages = [];
+const pages = []; //each page ~32kb max
 let page_last = 0; //amount of rows on last page
 let page_limit = 0; //if last page is reached
 let page_current = 0;
