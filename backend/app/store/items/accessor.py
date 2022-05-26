@@ -18,16 +18,28 @@ class ItemsAccessor(BaseAccessor):
         super().__init__(app, "Items", *args, **kwargs)
         self.app = app
 
+    async def connect(self, app: "Application"):
+        self.session_factory = self.app.database.db
+
     async def get_items(self, item_type: str, model) -> list[Union[Keyboard, Mouse, Mousepad, Switch, Tablet]]:
+        """
+        If cached: returns from cache
+        Else: requests database and caches the result
+        :param item_type:
+        :param model:
+        :return:
+        """
         items_list = await self.get_from_cache(item_type)
         if items_list:
             return items_list
 
         query = select(model)
         model_query = query.where(model.relevance > 0).order_by(desc(model.relevance)).order_by(model.name)
-        result = await self.app.database.db.execute(model_query)
-        models = result.scalars().all()
 
+        async with self.session_factory() as session:
+            result = await session.execute(model_query)
+
+        models = result.scalars().all()
         items_list = [m.to_dc() for m in models if m]
         await self.set_cache(items_list, item_type)
 

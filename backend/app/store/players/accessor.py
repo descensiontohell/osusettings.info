@@ -26,9 +26,13 @@ class PlayersAccessor(BaseAccessor):
 #                            "min_edpi", "max_edpi", "min_area_width", "min_area_height", "max_area_width",
 #                            "max_area_height"]
 
+    async def connect(self, app: "Application"):
+        self.session_factory = self.app.database.db
+
     async def get_players(self, player_filter: LeaderboardFilter):
         query = self._build_query(player_filter)
-        models = await self.app.database.db.execute(query)
+        async with self.session_factory() as session:
+            models = await session.execute(query)
         result = models.scalars().all()
         return [r.to_dc() for r in result]
 
