@@ -75,9 +75,9 @@ class PlayersAccessor(BaseAccessor):
             query = query.filter(PlayerModel.mouse_edpi <= pf.max_edpi)
 
         if pf.min_rank is not None:
-            query = query.filter(PlayerModel.global_rank >= pf.min_rank)
+            query = query.filter(or_(PlayerModel.global_rank >= pf.min_rank, PlayerModel.global_rank == None))
         if pf.max_rank is not None:
-            query = query.filter(PlayerModel.global_rank <= pf.max_rank)
+            query = query.filter(or_(PlayerModel.global_rank <= pf.max_rank, PlayerModel.global_rank == None))
 
         if pf.min_area_width is not None:
             query = query.filter(PlayerModel.tablet_area_width >= pf.min_area_width)
