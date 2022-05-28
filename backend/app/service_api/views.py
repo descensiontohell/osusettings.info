@@ -56,7 +56,10 @@ class SuperuserManageAdminsView(SuperuserRequiredMixin, View, CorsViewMixin):
         return json_response(data=ListAdminsSchema().dump({"admins": admins}))
 
 
-
+class SuperuserCalculateEdpiView(SuperuserRequiredMixin, View, CorsViewMixin):
+    async def post(self):
+        await self.store.service.update_players_edpi()
+        return json_response()
 
 
 
