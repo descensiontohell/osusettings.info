@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional
 
 from aiohttp import ClientSession, TCPConnector
@@ -27,7 +28,15 @@ class RankUpdater(BaseAccessor):
         self.session = ClientSession(connector=TCPConnector(verify_ssl=True))
         await self.get_access_token()
         await self.poller.start()
-        self.db_session = self.app.database.db()
+        self.db_session = self.app.database.db()  # Is callable because it's a factory
+        asyncio.create_task(self._timer())
+
+    async def _timer(self):
+        while True:
+            self.update_token_in -= 1
+            if self.update_token_in <= 0:
+                await self.get_access_token()
+            await asyncio.sleep(1)
 
     async def get_access_token(self):
         async with self.session.post(
