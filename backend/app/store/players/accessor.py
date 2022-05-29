@@ -26,9 +26,13 @@ class PlayersAccessor(BaseAccessor):
 #                            "min_edpi", "max_edpi", "min_area_width", "min_area_height", "max_area_width",
 #                            "max_area_height"]
 
+    async def connect(self, app: "Application"):
+        self.session_factory = self.app.database.db
+
     async def get_players(self, player_filter: LeaderboardFilter):
         query = self._build_query(player_filter)
-        models = await self.app.database.db.execute(query)
+        async with self.session_factory() as session:
+            models = await session.execute(query)
         result = models.scalars().all()
         return [r.to_dc() for r in result]
 
@@ -71,9 +75,9 @@ class PlayersAccessor(BaseAccessor):
             query = query.filter(PlayerModel.mouse_edpi <= pf.max_edpi)
 
         if pf.min_rank is not None:
-            query = query.filter(PlayerModel.global_rank >= pf.min_rank)
+            query = query.filter(or_(PlayerModel.global_rank >= pf.min_rank, PlayerModel.global_rank == None))
         if pf.max_rank is not None:
-            query = query.filter(PlayerModel.global_rank <= pf.max_rank)
+            query = query.filter(or_(PlayerModel.global_rank <= pf.max_rank, PlayerModel.global_rank == None))
 
         if pf.min_area_width is not None:
             query = query.filter(PlayerModel.tablet_area_width >= pf.min_area_width)
