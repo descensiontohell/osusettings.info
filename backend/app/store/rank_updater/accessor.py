@@ -25,7 +25,7 @@ class RankUpdater(BaseAccessor):
         self.poller = RankPoller(app)
 
     async def connect(self, app):
-        self.session = ClientSession(connector=TCPConnector(verify_ssl=True))
+        #self.session = ClientSession(connector=TCPConnector(verify_ssl=True))
         await self.get_access_token()
         await self.poller.start()
         self.db_session = self.app.database.db()  # Is callable because it's a factory
@@ -39,18 +39,20 @@ class RankUpdater(BaseAccessor):
             await asyncio.sleep(1)
 
     async def get_access_token(self):
-        async with self.session.post(
-                url=self.app.const.TOKEN_API_PATH,
-                data={
-                    "client_id": self.client_id,
-                    "client_secret": self.client_secret,
-                    "grant_type": self.grant_type,
-                    "scope": self.scope,
-                },
-        ) as resp:
-            data = await resp.json()
-            self.update_token_in = data["expires_in"] - self.app.const.TOKEN_EXPIRE_HANDICAP
-            self.access_token = data["access_token"]
+        async with ClientSession(connector=TCPConnector(verify_ssl=True)) as session:
+            async with session.post(
+                    url=self.app.const.TOKEN_API_PATH,
+                    data={
+                        "client_id": self.client_id,
+                        "client_secret": self.client_secret,
+                        "grant_type": self.grant_type,
+                        "scope": self.scope,
+                    },
+            ) as resp:
+                data = await resp.json()
+                self.update_token_in = int(data["expires_in"]) - self.app.const.TOKEN_EXPIRE_HANDICAP
+                #self.update_token_in = 10
+                self.access_token = data["access_token"]
 
     async def get_players_ids(self) -> list[int]:
         query = select(PlayerModel.osu_id).order_by(PlayerModel.global_rank)
@@ -60,33 +62,34 @@ class RankUpdater(BaseAccessor):
         return ids_list
 
     async def request_player_stats(self, osu_id: int) -> PlayerStats:
-        async with self.session.get(
-            url=self.app.const.PLAYER_STATS_PATH.format(osu_id=osu_id),
-            headers={"Authorization": f"Bearer {self.access_token}"}
-        ) as resp:
+        async with ClientSession(connector=TCPConnector(verify_ssl=True)) as session:
+            async with session.get(
+                url=self.app.const.PLAYER_STATS_PATH.format(osu_id=osu_id),
+                headers={"Authorization": f"Bearer {self.access_token}"}
+            ) as resp:
 
-            # If player is restricted
-            if resp.status == 404:
-                return PlayerStats(osu_id=osu_id, is_restricted=True)
+                # If player is restricted
+                if resp.status == 404:
+                    return PlayerStats(osu_id=osu_id, is_restricted=True)
 
-            data = await resp.json()
-            name = data["username"]
-            global_rank = data["statistics"]["global_rank"]
-            performance = round(data["statistics"]["pp"])
+                data = await resp.json()
+                name = data["username"]
+                global_rank = data["statistics"]["global_rank"]
+                performance = round(data["statistics"]["pp"])
 
-            # If player went inactive
-            if global_rank is None and performance == 0:
-                return PlayerStats(osu_id=osu_id, name=name, is_active=False, is_restricted=False)
+                # If player went inactive
+                if global_rank is None and performance == 0:
+                    return PlayerStats(osu_id=osu_id, name=name, is_active=False, is_restricted=False)
 
-            # If not restricted and not inactive: update rank, pp and name
-            return PlayerStats(
-                name=name,
-                osu_id=osu_id,
-                global_rank=global_rank,
-                performance=performance,
-                is_restricted=False,
-                is_active=True,
-            )
+                # If not restricted and not inactive: update rank, pp and name
+                return PlayerStats(
+                    name=name,
+                    osu_id=osu_id,
+                    global_rank=global_rank,
+                    performance=performance,
+                    is_restricted=False,
+                    is_active=True,
+                )
 
     async def update_player(self, stats: PlayerStats) -> None:
         self.logger.info(stats)

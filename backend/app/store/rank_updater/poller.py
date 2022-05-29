@@ -26,4 +26,4 @@ class RankPoller:
             for player_id in list_of_ids:
                 stats = await self.app.store.rank_updater.request_player_stats(player_id)
                 await self.app.store.rank_updater.update_player(stats)
-                await asyncio.sleep(1)
+                await asyncio.sleep(0.5)
