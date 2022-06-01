@@ -12,6 +12,7 @@ let typing_timer;
 let scroll_timer;
 let search_string = "";
 let selected_filter = -1;
+let forced_search = true; //when false, double checks if search string is different from returned list because keyup process is sometimes interrupted
 const column = { //how columns are addressed(string), sized(px), and how it addresses the object(func)
 //column object: must match the player object:
   //locked: column can't be removed in options
@@ -254,10 +255,12 @@ $(document).ready(function() {
     removeFilter();
   });
   // optional method to allow live search
+  $('#search_text').click(function(e){
+    forced_search = false;
+  });
   $('#search_text').keyup(function(){
-    clearTimeout(typing_timer);
-    let s = $('#search_text').val();
-    if (s !== search_string) {
+    const s = chkNameSearch();
+    if (typeof s === 'string') {
       typing_timer = setTimeout(startNameSearch, 750, s);
     }
   });
@@ -482,6 +485,7 @@ function headerHandler(mouseover) {
       $('#header_container').removeClass('hidden');
       break;
     case 'list':
+      if (!forced_search) forceNameSearch();
       $('#profile_container').removeClass('hidden');
       break;
   }
@@ -566,6 +570,19 @@ function startNameSearch(str) {
   console.log("searching for "+str);
   api_params.name = str;
   getNewList();
+}
+function chkNameSearch() {
+  clearTimeout(typing_timer);
+  const s = $('#search_text').val();
+  if (s !== search_string) {
+    return s;
+  }
+  return false;
+}
+function forceNameSearch() {
+  let s = chkNameSearch();
+  if (typeof s === 'string') startNameSearch(s);
+  forced_search = true;
 }
 
 /*
