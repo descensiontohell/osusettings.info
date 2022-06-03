@@ -13,7 +13,9 @@ class Store:
         from backend.app.store.items.accessor import ItemsAccessor
         from backend.app.store.redis.redis import setup_redis
         from backend.app.store.rank_updater.accessor import RankUpdater
+        from backend.app.store.rank_updater.osu_api import setup_osu_api
 
+        self.osu_api = setup_osu_api(app)
         self.redis = setup_redis(app)
         self.rank_updater = RankUpdater(app)
         self.service = ServiceAccessor(app)
