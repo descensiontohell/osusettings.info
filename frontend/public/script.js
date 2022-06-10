@@ -535,7 +535,10 @@ function mouseProfile(player) {
 
 function avatarTimeout(id) {
   clearTimeout(avatar_timer);
-  if (avatar_visible) avatarFadeOut();
+  if (avatar_visible) {
+    $("#avatar_container").stop(true, true);
+    avatarFadeOut();
+  }
   avatar_timer = setTimeout(function() {
     $("#avatar_container").attr("src", "https://a.ppy.sh/" + id);
     avatar_id = id;
@@ -547,7 +550,9 @@ function avatarFadeOut() {
   $("#avatar_container").fadeOut(250);
 }
 function avatarFadeIn() {
-  $("#avatar_container").fadeIn(250, function() { avatar_visible = true; });
+  avatar_visible = true;
+  //$("#avatar_container").fadeIn(250, function() { avatar_visible = true; });
+  $("#avatar_container").fadeIn(250);
 }
 
 function mouseSensSettings(player) {
