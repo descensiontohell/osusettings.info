@@ -5,10 +5,25 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: osusettings
-    ports:
-      - 8080:8080
+    #ports:
+      #- 8080:8080
     depends_on:
       - db
+      - redis
+
+#  nginx:
+#    build:
+#      context: .
+#      dockerfile: Nginxfile
+#    container_name: nginx_osu
+#    ports:
+#      - 80:80
+#    volumes:
+#      #- ./nginx-conf:/etc/nginx/conf.d
+#      - ./logs/nginx:/var/log/nginx
+##      - ./www:/var/www
+#    depends_on:
+#      - app
 
   db:
     image: postgres:latest
@@ -20,6 +35,7 @@ services:
       POSTGRES_PASSWORD: dev_elle_pass
     ports:
       - 5050:5432
+
   redis:
     image: redis:latest
     ports:
