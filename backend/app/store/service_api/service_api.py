@@ -57,7 +57,7 @@ class ServiceAccessor(BaseAccessor):
                 await session.commit()
             except IntegrityError:
                 pass
-        await self.cache_new_admin(osu_id)
+        # await self.cache_new_admin(osu_id)
 
     async def remove_admin(self, osu_id: int) -> None:
         """Removes admin from admins database table and from Redis cache"""
@@ -104,12 +104,12 @@ class ServiceAccessor(BaseAccessor):
     async def get_all_player_models(self) -> list[Player]:
         async with self.session as s:
             query = (select(PlayerModel)
-                       .options(selectinload(PlayerModel.mousepad))
-                       .options(selectinload(PlayerModel.mouse))
-                       .options(selectinload(PlayerModel.playstyle))
-                       .options(selectinload(PlayerModel.keyboard))
-                       .options(selectinload(PlayerModel.tablet))
-                       .options(selectinload(PlayerModel.switch))
+                     .options(selectinload(PlayerModel.mousepad))
+                     .options(selectinload(PlayerModel.mouse))
+                     .options(selectinload(PlayerModel.playstyle))
+                     .options(selectinload(PlayerModel.keyboard))
+                     .options(selectinload(PlayerModel.tablet))
+                     .options(selectinload(PlayerModel.switch))
                      )
             models = (await s.execute(query)).scalars().all()
         return [m.to_dc() for m in models]
@@ -153,18 +153,3 @@ class ServiceAccessor(BaseAccessor):
             area_width=play_area_width,
             area_height=play_area_height,
         )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

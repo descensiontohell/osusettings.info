@@ -37,6 +37,7 @@ class Credentials:
     client_secret: str
     grant_type: str
     scope: str
+    server_name: str
 
 
 @dataclass
@@ -57,6 +58,7 @@ def setup_config(app: "Application", config_path: str):
             client_secret=raw_config["credentials"]["client_secret"],
             grant_type=raw_config["credentials"]["grant_type"],
             scope=raw_config["credentials"]["scope"],
+            server_name=raw_config["credentials"]["server_name"],
         ),
         session=SessionConfig(
             key=raw_config["session"]["key"],
@@ -75,12 +77,3 @@ def setup_config(app: "Application", config_path: str):
             host=raw_config["redis"]["host"],
         ),
     )
-
-
-
-
-
-
-
-
-

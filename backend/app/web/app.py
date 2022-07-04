@@ -5,7 +5,6 @@ from aiohttp.web import (
     View as AiohttpView,
     Request as AiohttpRequest,
 )
-from aiohttp.web_exceptions import HTTPForbidden
 
 from aiohttp_apispec import setup_aiohttp_apispec
 from aiohttp_session import setup as setup_session
@@ -19,8 +18,8 @@ from backend.app.web.logger import setup_logging
 from backend.app.store import setup_store, Store
 from backend.app.store.database.database import Database
 from backend.app.web.config import Config, setup_config
-#from middlewares import setup_middlewares
-#from routes import setup_routes
+# from middlewares import setup_middlewares
+# from routes import setup_routes
 from backend.app.web.routes import setup_routes
 
 
@@ -71,8 +70,3 @@ def setup_app(config_path: str = None) -> Application:
     setup_aiohttp_apispec(app, title="osusettings", url="/api/docs/json", swagger_path="/api/docs")
     setup_cors(app)
     return app
-
-
-
-
-

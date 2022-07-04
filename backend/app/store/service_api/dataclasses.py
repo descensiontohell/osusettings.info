@@ -10,6 +10,7 @@ class Superuser:
     def is_valid_password(self, pw: str) -> bool:
         return self.password == sha256(pw.encode()).hexdigest()
 
+
 @dataclass
 class Admin:
     osu_id: int

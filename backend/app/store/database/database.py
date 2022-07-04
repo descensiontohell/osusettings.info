@@ -11,12 +11,13 @@ class Database:
 
     def __init__(self, app: "Application"):
         self.app = app
-        self.db: Optional[AsyncSession] = None
+        self.db = None
 
     async def connect(self, *_, **kw):
         try:
             self._engine = create_async_engine(
-                f"postgresql+asyncpg://{self.app.config.database.user}:{self.app.config.database.password}@{self.app.config.database.host}/{self.app.config.database.database}",
+                f"postgresql+asyncpg://{self.app.config.database.user}:{self.app.config.database.password}@\
+{self.app.config.database.host}/{self.app.config.database.database}",
                 pool_size=20,
                 max_overflow=0,
             )
@@ -30,7 +31,6 @@ class Database:
 
     async def disconnect(self, *_, **kw):
         if self.db:
-            #await self.db.close()
+            # await self.db.close()
             self._engine = None
             self.db: Optional[AsyncSession] = None
-

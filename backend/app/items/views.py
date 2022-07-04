@@ -1,13 +1,11 @@
-import json
-
 from aiohttp.web_exceptions import HTTPNotFound
-from aiohttp_apispec import response_schema, docs
+from aiohttp_apispec import docs
 from aiohttp_cors import CorsViewMixin
 
 from backend.app.items.schemas import KeyboardSuggestionsListSchema, MouseSuggestionsListSchema, \
     MousepadSuggestionsListSchema, SwitchSuggestionsListSchema, TabletSuggestionsListSchema
 from backend.app.store.database.models import SwitchModel, KeyboardModel, MouseModel, MousepadModel, TabletModel
-from backend.app.web.app import View, Request
+from backend.app.web.app import View
 from backend.app.web.response import json_response
 
 
@@ -23,18 +21,18 @@ class GetItemListView(View, CorsViewMixin):
     @docs(
         tags=["Items"],
         summary="Returns item lists for dropdown suggestions",
-        description="""Returns items list for dropdown suggestions. Only admin added items included. 
+        description="""Returns items list for dropdown suggestions. Only admin added items included.
         Sorted by relevance and name. Common items like "Custom", "laptop keyboard", "noname" go first.
         Available items:
-        
+
         keyboards
-        
+
         switches
-        
+
         tablets
-        
+
         mice
-        
+
         mousepads
         """,
         responses={

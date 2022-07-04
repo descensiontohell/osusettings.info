@@ -6,7 +6,6 @@ from datetime import datetime
 from aiohttp.web_exceptions import HTTPUnprocessableEntity, HTTPException, HTTPNotImplemented, HTTPUnauthorized, \
     HTTPFound
 from aiohttp.web_middlewares import middleware
-from aiohttp.web_response import json_response
 from aiohttp_apispec import validation_middleware
 from aiohttp_session import get_session
 

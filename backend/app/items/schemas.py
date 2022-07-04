@@ -19,5 +19,3 @@ class SwitchSuggestionsListSchema(Schema):
 
 class TabletSuggestionsListSchema(Schema):
     tablets = fields.Nested("TabletSchema", many=True)
-
-

@@ -1,12 +1,10 @@
 import typing
 
-from aiohttp.web_exceptions import HTTPBadRequest
-from multidict import MultiDictProxy
 from sqlalchemy import select, or_
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import selectinload
 
 from backend.app.leaderboard.filter import LeaderboardFilter
-from backend.app.store.database.models import PlayerModel, SuperuserModel, MousepadModel, MouseModel, KeyboardModel, \
+from backend.app.store.database.models import PlayerModel, MousepadModel, MouseModel, KeyboardModel, \
     SwitchModel, TabletModel
 from backend.app.store.base.base_accessor import BaseAccessor
 
@@ -19,12 +17,6 @@ class PlayersAccessor(BaseAccessor):
         super().__init__(app, "Players", *args, **kwargs)
         self.app = app
         self.page_size = 50
-#        self.filters = ["order_by", "min_rank", "max_rank", "is_mouse", "playstyle", "page", "name", "country",
-#                        "min_edpi", "max_edpi", "min_area_width", "min_area_height", "max_area_width",
-#                        "max_area_height", "mouse", "mousepad", "tablet", "keyboard", "switch"]
-#        self.int_filters = ["min_rank", "max_rank", "is_mouse", "playstyle", "page",
-#                            "min_edpi", "max_edpi", "min_area_width", "min_area_height", "max_area_width",
-#                            "max_area_height"]
 
     async def connect(self, app: "Application"):
         self.session_factory = self.app.database.db
@@ -114,43 +106,3 @@ class PlayersAccessor(BaseAccessor):
                    .offset((pf.page - 1) * self.page_size))
 
         return players
-
-#    def parse_filters(self, query: MultiDictProxy) -> dict:
-#        result = {}
-#        try:
-#            if query["is_mouse"] == "true":
-#                is_mouse = True
-#            else:
-#                is_mouse = False
-#        except KeyError:
-#            is_mouse = True
-#            result["is_mouse"] = is_mouse
-#
-#        for key in query:
-#            if key not in self.filters:
-#                continue
-#            if key == "is_mouse":
-#                result["is_mouse"] = is_mouse
-#                continue
-#            if key == "playstyle":
-#                ps_list = query[key].split(",")
-#                try:
-#                    ps = [int(v) for v in ps_list]
-#                    result["playstyle"] = ps
-#                    continue
-#                except ValueError:
-#                    raise HTTPBadRequest(reason="Playstyle should contain a single integer or comma separated integers")
-#            if key in self.int_filters:
-#                try:
-#                    result[key] = int(query[key])
-#                    continue
-#                except ValueError:
-#                    raise HTTPBadRequest(reason=f"{key} should be a number")
-#            else:
-#                result[key] = query[key]
-#        for key in query:
-#            if is_mouse and key in ["min_area_width", "min_area_height", "max_area_width", "max_area_height", "tablet"]:
-#                result.pop(key, None)
-#            if not is_mouse and key in ["min_edpi", "max_edpi", "mouse", "mousepad"]:
-#                result.pop(key, None)
-#        return result

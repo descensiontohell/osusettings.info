@@ -2,11 +2,9 @@ import typing
 import _pickle as pickle
 from typing import Union, Optional
 
-from aiohttp.web_exceptions import HTTPNotFound
 from sqlalchemy import select, desc
 
 from backend.app.store.base.base_accessor import BaseAccessor
-from backend.app.store.database.models import KeyboardModel, MouseModel, MousepadModel, SwitchModel, TabletModel, Base
 from backend.app.store.players.dataclasses import Keyboard, Mouse, Mousepad, Tablet, Switch
 
 if typing.TYPE_CHECKING:

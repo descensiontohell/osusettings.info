@@ -8,5 +8,3 @@ if typing.TYPE_CHECKING:
 def setup_redis(app: "Application"):
     redis = aioredis.from_url(f"redis://{app.config.redis.host}")
     return redis
-
-

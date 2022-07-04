@@ -89,4 +89,3 @@ class GetPlayersQuerySchema(Schema):
     keyboard = fields.Str()
     switch = fields.Str()
     tablet = fields.Str()
-
