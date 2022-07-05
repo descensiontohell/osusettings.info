@@ -11,6 +11,14 @@ services:
       - db
       - redis
 
+  rank_updater:
+    build:
+      context: .
+      dockerfile: Pollerfile
+    container_name: rank_updater
+    depends_on:
+      - db
+
 #  nginx:
 #    build:
 #      context: .

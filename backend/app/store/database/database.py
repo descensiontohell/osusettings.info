@@ -31,6 +31,6 @@ class Database:
 
     async def disconnect(self, *_, **kw):
         if self.db:
-            # await self.db.close()
+            await self.db.close()
             self._engine = None
             self.db: Optional[AsyncSession] = None

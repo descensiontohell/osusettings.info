@@ -1,22 +1,40 @@
+import logging
+from logging import getLogger
+
 from requests import HTTPError
 from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
-from backend.app.store.base.base_accessor import BaseAccessor
 from backend.app.store.database.models import PlayerModel
-from backend.app.store.rank_updater.player_stats import PlayerStats
-from backend.app.store.rank_updater.poller import RankPoller
-from backend.app.web.app import Application
+from backend.rank_updater.config import get_config
+from backend.rank_updater.osu_api import setup_osu_api
+from backend.rank_updater.player_stats import PlayerStats
 
 
-class RankUpdater(BaseAccessor):
-    def __init__(self, app: "Application", **kwargs):
-        super().__init__(app=app, name=kwargs.get("name"))
-        self.app = app
-        self.poller = RankPoller(app)
+class RankUpdater:
+    def __init__(self, config_path):
+        logging.basicConfig(level=logging.INFO)
+        self.config = get_config(config_path)
+        self.osu_api = setup_osu_api(self.config)
+        self.logger = getLogger("RANKS")
+        self.get_connection()
 
-    async def connect(self, app):
-        await self.poller.start()
-        self.db_session = self.app.database.db  # Is callable because it's a factory
+    def get_connection(self):
+        try:
+            self._engine = create_async_engine(
+                f"postgresql+asyncpg://{self.config.database.user}:{self.config.database.password}@\
+{self.config.database.host}/{self.config.database.database}",
+                pool_size=20,
+                max_overflow=0,
+            )
+        except Exception as e:
+            self.logger.error("Exception", exc_info=e)
+        self.db_session = sessionmaker(
+            self._engine,
+            expire_on_commit=False,
+            class_=AsyncSession,
+        )
 
     async def get_players_ids(self) -> list[int]:
         query = select(PlayerModel.osu_id).order_by(PlayerModel.global_rank)
@@ -29,7 +47,7 @@ class RankUpdater(BaseAccessor):
     async def request_player_stats(self, osu_id: int) -> PlayerStats:
         self.logger.info(f"Requesting stats {osu_id}")
         try:
-            user = await self.app.store.osu_api.get_user(user=osu_id, mode="osu")
+            user = await self.osu_api.get_user(user=osu_id, mode="osu")
         except HTTPError:  # api wrapper raises 404 HTTPError if user is restricted
             return PlayerStats(osu_id=osu_id, is_restricted=True)
 
