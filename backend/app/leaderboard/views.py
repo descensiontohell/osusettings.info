@@ -26,7 +26,6 @@ class GetPlayersView(View, CorsViewMixin):
     async def get(self):
         args = self.request["querystring"]
         players_filter = LeaderboardFilter(**args)
-        # args = self.store.players.parse_filters(self.request.rel_url.query)
 
         is_mouse_list = args.get("is_mouse", True)
         players = await self.store.players.get_players(players_filter)

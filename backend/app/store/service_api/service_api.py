@@ -57,7 +57,6 @@ class ServiceAccessor(BaseAccessor):
                 await session.commit()
             except IntegrityError:
                 pass
-        # await self.cache_new_admin(osu_id)
 
     async def remove_admin(self, osu_id: int) -> None:
         """Removes admin from admins database table and from Redis cache"""
@@ -67,23 +66,11 @@ class ServiceAccessor(BaseAccessor):
         async with self.session as session:
             await session.delete(admin)
             await session.commit()
-        # await self.remove_admin_id_from_cache(osu_id)
 
-    # async def remove_admin_id_from_cache(self, osu_id: int) -> None:
-    #     """Removes specified osu_id from Redis cache"""
-    #     await self.app.store.redis.lrem("admins", 0, osu_id)
-
-    # async def cache_new_admin(self, osu_id: int) -> None:
-    #     """Adds specified osu_id to admin list in Redis cache if it's not in there yet"""
-    #     admin_ids = await self.get_admin_ids_list()
-    #     if osu_id not in admin_ids:
-    #         await self.app.store.redis.rpush("admins", osu_id)
-
-    # async def get_admin_ids_list(self) -> list[int]:
-    #     """Returns list of osu_ids that belong to admin from Redis cache"""
-    #     byte_admin_ids = await self.app.store.redis.lrange("admins", 0, -1)
-    #     admin_ids = [int(aid) for aid in byte_admin_ids if aid]  # Transforms list[byte] into list[int]
-    #     return admin_ids
+    async def get_admin_ids_list(self) -> list[int]:
+        """Returns list of osu_ids that belong to admin from Redis cache"""
+        admins = await self.get_admins()
+        return [a.osu_id for a in admins]
 
     async def get_admins(self):
         """Returns list of AdminModel out of all records in admins database table"""
@@ -91,9 +78,6 @@ class ServiceAccessor(BaseAccessor):
             models = await s.execute(select(AdminModel))
         admins = models.scalars().all()
         return [a.to_dc() for a in admins if a]
-
-    # async def cache_admins_on_startup(self):  # TODO cache on startup
-    #     pass
 
     async def update_players_edpi(self) -> None:
         player_models = await self.get_all_player_models()

@@ -36,6 +36,17 @@ services:
     ports:
       - 5050:5432
 
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    ports:
+      - "5555:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: isuhanen@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: 12345
+    restart: unless-stopped
+
   redis:
     image: redis:latest
     ports:
