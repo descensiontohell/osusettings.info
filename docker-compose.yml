@@ -18,6 +18,9 @@ services:
     container_name: rank_updater
     depends_on:
       - db
+      - app
+      - redis
+    restart: always
 
 #  nginx:
 #    build:
@@ -43,17 +46,6 @@ services:
       POSTGRES_PASSWORD: dev_elle_pass
     ports:
       - 5050:5432
-
-  pgadmin:
-    image: dpage/pgadmin4
-    depends_on:
-      - postgres
-    ports:
-      - "5555:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: isuhanen@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: 12345
-    restart: unless-stopped
 
   redis:
     image: redis:latest
