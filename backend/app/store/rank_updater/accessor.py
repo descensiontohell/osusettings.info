@@ -14,6 +14,7 @@ class RankUpdater(BaseAccessor):
         self.app = app
         self.poller = RankPoller(app)
 
+    async def connect(self, app):
         await self.poller.start()
         self.db_session = self.app.database.db  # Is callable because it's a factory
 
@@ -43,13 +44,13 @@ class RankUpdater(BaseAccessor):
 
         # If not restricted and not inactive: update rank, pp and name
         return PlayerStats(
-                    name=name,
-                    osu_id=osu_id,
-                    global_rank=global_rank,
-                    performance=performance,
-                    is_restricted=False,
-                    is_active=True,
-                )
+            name=name,
+            osu_id=osu_id,
+            global_rank=global_rank,
+            performance=performance,
+            is_restricted=False,
+            is_active=True,
+        )
 
     async def update_player(self, stats: PlayerStats) -> None:
         self.logger.info(f"Stats for update: {stats}")
