@@ -4,7 +4,6 @@ from typing import Optional
 from osu import AsynchronousClient, AuthHandler, Scope
 
 from backend.app.store.base.base_accessor import BaseAccessor
-from backend.app.web.player_stats import PlayerStats
 
 if typing.TYPE_CHECKING:
     from backend.app.web.app import Application
@@ -20,7 +19,7 @@ class AuthAccessor(BaseAccessor):
         self.auth = AuthHandler(
             client_id=self.app.config.credentials.client_id,
             client_secret=self.app.config.credentials.client_secret,
-            redirect_url=self.app.config.credentials.server_name,
+            redirect_url=f"{self.app.config.credentials.server_name}/callback",
             scope=Scope.identify(),
         )
 
