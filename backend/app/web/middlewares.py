@@ -18,11 +18,10 @@ if typing.TYPE_CHECKING:
 @middleware
 async def auth_middleware(request: "Request", handler: callable):
     session = await get_session(request)
-    if session:
-        request.player_name = session.get("player_name")
-        request.player_id = session.get("player_id")
-        request.is_superuser = session.get("is_superuser")
-        request.is_admin = session.get("is_admin")
+    request.player_name = session.get("player_name")
+    request.player_id = session.get("player_id")
+    request.is_superuser = session.get("is_superuser")
+    request.is_admin = session.get("is_admin")
     return await handler(request)
 
 
