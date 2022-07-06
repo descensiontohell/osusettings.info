@@ -29,6 +29,8 @@ class AuthView(View):
         session["player_id"] = player["osu_id"]
         session["is_admin"] = is_admin
 
+        await self.store.auth.add_or_update_player(player)
+
         raise HTTPFound(location=self.request.app.config.credentials.server_name)
 
     async def post(self):
