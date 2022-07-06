@@ -11,7 +11,12 @@ from backend.app.web.app import View
 class LeaderboardView(View, CorsViewMixin):
     @aiohttp_jinja2.template("index.html")
     async def get(self):
-        return {"foo": "bar"}
+        is_logged_in = True if self.request.player_id else False
+        return {
+            "is_logged_in": is_logged_in,
+            "player_id": self.request.player_id,
+            "player_name": self.request.player_name,
+        }
 
 
 class ApiPlayersView(View, CorsViewMixin):
