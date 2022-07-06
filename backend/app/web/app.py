@@ -12,14 +12,13 @@ from aiohttp_session.redis_storage import RedisStorage
 
 from backend.app.web.const import Const
 from backend.app.web.cors import setup_cors
+from backend.app.web.jinja import setup_jinja
 from backend.app.web.middlewares import setup_middlewares
 from backend.app.store.redis.redis import setup_redis
 from backend.app.web.logger import setup_logging
 from backend.app.store import setup_store, Store
 from backend.app.store.database.database import Database
 from backend.app.web.config import Config, setup_config
-# from middlewares import setup_middlewares
-# from routes import setup_routes
 from backend.app.web.routes import setup_routes
 
 
@@ -61,6 +60,7 @@ def setup_app(config_path: str = None) -> Application:
         config_path = os.path.join(os.path.abspath("."), 'config.yml')
     app = Application()
     setup_logging(app)
+    setup_jinja(app)
     setup_config(app, config_path)
     setup_routes(app)
     setup_redis(app)

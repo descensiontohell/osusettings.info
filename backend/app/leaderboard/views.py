@@ -1,3 +1,4 @@
+import aiohttp_jinja2
 from aiohttp_apispec import response_schema, querystring_schema, docs
 from aiohttp_cors import CorsViewMixin
 
@@ -7,7 +8,13 @@ from backend.app.web.response import json_response
 from backend.app.web.app import View
 
 
-class GetPlayersView(View, CorsViewMixin):
+class LeaderboardView(View, CorsViewMixin):
+    @aiohttp_jinja2.template("index.html")
+    async def get(self):
+        return {"foo": "bar"}
+
+
+class ApiPlayersView(View, CorsViewMixin):
     @docs(
         tags=["Leaderboard"],
         summary="Get leaderboard with players and their settings",
