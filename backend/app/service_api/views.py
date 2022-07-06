@@ -1,6 +1,5 @@
 from aiohttp.web_exceptions import HTTPUnauthorized, HTTPConflict, HTTPNotFound
 from aiohttp_apispec import request_schema, response_schema
-from aiohttp_cors import CorsViewMixin
 from aiohttp_session import new_session
 
 from backend.app.web.app import View
@@ -10,7 +9,7 @@ from backend.app.service_api.schemas import SuperuserLoginRequestSchema, Superus
     SuperuserManageAdminsSchema, ListAdminsSchema
 
 
-class SuperuserLoginView(View, CorsViewMixin):
+class SuperuserLoginView(View):
     @request_schema(SuperuserLoginRequestSchema)
     async def post(self):
         name = self.data["name"]
@@ -25,7 +24,7 @@ class SuperuserLoginView(View, CorsViewMixin):
         return json_response(data=SuperuserLoginResponseSchema().dump({"name": superuser.name}))
 
 
-class SuperuserManageAdminsView(SuperuserRequiredMixin, View, CorsViewMixin):
+class SuperuserManageAdminsView(SuperuserRequiredMixin, View):
     @request_schema(SuperuserManageAdminsSchema)
     @response_schema(ListAdminsSchema, 200)
     async def post(self):
@@ -54,7 +53,7 @@ class SuperuserManageAdminsView(SuperuserRequiredMixin, View, CorsViewMixin):
         return json_response(data=ListAdminsSchema().dump({"admins": admins}))
 
 
-class SuperuserCalculateEdpiView(SuperuserRequiredMixin, View, CorsViewMixin):
+class SuperuserCalculateEdpiView(SuperuserRequiredMixin, View):
     async def post(self):
         await self.store.service.update_players_edpi()
         return json_response()

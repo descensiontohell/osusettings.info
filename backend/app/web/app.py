@@ -9,6 +9,7 @@ from aiohttp.web import (
 from aiohttp_apispec import setup_aiohttp_apispec
 from aiohttp_session import setup as setup_session
 from aiohttp_session.redis_storage import RedisStorage
+from aiohttp_cors import CorsViewMixin
 
 from backend.app.web.const import Const
 from backend.app.web.cors import setup_cors
@@ -41,7 +42,7 @@ class Request(AiohttpRequest):
         return super().app()
 
 
-class View(AiohttpView):
+class View(AiohttpView, CorsViewMixin):
     @property
     def request(self) -> Request:
         return super().request

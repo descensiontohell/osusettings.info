@@ -1,6 +1,5 @@
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp_apispec import docs
-from aiohttp_cors import CorsViewMixin
 
 from backend.app.items.schemas import KeyboardSuggestionsListSchema, MouseSuggestionsListSchema, \
     MousepadSuggestionsListSchema, SwitchSuggestionsListSchema, TabletSuggestionsListSchema
@@ -9,7 +8,7 @@ from backend.app.web.app import View
 from backend.app.web.response import json_response
 
 
-class GetItemListView(View, CorsViewMixin):
+class GetItemListView(View):
     item_schemas_models = {
         "switches": [SwitchSuggestionsListSchema(), SwitchModel],
         "keyboards": [KeyboardSuggestionsListSchema(), KeyboardModel],
