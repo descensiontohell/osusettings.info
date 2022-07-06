@@ -16,6 +16,9 @@ class LeaderboardView(View):
             "player_id": self.request.player_id,
             "player_name": self.request.player_name,
             "is_admin": self.request.is_admin,
+            "redirect_uri": f"{self.request.app.config.credentials.server_name}/callback",
+            "server_name": self.request.app.config.credentials.server_name,
+            "client_id": self.request.app.config.credentials.client_id,
         }
 
 

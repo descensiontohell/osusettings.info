@@ -3,7 +3,7 @@
 
 
 {% if not is_logged_in %}
-<input type="button" onclick="location.href='https://osu.ppy.sh/oauth/authorize?client_id=15033&redirect_uri=http://localhost:8080/callback&response_type=code';" value="Login" />
+<input type="button" onclick="location.href='https://osu.ppy.sh/oauth/authorize?client_id={{client_id}}&redirect_uri={{redirect_uri}}&response_type=code';" value="Login" />
 {% endif %}
 
 {% if is_logged_in %}
@@ -13,7 +13,7 @@ Hello {{ player_name }}
     {% else %}
     Not admin
 {% endif %}
-<form action="http://localhost:8080/callback" method="post">
+<form action="{{redirect_uri}}" method="post">
     <input type="submit" value="Logout">
 </form>
 {% endif %}
