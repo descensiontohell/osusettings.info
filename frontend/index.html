@@ -8,6 +8,11 @@
 
 {% if is_logged_in %}
 Hello {{ player_name }}
+    {% if is_admin %}
+    Admin
+    {% else %}
+    Not admin
+{% endif %}
 <form action="http://localhost:8080/callback" method="post">
     <input type="submit" value="Logout">
 </form>

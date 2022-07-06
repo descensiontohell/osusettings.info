@@ -72,6 +72,9 @@ class ServiceAccessor(BaseAccessor):
         admins = await self.get_admins()
         return [a.osu_id for a in admins]
 
+    async def is_user_admin(self, osu_id: int) -> bool:
+        return osu_id in await self.get_admin_ids_list()
+
     async def get_admins(self):
         """Returns list of AdminModel out of all records in admins database table"""
         async with self.session as s:

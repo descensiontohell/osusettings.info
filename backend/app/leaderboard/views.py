@@ -15,6 +15,7 @@ class LeaderboardView(View):
             "is_logged_in": is_logged_in,
             "player_id": self.request.player_id,
             "player_name": self.request.player_name,
+            "is_admin": self.request.is_admin,
         }
 
 

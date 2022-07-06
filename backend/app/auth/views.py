@@ -14,20 +14,22 @@ class AuthView(View):
             raise HTTPUnauthorized
 
         code = params["code"]
-        player = await self.request.app.store.auth.identify_player(oauth_code=code)
-
-        # self.request.app.store.
-
+        player = await self.store.auth.identify_player(oauth_code=code)
 
         log = logging.getLogger("SUS")
         log.info(player)
 
+        if await self.store.service.is_user_admin(osu_id=player["osu_id"]):
+            is_admin = True
+        else:
+            is_admin = False
+
         session = await new_session(request=self.request)
         session["player_name"] = player["name"]
         session["player_id"] = player["osu_id"]
+        session["is_admin"] = is_admin
 
-        raise HTTPFound(location="http://localhost:8080")
-        return json_response()
+        raise HTTPFound(location=self.request.app.config.credentials.server_name)
 
     async def post(self):
         session = await get_session(self.request)
@@ -36,4 +38,4 @@ class AuthView(View):
         session["is_admin"] = None
         session["is_superuser"] = None
 
-        raise HTTPFound(location="http://localhost:8080")
+        raise HTTPFound(location=self.request.app.config.credentials.server_name)
