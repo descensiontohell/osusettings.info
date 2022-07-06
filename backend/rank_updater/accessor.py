@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.app.store.database.models import PlayerModel
 from backend.rank_updater.config import get_config
 from backend.rank_updater.osu_api import setup_osu_api
-from backend.rank_updater.player_stats import PlayerStats
+from backend.app.web.player_stats import PlayerStats
 
 
 class RankUpdater:

@@ -15,4 +15,4 @@ credentials:
   client_secret: "dSbJw0V5RWbl3rBlOksmtNGHFPsz0PJDHlREOPPS"
   grant_type: "client_credentials"
   scope: "public"
-  server_name: "http://localhost:80"
+  server_name: "http://localhost:8080/callback"
