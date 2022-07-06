@@ -1,3 +1,14 @@
 
 
-Hello World
+
+
+{% if not is_logged_in %}
+<input type="button" onclick="location.href='https://osu.ppy.sh/oauth/authorize?client_id=15033&redirect_uri=http://localhost:8080/callback&response_type=code';" value="Login" />
+{% endif %}
+
+{% if is_logged_in %}
+Hello {{ player_name }}
+<form action="http://localhost:8080/callback" method="post">
+    <input type="submit" value="Logout">
+</form>
+{% endif %}
