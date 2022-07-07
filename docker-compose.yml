@@ -9,7 +9,7 @@ services:
       CLIENT_ID: ${CLIENT_ID}
       CLIENT_SECRET: ${CLIENT_SECRET}
       SERVER_NAME: ${SERVER_NAME}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: dev_osu
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
@@ -27,7 +27,7 @@ services:
       CLIENT_ID: ${CLIENT_ID}
       CLIENT_SECRET: ${CLIENT_SECRET}
       SERVER_NAME: ${SERVER_NAME}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: dev_osu
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     depends_on:
@@ -55,7 +55,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: dev_osu
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
