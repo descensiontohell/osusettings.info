@@ -5,9 +5,9 @@ superuser:
   password: 12345
 database:
   host: db
-  user: elle_dev
-  password: dev_elle_pass
-  database: dev_osu
+  user: $POSTGRES_USER
+  password: $POSTGRES_PASSWORD
+  database: $POSTGRES_DB
 redis:
   host: redis
 credentials:

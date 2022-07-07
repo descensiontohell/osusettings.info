@@ -3,6 +3,7 @@ import platform
 from logging.config import fileConfig
 
 import yaml
+from envyaml import EnvYAML
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
@@ -23,14 +24,13 @@ containerized = os.environ.get("IS_IN_DOCKER", False)
 if not containerized:
     config_name = "config_local.yml"
 
-with open(os.path.join(path, config_name)) as fh:
-    co = yaml.safe_load(fh)
-    app_config = DatabaseConfig(
-        host=co["database"]["host"],
-        user=co["database"]["user"],
-        password=co["database"]["password"],
-        database=co["database"]["database"],
-        )
+co = EnvYAML(os.path.join(path, config_name))
+app_config = DatabaseConfig(
+    host=co["database.host"],
+    user=co["database.user"],
+    password=co["database.password"],
+    database=co["database.database"],
+    )
 
 
 def set_sqlalchemy_url(host, user, password, database):
