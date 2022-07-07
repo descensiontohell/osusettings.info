@@ -4,7 +4,6 @@ from aiohttp.web_exceptions import HTTPUnauthorized, HTTPFound
 from aiohttp_session import new_session, get_session
 
 from backend.app.web.app import View
-from backend.app.web.response import json_response
 
 
 class AuthView(View):
