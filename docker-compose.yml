@@ -17,6 +17,7 @@ services:
     depends_on:
       - db
       - redis
+    restart: always
 
   rank_updater:
     build:
