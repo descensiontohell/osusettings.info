@@ -1,33 +1,32 @@
-import yaml
+from envyaml import EnvYAML
 
 from backend.app.web.config import DatabaseConfig, Config, Credentials, SessionConfig, SuperuserConfig, RedisConfig
 
 
 def get_config(config_path):
-    with open(config_path, "r") as f:
-        raw_config = yaml.safe_load(f)
+    env = EnvYAML(config_path)
     return Config(
         credentials=Credentials(
-            client_id=raw_config["credentials"]["client_id"],
-            client_secret=raw_config["credentials"]["client_secret"],
-            grant_type=raw_config["credentials"]["grant_type"],
-            scope=raw_config["credentials"]["scope"],
-            server_name=raw_config["credentials"]["server_name"],
+            client_id=env["credentials.client_id"],
+            client_secret=env["credentials.client_secret"],
+            grant_type=env["credentials.grant_type"],
+            scope=env["credentials.scope"],
+            server_name=env["credentials.server_name"],
         ),
         session=SessionConfig(
-            key=raw_config["session"]["key"],
+            key=env["session.key"],
         ),
         superuser=SuperuserConfig(
-            login=raw_config["superuser"]["login"],
-            password=raw_config["superuser"]["password"],
+            login=env["superuser.login"],
+            password=env["superuser.password"],
         ),
         database=DatabaseConfig(
-            host=raw_config["database"]["host"],
-            user=raw_config["database"]["user"],
-            password=raw_config["database"]["password"],
-            database=raw_config["database"]["database"],
+            host=env["database.host"],
+            user=env["database.user"],
+            password=env["database.password"],
+            database=env["database.database"],
         ),
         redis=RedisConfig(
-            host=raw_config["redis"]["host"],
+            host=env["redis.host"],
         ),
     )

@@ -7,6 +7,10 @@ services:
     container_name: osusettings
     ports:
       - 8080:8080
+    environment:
+      CLIENT_ID: 15033
+      CLIENT_SECRET: dSbJw0V5RWbl3rBlOksmtNGHFPsz0PJDHlREOPPS
+      SERVER_NAME: http://localhost:8080
     depends_on:
       - db
       - redis

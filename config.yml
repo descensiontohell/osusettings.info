@@ -11,8 +11,8 @@ database:
 redis:
   host: redis
 credentials:
-  client_id: "15033"
-  client_secret: "dSbJw0V5RWbl3rBlOksmtNGHFPsz0PJDHlREOPPS"
+  client_id: $CLIENT_ID
+  client_secret: $CLIENT_SECRET
   grant_type: "client_credentials"
   scope: "public"
-  server_name: "http://localhost:8080"
+  server_name: $SERVER_NAME
