@@ -1,7 +1,7 @@
-from aiohttp.web_app import Application
+from backend.app.web.app import Application
 
 
-def setup_routes(app: "Application"):
+def setup_routes(app: Application):
     from backend.app.leaderboard.views import ApiPlayersView
     from backend.app.leaderboard.views import LeaderboardView
 

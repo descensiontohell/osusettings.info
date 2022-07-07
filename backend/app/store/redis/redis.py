@@ -2,7 +2,7 @@ import typing
 import aioredis
 
 if typing.TYPE_CHECKING:
-    from app import Application
+    from backend.app.web.app import Application
 
 
 def setup_redis(app: "Application"):
