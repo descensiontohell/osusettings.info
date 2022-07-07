@@ -1,5 +1,3 @@
-
-
 class LeaderboardFilter:
     def __init__(
             self,
