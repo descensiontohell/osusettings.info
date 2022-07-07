@@ -5,12 +5,12 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: osusettings
+    environment:
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
+      SERVER_NAME: ${SERVER_NAME}
     ports:
       - 8080:8080
-    environment:
-      CLIENT_ID: 15033
-      CLIENT_SECRET: dSbJw0V5RWbl3rBlOksmtNGHFPsz0PJDHlREOPPS
-      SERVER_NAME: http://localhost:8080
     depends_on:
       - db
       - redis
@@ -20,6 +20,10 @@ services:
       context: .
       dockerfile: Pollerfile
     container_name: rank_updater
+    environment:
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
+      SERVER_NAME: ${SERVER_NAME}
     depends_on:
       - db
       - app
@@ -45,9 +49,9 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: dev_osu
-      POSTGRES_USER: elle_dev
-      POSTGRES_PASSWORD: dev_elle_pass
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - 5050:5432
 
