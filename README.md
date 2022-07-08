@@ -32,7 +32,7 @@ POSTGRES_PASSWORD=postgres
 docker-compose up
 ```
 5. Navigate to Swagger UI: `http://localhost:8080/api/docs`
-6. Restart the app after changes:
+6. Rebuild the app after changes:
 ```
 docker-compose down && docker-compose up --build
 ```
