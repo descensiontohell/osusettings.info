@@ -54,7 +54,7 @@ services:
   db:
     image: postgres:latest
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ./pgdata:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: dev_osu
       POSTGRES_USER: ${POSTGRES_USER}
@@ -66,6 +66,4 @@ services:
     image: redis:latest
     ports:
       - 6379:6379
-
-volumes:
-  pgdata:
+      -
