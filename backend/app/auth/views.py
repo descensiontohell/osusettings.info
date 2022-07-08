@@ -15,9 +15,6 @@ class AuthView(View):
         code = params["code"]
         player = await self.store.auth.identify_player(oauth_code=code)
 
-        log = logging.getLogger("SUS")
-        log.info(player)
-
         if await self.store.service.is_user_admin(osu_id=player["osu_id"]):
             is_admin = True
         else:
