@@ -5,5 +5,6 @@
 tests
 venv
 .gitignore
+pgdata
 pytest.ini
 README.md
