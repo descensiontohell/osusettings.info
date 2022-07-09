@@ -5,7 +5,7 @@ from typing import Union, Optional
 from sqlalchemy import select, desc
 
 from backend.app.store.base.base_accessor import BaseAccessor
-from backend.app.store.players.dataclasses import Keyboard, Mouse, Mousepad, Tablet, Switch
+from backend.app.store.leaderboard.dataclasses import Keyboard, Mouse, Mousepad, Tablet, Switch
 
 if typing.TYPE_CHECKING:
     from backend.app.web.app import Application

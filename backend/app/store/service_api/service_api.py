@@ -5,7 +5,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
-from backend.app.store.players.dataclasses import Player
+from backend.app.store.leaderboard.dataclasses import Player
 from backend.app.store.service_api.player_edpi import PlayerEdpi
 from backend.app.store.database.models import PlayerModel, SuperuserModel, AdminModel
 from backend.app.store.base.base_accessor import BaseAccessor

@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, MetaData, Float, Date
 from sqlalchemy.orm import declarative_base, relationship
 
-from backend.app.store.players.dataclasses import Playstyle, Mouse, Tablet, Keyboard, Switch, Player, Settings, Mousepad
+from backend.app.store.leaderboard.dataclasses import Playstyle, Mouse, Tablet, Keyboard, Switch, Player, Settings, Mousepad
 
 from backend.app.store.service_api.dataclasses import Superuser, Admin
 
