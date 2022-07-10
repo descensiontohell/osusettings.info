@@ -43,6 +43,6 @@ class ApiPlayersView(View):
         players_filter = LeaderboardFilter(**args)
 
         is_mouse_list = args.get("is_mouse", True)
-        players = await self.store.players.get_players(players_filter)
+        players = await self.store.leaderboard.get_players(players_filter)
         return json_response(
             data=LeaderboardSchema().dump({"players": players, "is_mouse_list": is_mouse_list}))
