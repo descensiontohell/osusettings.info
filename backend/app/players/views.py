@@ -1,9 +1,9 @@
 import aiohttp_jinja2
-from aiohttp.web_exceptions import HTTPNotFound
+from aiohttp.web_exceptions import HTTPNotFound, HTTPBadRequest
 from aiohttp_apispec import response_schema, querystring_schema, docs
 
-from backend.app.leaderboard.filter import LeaderboardFilter
-from backend.app.leaderboard.schemas import LeaderboardSchema, GetPlayersQuerySchema, PlayerSchema
+from backend.app.players.filter import LeaderboardFilter
+from backend.app.players.schemas import LeaderboardSchema, GetPlayersQuerySchema, PlayerSchema, SettingsHistorySchema
 from backend.app.web.response import json_response
 from backend.app.web.app import View
 
@@ -90,17 +90,29 @@ class ApiLeaderboardView(View):
 class SinglePlayerView(View):
     @response_schema(PlayerSchema(), 200)
     async def get(self):
-        osu_id_string = self.request.match_info["osu_id"]
-        # If ID is an integer: check if there is a player with that ID, then check there is a player with that name
-        # If ID is not integer: treat it as player name
         try:
-            user = await self.store.players.get_user_by_osu_id_or_name(osu_id=int(osu_id_string))
-            if not user:
-                user = await self.store.players.get_user_by_osu_id_or_name(osu_id=osu_id_string, search_by_name=True)
+            osu_id = int(self.request.match_info["osu_id"])
         except ValueError:
-            user = await self.store.players.get_user_by_osu_id_or_name(osu_id=osu_id_string, search_by_name=True)
+            raise HTTPBadRequest()
+
+        user = await self.store.players.get_user_by_osu_id_or_name(osu_id)
 
         if not user:
-            raise HTTPNotFound(reason=f"User {osu_id_string} not found!")
+            raise HTTPNotFound(reason=f"User {osu_id} not found")
 
         return json_response(data=PlayerSchema().dump(user))
+
+
+class PlayerSettingsHistoryView(View):
+    async def get(self):
+        try:
+            osu_id = int(self.request.match_info["osu_id"])
+        except ValueError:
+            raise HTTPBadRequest(reason="osu_id must be an integer")
+
+        settings_list = await self.store.players.get_settings_history_by_osu_id(osu_id)
+
+        if settings_list is None:
+            raise HTTPNotFound(reason=f"User {osu_id} not found")
+
+        return json_response(data=SettingsHistorySchema().dump({"settings": settings_list}))

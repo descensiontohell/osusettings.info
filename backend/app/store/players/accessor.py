@@ -1,14 +1,14 @@
 import typing
 from typing import Optional, Union
 
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, desc
 from sqlalchemy.orm import selectinload
 
-from backend.app.leaderboard.filter import LeaderboardFilter
+from backend.app.players.filter import LeaderboardFilter
 from backend.app.store.database.models import PlayerModel, MousepadModel, MouseModel, KeyboardModel, \
-    SwitchModel, TabletModel
+    SwitchModel, TabletModel, SettingsModel
 from backend.app.store.base.base_accessor import BaseAccessor
-from backend.app.store.players.dataclasses import Player
+from backend.app.store.players.dataclasses import Player, Settings
 
 if typing.TYPE_CHECKING:
     from backend.app.web.app import Application
@@ -109,11 +109,10 @@ class PlayerAccessor(BaseAccessor):
 
         return players
 
-    async def get_user_by_osu_id_or_name(self, osu_id: Union[str, int], search_by_name=False) -> Optional[Player]:
-        query = select(PlayerModel).filter(PlayerModel.osu_id == osu_id)
-        if search_by_name:
-            query = select(PlayerModel).filter(PlayerModel.name.ilike(osu_id))
-        query = (query.options(selectinload(PlayerModel.mousepad))
+    async def get_user_by_osu_id_or_name(self, osu_id: int) -> Optional[Player]:
+        query = (select(PlayerModel)
+                 .filter(PlayerModel.osu_id == osu_id)
+                 .options(selectinload(PlayerModel.mousepad))
                  .options(selectinload(PlayerModel.mouse))
                  .options(selectinload(PlayerModel.playstyle))
                  .options(selectinload(PlayerModel.keyboard))
@@ -127,5 +126,21 @@ class PlayerAccessor(BaseAccessor):
 
         if result:
             return result.to_dc()
-        else:
-            return None
+
+    async def get_settings_history_by_osu_id(self, osu_id: int) -> list[Settings]:
+        query = (select(SettingsModel)
+                 .filter(SettingsModel.osu_id == osu_id)
+                 .options(selectinload(SettingsModel.mousepad))
+                 .options(selectinload(SettingsModel.mouse))
+                 .options(selectinload(SettingsModel.playstyle))
+                 .options(selectinload(SettingsModel.keyboard))
+                 .options(selectinload(SettingsModel.tablet))
+                 .options(selectinload(SettingsModel.switch))
+                 .order_by(desc(SettingsModel.id))
+                 )
+
+        async with self.session_factory() as session:
+            models = await session.execute(query)
+        result = models.scalars().all()
+
+        return [s.to_dc() for s in result if s]
