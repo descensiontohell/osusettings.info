@@ -215,6 +215,7 @@ class PlayerModel(Base):
             keyboard=keyboard,
             switch=switch,
             is_active=self.is_active,
+            updated_by=self.updated_by,
         )
 
 
@@ -307,6 +308,7 @@ class SettingsModel(Base):
             tablet=tablet,
             keyboard=keyboard,
             switch=switch,
+            updated_by=self.updated_by,
         )
 
 

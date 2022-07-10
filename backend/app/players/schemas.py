@@ -66,6 +66,7 @@ class PlayerSchema(Schema):
     keyboard = fields.Nested("KeyboardSchema", many=False)
     switch = fields.Nested("SwitchSchema", many=False)
     is_active = fields.Bool(required=True)
+    updated_by = fields.Str(required=True)
 
 
 class LeaderboardSchema(Schema):
@@ -93,3 +94,33 @@ class GetPlayersQuerySchema(Schema):
     keyboard = fields.Str()
     switch = fields.Str()
     tablet = fields.Str()
+
+
+class PreviousSettingsSchema(Schema):
+    last_updated = fields.Date(required=True)
+    is_mouse = fields.Bool()
+    playstyle = fields.Str()
+    mouse_edpi = fields.Int()
+    tablet_area_width = fields.Int()
+    tablet_area_height = fields.Int()
+    dpi = fields.Int()
+    os_sens = fields.Int()
+    os_accel = fields.Bool()
+    multiplier = fields.Float()
+    res_width = fields.Int()
+    res_height = fields.Int()
+    polling_rate = fields.Int()
+    play_area_width = fields.Int()
+    play_area_height = fields.Int()
+    refresh_rate = fields.Int()
+    raw_input = fields.Bool()
+    mouse = fields.Nested("MouseSchema", many=False)
+    mousepad = fields.Nested("MousepadSchema", many=False)
+    tablet = fields.Nested("TabletSchema", many=False)
+    keyboard = fields.Nested("KeyboardSchema", many=False)
+    switch = fields.Nested("SwitchSchema", many=False)
+    updated_by = fields.Str(required=True)
+
+
+class SettingsHistorySchema(Schema):
+    settings = fields.Nested("PreviousSettingsSchema", many=True)

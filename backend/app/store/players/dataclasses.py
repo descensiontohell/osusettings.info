@@ -79,6 +79,7 @@ class Player:
     keyboard: Optional[Keyboard]
     switch: Optional[Switch]
     is_active: bool
+    updated_by: str
 
 
 @dataclass
@@ -106,3 +107,4 @@ class Settings:
     tablet: Optional[Tablet]
     keyboard: Optional[Keyboard]
     switch: Optional[Switch]
+    updated_by: str
