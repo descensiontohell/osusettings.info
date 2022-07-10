@@ -3,7 +3,7 @@ osusettings is codename for a website that is a successor of [osu! Top Mouse Pla
 
 ### What already works:
  - Players list with settings retrieval (filters are supported)
-- Items retrieval
+- Items, players, player settings history retrieval
 - Sample OAuth page that adds (or updates) player to the database on login
 - Automated rank updating for players in the database
 - Superuser endpoints to manage players with admin rights
