@@ -49,12 +49,12 @@ class Switch:
 
 @dataclass
 class Player:
-    last_updated: datetime.datetime
+    last_updated: datetime.date
     is_admin: bool
     osu_id: int
     name: str
     global_rank: int
-    performance: int
+    performance: float
     is_restricted: bool
     is_mouse: bool
     country: str
@@ -83,7 +83,7 @@ class Player:
 
 @dataclass
 class Settings:
-    last_updated: datetime.datetime
+    last_updated: datetime.date
     osu_id: int
     is_mouse: bool
     playstyle: Optional[Playstyle]
@@ -91,7 +91,7 @@ class Settings:
     tablet_area_width: int
     tablet_area_height: int
     dpi: int
-    os_sens: str
+    os_sens: int
     os_accel: bool
     multiplier: float
     res_width: int

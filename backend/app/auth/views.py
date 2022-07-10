@@ -1,5 +1,3 @@
-import logging
-
 from aiohttp.web_exceptions import HTTPUnauthorized, HTTPFound
 from aiohttp_session import new_session, get_session
 

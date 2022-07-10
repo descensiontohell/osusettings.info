@@ -12,7 +12,7 @@ if typing.TYPE_CHECKING:
     from backend.app.web.app import Application
 
 
-class LeaderboardAccessor(BaseAccessor):
+class PlayerAccessor(BaseAccessor):
     def __init__(self, app: "Application", *args, **kwargs):
         super().__init__(app, "Players", *args, **kwargs)
         self.app = app
