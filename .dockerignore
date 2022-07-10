@@ -2,8 +2,10 @@
 .idea
 .github
 .pytest_cache
+.env
 tests
 venv
+.flake8
 .gitignore
 pgdata
 pytest.ini
