@@ -63,7 +63,7 @@ class LeaderboardView(View):
 
 class ApiLeaderboardView(View):
     @docs(
-        tags=["Leaderboard"],
+        tags=["Players"],
         summary="Get leaderboard with players and their settings",
         description="""Returns a list of mouse players or a list of tablet players.
                     For filtering multiple playstyles you need to put it in query string multiple times (see example)
@@ -88,6 +88,16 @@ class ApiLeaderboardView(View):
 
 
 class SinglePlayerView(View):
+    @docs(
+        tags=["Players"],
+        summary="Get single player data",
+        description="Returns player data by osu_id.",
+        responses={
+            200: {"description": "Success", "schema": PlayerSchema},
+            400: {"description": "osu_id is not a valid integer"},
+            404: {"description": "Player not found"}
+        },
+    )
     @response_schema(PlayerSchema(), 200)
     async def get(self):
         try:
@@ -104,6 +114,17 @@ class SinglePlayerView(View):
 
 
 class PlayerSettingsHistoryView(View):
+    @docs(
+        tags=["Players"],
+        summary="Get player settings history",
+        description="""Returns settings history of player with id=osu_id. 
+        Returns empty list if there is no history or player does not exist.""",
+        responses={
+            200: {"description": "Success", "schema": SettingsHistorySchema},
+            400: {"description": "osu_id is not a valid integer"},
+        },
+    )
+    @response_schema(SettingsHistorySchema, 200)
     async def get(self):
         try:
             osu_id = int(self.request.match_info["osu_id"])
