@@ -1,4 +1,5 @@
 import typing
+from typing import Optional, Union
 
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
@@ -7,6 +8,7 @@ from backend.app.leaderboard.filter import LeaderboardFilter
 from backend.app.store.database.models import PlayerModel, MousepadModel, MouseModel, KeyboardModel, \
     SwitchModel, TabletModel
 from backend.app.store.base.base_accessor import BaseAccessor
+from backend.app.store.players.dataclasses import Player
 
 if typing.TYPE_CHECKING:
     from backend.app.web.app import Application
@@ -106,3 +108,24 @@ class PlayerAccessor(BaseAccessor):
                    .offset((pf.page - 1) * self.page_size))
 
         return players
+
+    async def get_user_by_osu_id_or_name(self, osu_id: Union[str, int], search_by_name=False) -> Optional[Player]:
+        query = select(PlayerModel).filter(PlayerModel.osu_id == osu_id)
+        if search_by_name:
+            query = select(PlayerModel).filter(PlayerModel.name.ilike(osu_id))
+        query = (query.options(selectinload(PlayerModel.mousepad))
+                 .options(selectinload(PlayerModel.mouse))
+                 .options(selectinload(PlayerModel.playstyle))
+                 .options(selectinload(PlayerModel.keyboard))
+                 .options(selectinload(PlayerModel.tablet))
+                 .options(selectinload(PlayerModel.switch))
+                 )
+
+        async with self.session_factory() as session:
+            models = await session.execute(query)
+        result = models.scalars().first()
+
+        if result:
+            return result.to_dc()
+        else:
+            return None
