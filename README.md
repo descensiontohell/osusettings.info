@@ -38,6 +38,4 @@ docker-compose down && docker-compose up --build
 ```
 ### Next  tasks:
 - Add front page for leaderboard
-- Add API userpage views
-- Add settings history to player model
 - Implement add items, update player settings endpoints
