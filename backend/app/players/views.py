@@ -14,10 +14,10 @@ from backend.app.web.app import View
 Users views:
 
 1. GET - /api/users/{osu_id}
-    Returns all player stats, player settings AND settings_history field
+    Returns all player stats and player settings
 
     Codes:
-        - 200 - returned requested user
+        - 200 - returns requested user
         - 404 - user not found
 
 
@@ -25,7 +25,7 @@ Users views:
     Adds a new user with given osu_id and gets their stats from osu!api
 
     Codes:
-        - 201 - user created (client should be redirected)
+        - 200 - user created (client should be redirected)
         - 401 - not logged in
         - 403 - logged in but the user is not admin
         - 409 - conflict - user exists (client should be redirected to according userpage)
@@ -128,11 +128,11 @@ Sets according osu! stats if the player is added",
         },
     )
     async def post(self):
-        # if not self.request.player_id:
-        #     raise HTTPUnauthorized
-        #
-        # if not self.request.is_admin:
-        #     raise HTTPForbidden
+        if not self.request.player_id:
+            raise HTTPUnauthorized
+
+        if not self.request.is_admin:
+            raise HTTPForbidden
 
         try:
             osu_id = int(self.request.match_info["osu_id"])
