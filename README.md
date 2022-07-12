@@ -3,7 +3,7 @@ osusettings is codename for a website that is a successor of [osu! Top Mouse Pla
 
 ### What already works:
  - Players list with settings retrieval (filters are supported)
-- Items retrieval
+- Items, players, player settings history retrieval
 - Sample OAuth page that adds (or updates) player to the database on login
 - Automated rank updating for players in the database
 - Superuser endpoints to manage players with admin rights
@@ -38,6 +38,4 @@ docker-compose down && docker-compose up --build
 ```
 ### Next  tasks:
 - Add front page for leaderboard
-- Add API userpage views
-- Add settings history to player model
 - Implement add items, update player settings endpoints
