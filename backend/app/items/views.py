@@ -1,5 +1,5 @@
 from aiohttp.web_exceptions import HTTPNotFound
-from aiohttp_apispec import docs
+from aiohttp_apispec import docs, response_schema
 
 from backend.app.items.schemas import KeyboardSuggestionsListSchema, MouseSuggestionsListSchema, \
     MousepadSuggestionsListSchema, SwitchSuggestionsListSchema, TabletSuggestionsListSchema, AllItemsSchema
@@ -57,6 +57,14 @@ class GetItemListView(View):
 
 
 class GetAllItemsView(View):
+    @docs(
+        tags=["Items"],
+        summary="Returns all items list",
+        description="""Returns items list for dropdown suggestions. Only admin added items included.
+        Sorted by relevance and name. Common items like "Custom", "laptop keyboard", "noname" go first.
+        """,
+    )
+    @response_schema(AllItemsSchema, 200)
     async def get(self):
         mice = await self.store.items.get_items(item_type="mice", model=item_schemas_models["mice"][1])
         mousepads = await self.store.items.get_items(item_type="mousepads", model=item_schemas_models["mousepads"][1])
