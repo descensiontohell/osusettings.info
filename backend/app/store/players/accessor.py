@@ -1,6 +1,7 @@
 import typing
 from typing import Optional, Union
 
+from osu import AsynchronousClient
 from sqlalchemy import select, or_, desc
 from sqlalchemy.orm import selectinload
 
@@ -18,10 +19,18 @@ class PlayerAccessor(BaseAccessor):
     def __init__(self, app: "Application", *args, **kwargs):
         super().__init__(app, "Players", *args, **kwargs)
         self.app = app
+        self.client_id = self.app.config.credentials.client_id
+        self.client_secret = self.app.config.credentials.client_secret
+        self.redirect_url = f"{self.app.config.credentials.server_name}/callback"
         self.page_size = 50
 
     async def connect(self, app: "Application"):
         self.session_factory = self.app.database.db
+        self.osu_api = AsynchronousClient.from_client_credentials(
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+            redirect_url=self.redirect_url,
+        )
 
     async def get_players(self, player_filter: LeaderboardFilter):
         query = self._build_query(player_filter)
@@ -144,3 +153,23 @@ class PlayerAccessor(BaseAccessor):
         result = models.scalars().all()
 
         return [s.to_dc() for s in result if s]
+
+    async def add_new_player(self, osu_id) -> None:
+        player = await self.osu_api.get_user(user=osu_id)
+
+        if player.statistics.global_rank is None and player.statistics.pp == 0:
+            is_active = False
+        else:
+            is_active = True
+
+        player_stats_dict = {
+            "osu_id": player.id,
+            "name": player.username,
+            "global_rank": player.statistics.global_rank,
+            "performance": round(player.statistics.pp),
+            "country_code": player.country_code,
+            "is_active": is_active,
+            "is_restricted": False,
+        }
+
+        await self.app.store.auth.add_player(player_stats_dict)

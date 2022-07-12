@@ -1,6 +1,8 @@
 import aiohttp_jinja2
-from aiohttp.web_exceptions import HTTPNotFound, HTTPBadRequest
+from aiohttp.web_exceptions import HTTPNotFound, HTTPBadRequest, HTTPUnauthorized, HTTPForbidden, HTTPConflict
 from aiohttp_apispec import response_schema, querystring_schema, docs
+from requests import HTTPError
+from sqlalchemy.exc import IntegrityError
 
 from backend.app.players.filter import LeaderboardFilter
 from backend.app.players.schemas import LeaderboardSchema, GetPlayersQuerySchema, PlayerSchema, SettingsHistorySchema
@@ -102,6 +104,8 @@ class SinglePlayerView(View):
     async def get(self):
         try:
             osu_id = int(self.request.match_info["osu_id"])
+            if osu_id > 2147483647 or osu_id < -2147483647:
+                raise ValueError
         except ValueError:
             raise HTTPBadRequest()
 
@@ -111,6 +115,40 @@ class SinglePlayerView(View):
             raise HTTPNotFound(reason=f"User {osu_id} not found")
 
         return json_response(data=PlayerSchema().dump(user))
+
+    @docs(
+        tags=["Players"],
+        summary="Add new player [admin]",
+        description="Adds new player to the system or does nothing if the player exists. \
+Sets according osu! stats if the player is added",
+        responses={
+            200: {"description": "Success"},
+            400: {"description": "osu_id is not a valid integer"},
+            409: {"description": "Player already exists"}
+        },
+    )
+    async def post(self):
+        # if not self.request.player_id:
+        #     raise HTTPUnauthorized
+        #
+        # if not self.request.is_admin:
+        #     raise HTTPForbidden
+
+        try:
+            osu_id = int(self.request.match_info["osu_id"])
+            if osu_id > 2147483647 or osu_id < -2147483647:
+                raise ValueError
+        except ValueError:
+            raise HTTPBadRequest()
+
+        try:
+            await self.store.players.add_new_player(osu_id=osu_id)
+        except HTTPError:
+            raise HTTPNotFound(reason=f"User {osu_id} not found")
+        except IntegrityError:
+            raise HTTPConflict(reason=f"User {osu_id} exists")
+
+        return json_response()
 
 
 class PlayerSettingsHistoryView(View):
@@ -128,6 +166,8 @@ class PlayerSettingsHistoryView(View):
     async def get(self):
         try:
             osu_id = int(self.request.match_info["osu_id"])
+            if osu_id > 2147483647 or osu_id < -2147483647:
+                raise ValueError
         except ValueError:
             raise HTTPBadRequest(reason="osu_id must be an integer")
 
