@@ -43,7 +43,6 @@ Users views:
         - 400 - invalid schema
         - 401 - not logged in
         - 403 - logged in but the user is not admin or osu_id owner
-        - 409 - conflict - client should be redirected to according userpage
         - 422 - can't update settings with given request body (add_new_item is True, but no item id provided etc.)
 """
 
@@ -124,6 +123,9 @@ Sets according osu! stats if the player is added",
         responses={
             200: {"description": "Success"},
             400: {"description": "osu_id is not a valid integer"},
+            401: {"description": "User not logged in"},
+            403: {"description": "User logged in but is not admin"},
+            404: {"description": "No user with given osu_id"},
             409: {"description": "Player already exists"}
         },
     )
@@ -150,6 +152,22 @@ Sets according osu! stats if the player is added",
 
         return json_response()
 
+    @docs(
+        tags=["Players"],
+        summary="Add new player [admin]",
+        description="Update player settings and add old ones to settings history",
+        responses={
+            200: {"description": "Success"},
+            400: {"description": "Invalid schema or osu_id is not a valid integer"},
+            401: {"description": "User not logged in"},
+            403: {"description": "User logged in but is not admin or profile owner"},
+            404: {"description": "No user with given osu_id"},
+            422: {"description": "Schema cannot be processed due to semantic mistakes"},
+        },
+    )
+    async def patch(self):
+        ...
+
 
 class PlayerSettingsHistoryView(View):
     @docs(
@@ -172,8 +190,5 @@ class PlayerSettingsHistoryView(View):
             raise HTTPBadRequest(reason="osu_id must be an integer")
 
         settings_list = await self.store.players.get_settings_history_by_osu_id(osu_id)
-
-        if settings_list is None:
-            raise HTTPNotFound(reason=f"User {osu_id} not found")
 
         return json_response(data=SettingsHistorySchema().dump({"settings": settings_list}))
