@@ -4,7 +4,7 @@ from backend.app.web.config import DatabaseConfig, Config, Credentials, SessionC
 
 
 def get_config(config_path):
-    env = EnvYAML(config_path)
+    env = EnvYAML(config_path, strict=False)
     return Config(
         credentials=Credentials(
             client_id=env["credentials.client_id"],

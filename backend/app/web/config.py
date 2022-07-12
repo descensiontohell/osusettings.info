@@ -64,7 +64,7 @@ def setup_config(app: "Application", config_path: str):
         ),
         superuser=SuperuserConfig(
             login=env["superuser.login"],
-            password=env["superuser.password"],
+            password=str(env["superuser.password"]),
         ),
         database=DatabaseConfig(
             host=env["database.host"],

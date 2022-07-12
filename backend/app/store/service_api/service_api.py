@@ -1,7 +1,8 @@
 import typing
+from hashlib import sha256
 from typing import Optional
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update, delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
@@ -22,6 +23,7 @@ class ServiceAccessor(BaseAccessor):
 
     async def connect(self, app: "Application"):
         self.session = self.app.database.db()
+        await self.setup_superuser()
 
     async def get_su_by_name(self, name: str) -> Optional[Superuser]:
         """Get superuser credentials from database table by name"""
@@ -140,3 +142,19 @@ class ServiceAccessor(BaseAccessor):
             area_width=play_area_width,
             area_height=play_area_height,
         )
+
+    async def setup_superuser(self):
+        # Truncate table superusers
+        # Add new superuser using credentials in app config
+        async with self.session as s:
+            query = delete(SuperuserModel)
+            await s.execute(query)
+            await s.commit()
+
+        new_superuser = SuperuserModel(
+            name=self.app.config.superuser.login,
+            password=sha256(self.app.config.superuser.password.encode()).hexdigest()
+        )
+        async with self.session as s:
+            s.add_all([new_superuser])
+            await s.commit()

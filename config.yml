@@ -1,8 +1,8 @@
 session:
   key: PfJ4Hkf_glFG_S08LlxjmJMgHNhMSHY8LO7bxOP11bo=
 superuser:
-  login: elle
-  password: 12345
+  login: $SUPERUSER_NAME
+  password: $SUPERUSER_PASSWORD
 database:
   host: db
   user: $POSTGRES_USER
