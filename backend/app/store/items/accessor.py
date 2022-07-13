@@ -56,3 +56,10 @@ class ItemsAccessor(BaseAccessor):
         if self.app.const.ENABLE_CACHING:
             pickled_items = pickle.dumps(items_list)
             await self.app.store.redis.set(item_type, pickled_items, ex=self.app.const.CACHE_EX)
+
+    async def add_item(self, item: dict, model) -> None:
+        item["relevance"] = 10  # TODO untested
+        new_item = model(**item)
+        async with self.session_factory() as s:
+            s.add_all(new_item)
+            await s.commit()

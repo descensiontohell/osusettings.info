@@ -29,12 +29,12 @@ class KeyboardSchema(Schema):
 class MouseSchema(Schema):
     id = fields.Int(required=False)
     name = fields.Str(required=True)
-    sensor = fields.Str(required=True)
-    weight = fields.Int(required=True)
-    length = fields.Int(required=True)
-    width = fields.Int(required=True)
-    height = fields.Int(required=True)
-    switch = fields.Str(required=True)
+    sensor = fields.Str(required=False)
+    weight = fields.Int(required=False)
+    length = fields.Int(required=False)
+    width = fields.Int(required=False)
+    height = fields.Int(required=False)
+    switch = fields.Str(required=False)
 
 
 class PlayerSchema(Schema):
@@ -124,3 +124,7 @@ class PreviousSettingsSchema(Schema):
 
 class SettingsHistorySchema(Schema):
     settings = fields.Nested("PreviousSettingsSchema", many=True)
+
+
+class UpdatePlayerSettingsSchema(Schema):
+    ...

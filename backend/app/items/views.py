@@ -1,4 +1,4 @@
-from aiohttp.web_exceptions import HTTPNotFound
+from aiohttp.web_exceptions import HTTPNotFound, HTTPUnauthorized, HTTPForbidden
 from aiohttp_apispec import docs, response_schema
 
 from backend.app.items.schemas import KeyboardSuggestionsListSchema, MouseSuggestionsListSchema, \
@@ -52,8 +52,22 @@ class GetItemListView(View):
         items = await self.store.items.get_items(item_type=item_type, model=item_schemas_models[item_type][1])
         return json_response(data=item_schemas_models[item_type][0].dump({item_type: items}))
 
-    async def post(self):  # TODO add items view
-        pass
+    async def post(self):
+        if not self.request.player_id:
+            raise HTTPUnauthorized
+        if not self.request.is_admin:
+            raise HTTPForbidden
+
+        item_type = self.request.match_info["item_type"]
+        if item_type not in item_schemas_models:
+            raise HTTPNotFound(reason=f"Requested item {item_type} not found")
+
+        body = await self.request.json()
+        item = item_schemas_models[item_type][0].load(body)
+
+        await self.store.items.add_item(item, item_schemas_models[item_type][1])
+
+        return json_response()
 
 
 class GetAllItemsView(View):
