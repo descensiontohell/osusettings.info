@@ -1379,3 +1379,14 @@ false,false,,true,23029,6194,4223722,US,[Ninja],2,1000,6,false,1.1,2560,1440,tru
 false,false,,true,23992,6134,11203609,PH,Seydi,1,800,6,false,0.81,1920,1080,true,\N,56,42,188,\N,\N,\N,2020-06-01,648
 false,false,,true,24518,6102,3166753,TW,H_Scarlet,5,800,7,false,1.5,1920,1080,true,\N,31,24,14,\N,184,46,2018-03-01,1200
 \.
+
+
+SELECT setval('keyboard_id_seq', 300);
+
+SELECT setval('mouse_id_seq', 200);
+
+SELECT setval('mousepad_id_seq', 200);
+
+SELECT setval('switch_id_seq', 100);
+
+SELECT setval('playstyle_id_seq', 20);
