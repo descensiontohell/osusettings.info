@@ -1,5 +1,5 @@
 import typing
-from typing import Optional, Union
+from typing import Optional
 
 from osu import AsynchronousClient
 from sqlalchemy import select, or_, desc
