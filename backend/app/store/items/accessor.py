@@ -61,5 +61,5 @@ class ItemsAccessor(BaseAccessor):
         item["relevance"] = 10  # TODO untested
         new_item = model(**item)
         async with self.session_factory() as s:
-            s.add_all(new_item)
+            s.add_all([new_item])
             await s.commit()
