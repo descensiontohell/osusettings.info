@@ -1,11 +1,12 @@
 import aiohttp_jinja2
 from aiohttp.web_exceptions import HTTPNotFound, HTTPBadRequest, HTTPUnauthorized, HTTPForbidden, HTTPConflict
-from aiohttp_apispec import response_schema, querystring_schema, docs
+from aiohttp_apispec import response_schema, querystring_schema, docs, request_schema
 from requests import HTTPError
 from sqlalchemy.exc import IntegrityError
 
 from backend.app.players.filter import LeaderboardFilter
-from backend.app.players.schemas import LeaderboardSchema, GetPlayersQuerySchema, PlayerSchema, SettingsHistorySchema
+from backend.app.players.schemas import LeaderboardSchema, GetPlayersQuerySchema, PlayerSchema, SettingsHistorySchema, \
+    UpdatePlayerSettingsSchema
 from backend.app.web.response import json_response
 from backend.app.web.app import View
 
@@ -154,7 +155,7 @@ Sets according osu! stats if the player is added",
 
     @docs(
         tags=["Players"],
-        summary="Add new player [admin]",
+        summary="Update player settings [admin or profile owner]",
         description="Update player settings and add old ones to settings history",
         responses={
             200: {"description": "Success"},
@@ -165,7 +166,8 @@ Sets according osu! stats if the player is added",
             422: {"description": "Schema cannot be processed due to semantic mistakes"},
         },
     )
-    async def patch(self):
+    @request_schema(UpdatePlayerSettingsSchema)
+    async def patch(self):  # TODO add patch player view
         ...
 
 
@@ -173,7 +175,7 @@ class PlayerSettingsHistoryView(View):
     @docs(
         tags=["Players"],
         summary="Get player settings history",
-        description="""Returns settings history of player with id=osu_id. 
+        description="""Returns settings history of player with id=osu_id.
         Returns empty list if there is no history or player does not exist.""",
         responses={
             200: {"description": "Success", "schema": SettingsHistorySchema},
