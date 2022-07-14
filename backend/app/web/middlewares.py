@@ -45,6 +45,7 @@ HTTP_ERROR_CODES = {
     404: "not_found",
     405: "not_implemented",
     409: "conflict",
+    422: "unprocessable_entity",
     500: "internal_server_error",
 }
 
@@ -58,10 +59,10 @@ async def error_handling_middleware(request: "Request", handler):
         raise HTTPFound(location=e.location)
     except HTTPUnprocessableEntity as e:
         return error_json_response(
-            http_status=400,
-            status="bad_request",
+            http_status=422,
+            status=HTTP_ERROR_CODES[422],
             message=e.reason,
-            data=json.loads(e.text),
+            data=e.text,
         )
     except HTTPUnauthorized as e:
         return error_json_response(
