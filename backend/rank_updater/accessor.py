@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from logging import getLogger
 
@@ -41,6 +42,8 @@ class RankUpdater:
         async with self.db_session() as session:
             result = await session.execute(query)
         ids_list = result.scalars().all()
+        if not ids_list:
+            await asyncio.sleep(1)
         self.logger.info("Acquired list of player ids")
         return ids_list
 
