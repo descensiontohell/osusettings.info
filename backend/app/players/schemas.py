@@ -3,7 +3,7 @@ from marshmallow import Schema, fields
 
 class MousepadSchema(Schema):
     id = fields.Int(required=False)
-    name = fields.Str(required=True)
+    name = fields.Str(required=False)
 
 
 class PlaystyleSchema(Schema):
@@ -13,22 +13,22 @@ class PlaystyleSchema(Schema):
 
 class SwitchSchema(Schema):
     id = fields.Int(required=False)
-    name = fields.Str(required=True)
+    name = fields.Str(required=False)
 
 
 class TabletSchema(Schema):
     id = fields.Int(required=False)
-    name = fields.Str(required=True)
+    name = fields.Str(required=False)
 
 
 class KeyboardSchema(Schema):
     id = fields.Int(required=False)
-    name = fields.Str(required=True)
+    name = fields.Str(required=False)
 
 
 class MouseSchema(Schema):
     id = fields.Int(required=False)
-    name = fields.Str(required=True)
+    name = fields.Str(required=False)
     sensor = fields.Str(required=False)
     weight = fields.Int(required=False)
     length = fields.Int(required=False)
@@ -127,4 +127,31 @@ class SettingsHistorySchema(Schema):
 
 
 class UpdatePlayerSettingsSchema(Schema):
-    ...
+    add_new_mouse = fields.Bool()
+    add_new_mousepad = fields.Bool()
+    add_new_keyboard = fields.Bool()
+    add_new_switch = fields.Bool()
+    add_new_tablet = fields.Bool()
+    last_updated = fields.Date(required=True)
+    is_mouse = fields.Bool()
+    playstyle = fields.Str()
+    mouse_edpi = fields.Int()
+    tablet_area_width = fields.Int()
+    tablet_area_height = fields.Int()
+    dpi = fields.Int()
+    os_sens = fields.Int()
+    os_accel = fields.Bool()
+    multiplier = fields.Float()
+    res_width = fields.Int()
+    res_height = fields.Int()
+    polling_rate = fields.Int()
+    play_area_width = fields.Int()
+    play_area_height = fields.Int()
+    refresh_rate = fields.Int()
+    raw_input = fields.Bool()
+    mouse = fields.Nested("MouseSchema", many=False)
+    mousepad = fields.Nested("MousepadSchema", many=False)
+    tablet = fields.Nested("TabletSchema", many=False)
+    keyboard = fields.Nested("KeyboardSchema", many=False)
+    switch = fields.Nested("SwitchSchema", many=False)
+    updated_by = fields.Str(required=True)
