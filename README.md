@@ -37,5 +37,5 @@ docker-compose up
 docker-compose down && docker-compose up --build
 ```
 ### Next  tasks:
-- Add front page for leaderboard
-- Implement add items, update player settings endpoints
+- Finish update player endpoint
+- Modify playstyle models & implement playstyle retrieval 
