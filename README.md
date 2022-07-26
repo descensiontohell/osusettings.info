@@ -1,7 +1,7 @@
 ### What is that?
 osusettings is codename for a website that is a successor of [osu! Top Mouse Player List](https://docs.google.com/spreadsheets/d/1EOWc7kf9TdyvT31VfzlY284udUNOrtz0uyRtQ2t4MHY/edit#gid=0). We are working on this project to move the list to its own website to make it fancy and maintainable. 
 
-### What already works:
+### What is implemented:
  - Players list with settings retrieval (filters are supported)
 - Items, players, player settings history retrieval
 - Sample OAuth page that adds (or updates) player to the database on login
