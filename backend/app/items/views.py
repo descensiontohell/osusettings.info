@@ -3,9 +3,12 @@ from aiohttp_apispec import docs, response_schema
 from marshmallow import ValidationError
 
 from backend.app.items.schemas import KeyboardSuggestionsListSchema, MouseSuggestionsListSchema, \
-    MousepadSuggestionsListSchema, SwitchSuggestionsListSchema, TabletSuggestionsListSchema, AllItemsSchema
-from backend.app.players.schemas import SwitchSchema, TabletSchema, MousepadSchema, MouseSchema, KeyboardSchema
-from backend.app.store.database.models import SwitchModel, KeyboardModel, MouseModel, MousepadModel, TabletModel
+    MousepadSuggestionsListSchema, SwitchSuggestionsListSchema, TabletSuggestionsListSchema, AllItemsSchema, \
+    PlaystyleSuggestionsListSchema
+from backend.app.players.schemas import SwitchSchema, TabletSchema, MousepadSchema, MouseSchema, KeyboardSchema, \
+    PlaystyleSchema
+from backend.app.store.database.models import SwitchModel, KeyboardModel, MouseModel, MousepadModel, TabletModel, \
+    PlaystyleModel
 from backend.app.web.app import View
 from backend.app.web.response import json_response
 
@@ -16,6 +19,7 @@ item_schemas_models = {
     "mice": [MouseSuggestionsListSchema(), MouseModel, MouseSchema()],
     "mousepads": [MousepadSuggestionsListSchema(), MousepadModel, MousepadSchema()],
     "tablets": [TabletSuggestionsListSchema(), TabletModel, TabletSchema()],
+    "playstyles": [PlaystyleSuggestionsListSchema(), PlaystyleModel, PlaystyleSchema()],
 }
 
 
@@ -37,6 +41,8 @@ class GetItemListView(View):
         mice
 
         mousepads
+        
+        playstyles
         """,
         responses={
             "200 - 1": {"description": "Ok. Returns list of mice", "schema": MouseSuggestionsListSchema},
@@ -44,6 +50,7 @@ class GetItemListView(View):
             "200 - 3": {"description": "Ok. Returns list of keyboards", "schema": KeyboardSuggestionsListSchema},
             "200 - 4": {"description": "Ok. Returns list of switches", "schema": SwitchSuggestionsListSchema},
             "200 - 5": {"description": "Ok. Returns list of tablets", "schema": TabletSuggestionsListSchema},
+            "200 - 6": {"description": "Ok. Returns list of playstyles", "schema": PlaystyleSuggestionsListSchema},
             "404": {"description": "Requested item not found"}
         }
     )
@@ -113,10 +120,12 @@ class GetAllItemsView(View):
         keyboards = await self.store.items.get_items(item_type="keyboards", model=item_schemas_models["keyboards"][1])
         switches = await self.store.items.get_items(item_type="switches", model=item_schemas_models["switches"][1])
         tablets = await self.store.items.get_items(item_type="tablets", model=item_schemas_models["tablets"][1])
+        playstyles = await self.store.items.get_items("playstyles", item_schemas_models["playstyles"][1])
         return json_response(data=AllItemsSchema().dump({
             "mice": mice,
             "mousepads": mousepads,
             "keyboards": keyboards,
             "switches": switches,
             "tablets": tablets,
+            "playstyles": playstyles,
         }))

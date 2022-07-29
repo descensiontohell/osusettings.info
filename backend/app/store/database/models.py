@@ -15,6 +15,7 @@ class PlaystyleModel(Base):
     __tablename__ = "playstyle"
     id = Column(Integer(), primary_key=True)
     name = Column(String(20), nullable=False, unique=True)
+    is_mouse = Column(Boolean())
     player = relationship("PlayerModel", back_populates="playstyle")
     settings = relationship("SettingsModel", back_populates="playstyle")
 
@@ -22,6 +23,7 @@ class PlaystyleModel(Base):
         return Playstyle(
             id=self.id,
             name=self.name,
+            is_mouse=self.is_mouse,
         )
 
 

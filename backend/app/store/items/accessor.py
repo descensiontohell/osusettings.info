@@ -5,7 +5,8 @@ from typing import Union, Optional
 from sqlalchemy import select, desc
 
 from backend.app.store.base.base_accessor import BaseAccessor
-from backend.app.store.players.dataclasses import Keyboard, Mouse, Mousepad, Tablet, Switch
+from backend.app.store.database.models import PlaystyleModel
+from backend.app.store.players.dataclasses import Keyboard, Mouse, Mousepad, Tablet, Switch, Playstyle
 
 if typing.TYPE_CHECKING:
     from backend.app.web.app import Application
@@ -19,7 +20,11 @@ class ItemsAccessor(BaseAccessor):
     async def connect(self, app: "Application"):
         self.session_factory = self.app.database.db
 
-    async def get_items(self, item_type: str, model) -> list[Union[Keyboard, Mouse, Mousepad, Switch, Tablet]]:
+    async def get_items(
+            self,
+            item_type: str,
+            model
+    ) -> list[Union[Keyboard, Mouse, Mousepad, Switch, Tablet, Playstyle]]:
         """
         If cached: returns from cache
         Else: requests database and caches the result
@@ -32,7 +37,10 @@ class ItemsAccessor(BaseAccessor):
             return items_list
 
         query = select(model)
-        model_query = query.where(model.relevance > 0).order_by(desc(model.relevance)).order_by(model.name)
+        if model == PlaystyleModel:
+            model_query = query
+        else:
+            model_query = query.where(model.relevance > 0).order_by(desc(model.relevance)).order_by(model.name)
 
         async with self.session_factory() as session:
             result = await session.execute(model_query)
@@ -47,7 +55,6 @@ class ItemsAccessor(BaseAccessor):
         if self.app.const.ENABLE_CACHING:
             pickled_items = await self.app.store.redis.get(item_type)
             if pickled_items:
-                self.logger.info("CACHED")
                 items_list = pickle.loads(pickled_items)
                 return items_list
         return None
@@ -58,7 +65,7 @@ class ItemsAccessor(BaseAccessor):
             await self.app.store.redis.set(item_type, pickled_items, ex=self.app.const.CACHE_EX)
 
     async def add_item(self, item: dict, model) -> None:
-        item["relevance"] = 10  # TODO untested
+        item["relevance"] = 10
         new_item = model(**item)
         async with self.session_factory() as s:
             s.add_all([new_item])

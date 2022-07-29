@@ -624,15 +624,15 @@
 174|10|Zowie P-SR
 \.
 BEGIN;
-\COPY playstyle (id, name) FROM stdin DELIMITER '|';
-1|Mouse/KB
-2|Mouse Only
-3|Dual Mouse
-4|Hybrid
-5|Click/X
-6|Tablet/KB
-7|Tablet Only
-8|Tap/X
+\COPY playstyle (id, name, is_mouse) FROM stdin DELIMITER '|';
+1|Mouse/KB|true
+2|Mouse Only|true
+3|Dual Mouse|true
+4|Hybrid|true
+5|Click/X|true
+6|Tablet/KB|false
+7|Tablet Only|false
+8|Tap/X|false
 \.
 SELECT setval('keyboard_id_seq', 300);
 SELECT setval('mouse_id_seq', 200);

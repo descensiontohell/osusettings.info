@@ -21,9 +21,14 @@ class TabletSuggestionsListSchema(Schema):
     tablets = fields.Nested("TabletSchema", many=True)
 
 
+class PlaystyleSuggestionsListSchema(Schema):
+    playstyles = fields.Nested("PlaystyleSchema", many=True)
+
+
 class AllItemsSchema(Schema):
     mice = fields.Nested("MouseSchema", many=True)
     mousepads = fields.Nested("MousepadSchema", many=True)
     keyboards = fields.Nested("KeyboardSchema", many=True)
     switches = fields.Nested("SwitchSchema", many=True)
     tablets = fields.Nested("TabletSchema", many=True)
+    playstyles = fields.Nested("PlaystyleSchema", many=True)

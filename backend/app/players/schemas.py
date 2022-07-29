@@ -9,6 +9,7 @@ class MousepadSchema(Schema):
 class PlaystyleSchema(Schema):
     id = fields.Int(required=False)
     name = fields.Str(required=True)
+    is_mouse = fields.Boolean()
 
 
 class SwitchSchema(Schema):

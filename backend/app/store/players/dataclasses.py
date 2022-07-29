@@ -9,6 +9,7 @@ from attr import dataclass
 class Playstyle:
     id: int
     name: str
+    is_mouse: bool
 
 
 @dataclass
