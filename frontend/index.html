@@ -8,8 +8,11 @@
         <div id="top_container">
             <div id="main_container" class="hidden">
                 <div id="filters_container">
-                    <div id="blue_box"></div>
+                    <div id="sub_button_edge_t" class="sub_button_edge"></div>
+                    <div id="sub_button_edge_m" class="sub_button_edge"></div>
+                    <div id="sub_button_edge_b" class="sub_button_edge"></div>
                     <div id="applied_filters" class="sub_scroll scrollable_div"><span style='color: gray'>&emsp;[none]</span></div>
+                    <input id='filter_add_button' type='button' value='Add' class="sub_button_t sub_button">
                     <input id='filter_delete_button' type='button' value='Delete' class="sub_button_m sub_button" disabled>
                     <input id='filter_reset_button' type='button' value='Reset' class="sub_button_b sub_button" disabled>
                     <div class="border_title">Filters</div>
@@ -18,7 +21,8 @@
                     <div id="border_r_f" class="cut_border_r"></div>
                 </div>
                 <div id="columns_container">
-                    <div id="blue_box"></div>
+                    <div id="sub_button_edge_m" class="sub_button_edge"></div>
+                    <div id="sub_button_edge_b" class="sub_button_edge"></div>
                     <div id="applied_columns" class="sub_scroll scrollable_div"></div>
                     <input id='column_apply_button' type='button' value='Apply' class="sub_button_m sub_button">
                     <input id='column_default_button' type='button' value='Default' class="sub_button_b sub_button">
@@ -59,6 +63,23 @@
         </div>
         <div id="tab2" class="tab">wooa
             <div class="tab_text">Test Tab 2</div>
+        </div>
+        <div id="div_lock" class="hidden">
+            <div id="filters_frame" class="hidden frame">
+                <input id="close_filters_button" type="button" value="Close" class="close_frame">
+                <div id="peri_filters">
+                    <div id="filter_div1"><br>
+                        <select id="filter_sel1" class="text_input filter_select"></select>
+                        <input id="filter_inp1" type="text" name="product" class="text_input filter_input" list="" autocomplete="off">
+                        <input id="delete_peri_filter_button1" type="button" value="-" class="delete_peri">
+                    </div>
+                </div>
+                <input id="add_peri_filters_button" type="button" value="+" disabled>
+                <input id="apply_filters_button" type="button" value="Apply">
+            </div>
+            <div id="profile_frame" class="hidden frame">
+                <input id="close_profile_button" type="button" value="Close" class="close_frame">
+            </div>
         </div>
         <div id="shhh"></div>
     </body>

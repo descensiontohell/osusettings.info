@@ -1,4 +1,6 @@
 let players = [];
+const items = { mice: [], mousepads: [], keyboards: [], switches: [], tablets: [] };
+let datalist_items = {};
 let reader;
 let mouse_pos;
 let hover_header = "";
@@ -11,7 +13,11 @@ let avatar_visible = false;
 let typing_timer;
 let scroll_timer;
 let search_string = "";
+let active_frame = "";
 let selected_filter = -1;
+let peri_filter_count = 1;
+let peri_filters = [];
+let peri_filters_avail = [];
 let forced_search = true; //when false, double checks if search string is different from returned list because keyup process is sometimes interrupted
 const column = { //how columns are addressed(string), sized(px), and how it addresses the object(func)
 //column object: must match the player object:
@@ -181,9 +187,7 @@ HTML EVENT LISTENER SHIT
 */
 
 $(document).ready(function() {
-  loadHeaderOptions();
-  refreshHeaders();
-  getNewList();
+  init();
   $("#column_apply_button").click(function() {
     applyColumns();
   });
@@ -248,11 +252,17 @@ $(document).ready(function() {
       $('#filter_delete_button').prop('disabled', false);
     }
   });
+  $('#filter_add_button').click(function(e){
+    lockMainLayer('#filters_frame');
+  });
   $('#filter_delete_button').click(function(e) {
     removeFilter(selected_filter);
   });
   $('#filter_reset_button').click(function(e) {
     removeFilter();
+  });
+  $('.close_frame').click(function(e) {
+    unlockMainLayer();
   });
   // optional method to allow live search
   $('#search_text').click(function(e){
@@ -264,6 +274,70 @@ $(document).ready(function() {
       typing_timer = setTimeout(startNameSearch, 750, s);
     }
   });
+  $('#peri_filters').on('keyup', 'input[type=text]', function(e){
+    console.log('test');
+    let fi_num = $(this).attr('id').slice(-1);
+    let fs_dl = $(`#filter_sel${fi_num}`).val() + "Datalist";
+    if ($(this).val() !== "") {
+      if ($(this).attr('list') !== fs_dl) {
+        $(this).attr('list', fs_dl);
+        $('#add_peri_filters_button').prop('disabled', false);
+      }
+    }
+    else {
+      $(this).attr('list', "");
+      $('#add_peri_filters_button').prop('disabled', true);
+    }
+  });
+  $('#peri_filters').on('focusout', 'input[type=text]', function(e){
+    $(this).attr('list', "");
+  });
+  $('#peri_filters').on('click', '.delete_peri', function(e){
+    let peri = parseInt($(this).attr('id').slice(-1));
+    peri_filters.splice(peri - 1, 1)
+    $(`#filter_div${peri}`).remove();
+    /*$(`#filter_sel${peri}`).remove();
+    $(`#filter_inp${peri}`).remove();
+    $(`#delete_peri_filter_button${peri}`).remove();*/
+    let j;
+    for (let i = peri; i < peri_filter_count; i++) {
+      j = i+1;
+      console.log("change " + j + " to " + i);
+      $(`#filter_div${j}`).prop('id', `filter_div${i}`);
+      $(`#filter_sel${j}`).prop('id', `filter_sel${i}`);
+      $(`#filter_inp${j}`).prop('id', `filter_inp${i}`);
+      $(`#delete_peri_filter_button${j}`).prop('id', `delete_peri_filter_button${i}`);
+    }
+    peri_filter_count--;
+    const count = peri_filter_count;
+    if (count > 0) {
+      $(`#filter_sel${count}`).html(availFilters());
+      $(`#filter_sel${count}`).prop('disabled', false);
+      $(`#filter_inp${count}`).prop('disabled', false);
+    }
+    else { 
+      $('#add_peri_filters_button').prop('disabled', false);
+      $('#peri_filters').html('');
+    }
+  });
+  $('#add_peri_filters_button').click(function(e){
+    const x = peri_filter_count;
+    if (x > 0) {
+      peri_filters.push($(`#filter_sel${x}`).val());
+      $(`#filter_sel${x}`).prop('disabled', true);
+      $(`#filter_inp${x}`).prop('disabled', true);
+    }
+    peri_filter_count++;
+    const y = peri_filter_count;
+    $('#peri_filters').append(`<div id='filter_div${y}'><br><select id='filter_sel${y}' class='text_input filter_select'>${availFilters()}</select>
+      <input id='filter_inp${y}' type='text' name='product' class='text_input filter_input' list='' autocomplete='off'>
+      <input id='delete_peri_filter_button${y}' type='button' value='-' class='delete_peri'></div>`);
+    $('#add_peri_filters_button').prop('disabled', true);
+  });
+  $('#apply_filters_button').click(function(e){
+    updateFilters();
+    unlockMainLayer();
+  });
   $(document).scroll(function() {
     chkScroll();
   });
@@ -273,6 +347,14 @@ function parseIndex(s) { //ids 5 chars + int
   s = s.substring(5);
   let id = parseInt(s);
   return id;
+}
+
+function init() {
+  loadHeaderOptions();
+  refreshHeaders();
+  getNewList();
+  getItems();
+  //getItem('mice');
 }
 
 function loadHeaderOptions() {
@@ -570,6 +652,44 @@ function peripheralSettings(player) {
   return str;
 }
 
+function lockMainLayer(frame) {
+  active_frame = frame;
+  $('#div_lock').removeClass('hidden');
+  $('body').css('overflow-x', 'hidden');
+  $('body').css('overflow-y', 'hidden');
+  if (frame) $(frame).removeClass('hidden');
+}
+function unlockMainLayer() {
+  $('#div_lock').addClass('hidden');
+  $('body').css('overflow-x', 'scroll');
+  $('body').css('overflow-y', 'overlay');
+  if (active_frame) {
+    $(active_frame).addClass('hidden');
+    active_frame = "";
+  }
+}
+
+function availFilters() {
+  const toRemove = new Set(peri_filters);
+  const avail = peri_filters_avail.filter( x => !toRemove.has(x) );
+  let s = "";
+  for (i = 0; i < avail.length; i++) {
+    s += `<option value='${avail[i]}'>${getOptionFromItem(avail[i]).string}</option>`
+  }
+  return s;
+}
+function updateFilters() {
+  let filter;
+  let value;
+  for (i = 1; i <= peri_filter_count; i++) {
+    filter = $(`#filter_sel${i}`).val();
+    value = $(`#filter_inp${i}`).val();
+    api_params[getOptionFromItem(filter).param] = value;
+  }
+  updateFilterList();
+  getNewList();
+}
+
 function startNameSearch(str) {
   search_string = str;
   console.log("searching for "+str);
@@ -601,7 +721,7 @@ let page_last = 0; //amount of rows on last page
 let page_limit = 0; //if last page is reached
 let page_current = 0;
 const page_size = 50;
-const api_path = "http://213.202.238.224:8080/api/";
+const api_path = "http://213.202.238.224:8080/api";
 const api_params = {
   is_mouse: "true", //bool NECESSARY
   order_by: "pp", //'-pp', 'edpi', '-edpi'
@@ -613,6 +733,8 @@ const api_params = {
   mouse: "", //search string
   mousepad: "", //search string
   keyboard: "", //search string
+  switch: "", //search string
+  tablet: "", //search string
   country: "", //country code string, how tf am i gonna do this
   page: 1, //int, page 1 default
 }
@@ -622,7 +744,9 @@ const api_filters = [ //there's probably a cleaner way to do this
     string: function() { return `"${this.get()}"` },
     set: (x)=> {
       api_params.name = x;
-      if (x === "") $('#search_text').val(""); } },
+      if (x === "") {
+        $('#search_text').val("");
+        search_string = "" } } }, //idk if this is the best spot for this
   { name: 'Playstyle',
     get: ()=> { return api_params.playstyle },
     string: function() { return `"${this.get()}"` }, //change later
@@ -646,6 +770,14 @@ const api_filters = [ //there's probably a cleaner way to do this
     get: ()=> { return api_params.keyboard },
     string: function() { return `"${this.get()}"` },
     set: (x)=> { api_params.keyboard = x } },
+    { name: 'KB Switch',
+    get: ()=> { return api_params.switch },
+    string: function() { return `"${this.get()}"` },
+    set: (x)=> { api_params.keyboard = x } },
+    { name: 'Tablet', //change later
+    get: ()=> { return "" },
+    string: function() { return `"${this.get()}"` },
+    set: (x)=> { x } },
   { name: 'Country',
     get: ()=> { return api_params.country },
     string: function() { return `"${this.get()}"` }, //change later
@@ -670,7 +802,7 @@ function updateFilterList() {
   selected_filter = -1;
 }
 
-function setApiPlaystyle(arr) {
+function setApiPlaystyle(arr) {  //USE THIS TO ADD PLAYSTYLE FILTERS (with playstyle ids in an array)
   let s = "";
   for (let i = 0; i < arr.length; i++) {
     if (i == 0) s = arr[i];
@@ -680,7 +812,7 @@ function setApiPlaystyle(arr) {
 }
 
 function getApiUrl() {
-  let s = api_path + 'players?';
+  let s = api_path + '/players?';
   for (const [key, value] of Object.entries(api_params)) {
     if (value) s += `${key}=${value}&`;
   }
@@ -737,6 +869,67 @@ async function getNewPage() {
     }
   }
   setLoadMsg(response.status);
+}
+
+async function getItems() { //will probably have to be altered, can only run once
+  let apiString = api_path + "/items";
+  let response = await getDataAsync(apiString);
+  if (response.status === 'ok') {
+    for (const [key, value] of Object.entries(response.data)) {
+      items[key] = value;
+    }
+    createDatalists();
+  }
+}
+
+async function getItem(item) {
+  let apiString = `${api_path}/items/${item}`;
+  let response = await getDataAsync(apiString);
+  if (response.status === 'ok') {
+    items[item] = response.data[item];
+  }
+}
+
+function createDatalists() {
+  let arrays = Object.keys(items);
+  let item;
+  let obj;
+  let s;
+  for (let i = 0; i < arrays.length; i++) {
+    item = arrays[i];
+    s = "";
+    obj = getOptionFromItem(item);
+    if (obj.param) {
+      for (let j = 0; j < items[item].length; j++) {
+        s += `<option value='${items[item][j].name}'>`;
+      }
+      peri_filters_avail.push(item);
+      datalist_items[item] = s;
+      $('#filters_frame').append(`<datalist id='${item}Datalist'>${s}</datalist>`);
+      $('#filter_sel1').append(`<option value='${item}'>${obj.string}</option>`);
+    }
+    else if (obj.string) {
+      //stuff for playstyle
+    }
+  }
+}
+function getOptionFromItem(item) {
+  switch (item) {
+    case 'mice':
+      return {string:'Mouse', param:'mouse'};
+    case 'keyboards':
+      return {string:'Keyboard', param:'keyboard'};
+    case 'switches':
+      return {string:'KB Switch', param:'switch'};
+    case 'mousepads':
+      return {string:'Mousepad', param:'mousepad'};
+    case 'tablets':
+      return {string:false, param:false};
+    case 'playstyles':
+      return {string:'Playstyle'};
+    default:
+      return {string:false, param:false};
+  }
 }
 
 function initPlayer(index) {
@@ -853,9 +1046,9 @@ function refreshList(page = -1) {
 }
 
 //currently, $(window).scrollTop for 1 page ranges from 0-1350px, each row is 27px found by $("#list").children()[0].clientHeight
-//should be in a global variable once a propet initializer is created
+//should be in a global variable once a proper initializer is created
 
-//gonna need this later
+//idk saving this
 //$('body').scrollTop(0);
 /*$('body,html').animate({
     'scrollTop': 0,
