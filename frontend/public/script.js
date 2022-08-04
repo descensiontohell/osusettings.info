@@ -275,7 +275,6 @@ $(document).ready(function() {
     }
   });
   $('#peri_filters').on('keyup', 'input[type=text]', function(e){
-    console.log('test');
     let fi_num = $(this).attr('id').slice(-1);
     let fs_dl = $(`#filter_sel${fi_num}`).val() + "Datalist";
     if ($(this).val() !== "") {
@@ -293,32 +292,13 @@ $(document).ready(function() {
     $(this).attr('list', "");
   });
   $('#peri_filters').on('click', '.delete_peri', function(e){
-    let peri = parseInt($(this).attr('id').slice(-1));
-    peri_filters.splice(peri - 1, 1)
-    $(`#filter_div${peri}`).remove();
-    /*$(`#filter_sel${peri}`).remove();
-    $(`#filter_inp${peri}`).remove();
-    $(`#delete_peri_filter_button${peri}`).remove();*/
-    let j;
-    for (let i = peri; i < peri_filter_count; i++) {
-      j = i+1;
-      console.log("change " + j + " to " + i);
-      $(`#filter_div${j}`).prop('id', `filter_div${i}`);
-      $(`#filter_sel${j}`).prop('id', `filter_sel${i}`);
-      $(`#filter_inp${j}`).prop('id', `filter_inp${i}`);
-      $(`#delete_peri_filter_button${j}`).prop('id', `delete_peri_filter_button${i}`);
-    }
-    peri_filter_count--;
-    const count = peri_filter_count;
-    if (count > 0) {
-      $(`#filter_sel${count}`).html(availFilters());
-      $(`#filter_sel${count}`).prop('disabled', false);
-      $(`#filter_inp${count}`).prop('disabled', false);
-    }
-    else { 
-      $('#add_peri_filters_button').prop('disabled', false);
-      $('#peri_filters').html('');
-    }
+    const peri = parseInt($(this).attr('id').slice(-1));
+    deletePeri(peri);
+  });
+  $('#peri_filters').on('change', '.filter_select', function(e){
+    let fi_num = $(this).attr('id').slice(-1);
+    $(`#filter_inp${fi_num}`).val("");
+    $('#add_peri_filters_button').prop('disabled', true);
   });
   $('#add_peri_filters_button').click(function(e){
     const x = peri_filter_count;
@@ -669,6 +649,40 @@ function unlockMainLayer() {
   }
 }
 
+function deletePeri(peri) {
+  $(`#filter_div${peri}`).remove();
+  let j;
+  for (let i = peri; i < peri_filter_count; i++) {
+    j = i+1;
+    console.log("change " + j + " to " + i);
+    $(`#filter_div${j}`).prop('id', `filter_div${i}`);
+    $(`#filter_sel${j}`).prop('id', `filter_sel${i}`);
+    $(`#filter_inp${j}`).prop('id', `filter_inp${i}`);
+    $(`#delete_peri_filter_button${j}`).prop('id', `delete_peri_filter_button${i}`);
+  }
+  peri_filter_count--;
+  const count = peri_filter_count;
+  if (count > 0) {
+    if (peri <= count) {
+      peri_filters.splice(peri - 1, 1);
+      const val = $(`#filter_sel${count}`).val();
+      $(`#filter_sel${count}`).html(availFilters());
+      $(`#filter_sel${count}`).val(val);
+    }
+    else {
+      peri_filters.splice(peri_filters.length - 1, 1);
+      $('#add_peri_filters_button').prop('disabled', false);
+    }
+    $(`#filter_sel${count}`).prop('disabled', false);
+    $(`#filter_inp${count}`).prop('disabled', false);
+  }
+  else { 
+    $('#add_peri_filters_button').prop('disabled', false);
+    $('#peri_filters').html('');
+    peri_filters = [];
+    peri_filter_count = 0;
+  }
+}
 function availFilters() {
   const toRemove = new Set(peri_filters);
   const avail = peri_filters_avail.filter( x => !toRemove.has(x) );
@@ -773,7 +787,7 @@ const api_filters = [ //there's probably a cleaner way to do this
     { name: 'KB Switch',
     get: ()=> { return api_params.switch },
     string: function() { return `"${this.get()}"` },
-    set: (x)=> { api_params.keyboard = x } },
+    set: (x)=> { api_params.switch = x } },
     { name: 'Tablet', //change later
     get: ()=> { return "" },
     string: function() { return `"${this.get()}"` },
