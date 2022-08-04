@@ -395,6 +395,10 @@ function removeFilter(index = -1) {
   }
   else {
     for (index = 0; index < api_filters.length; index++) api_filters[index].set("");
+    $('#peri_filters').html('');
+    peri_filter_count = 0;
+    peri_filters = [];
+    addPeri();
   }
   getNewList();
 }
