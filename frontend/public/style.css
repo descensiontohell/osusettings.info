@@ -451,7 +451,7 @@ SUB-MENU SECTION (filters and columns section in header)
 .border_title {
   position: absolute;
   width: 100%;
-  top: -10px;
+  top: -11px;
   left: 15px;
 }
 .cut_border_b {

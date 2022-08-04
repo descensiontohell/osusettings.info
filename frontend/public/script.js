@@ -280,7 +280,7 @@ $(document).ready(function() {
     if ($(this).val() !== "") {
       if ($(this).attr('list') !== fs_dl) {
         $(this).attr('list', fs_dl);
-        $('#add_peri_filters_button').prop('disabled', false);
+        if (peri_filter_count < peri_filters_avail.length) $('#add_peri_filters_button').prop('disabled', false); 
       }
     }
     else {
@@ -290,32 +290,26 @@ $(document).ready(function() {
   });
   $('#peri_filters').on('focusout', 'input[type=text]', function(e){
     $(this).attr('list', "");
+    if ($(this).val() !== "") updatePeriFilters();
   });
   $('#peri_filters').on('click', '.delete_peri', function(e){
     const peri = parseInt($(this).attr('id').slice(-1));
     deletePeri(peri);
+    updatePeriFilters();
   });
   $('#peri_filters').on('change', '.filter_select', function(e){
     let fi_num = $(this).attr('id').slice(-1);
-    $(`#filter_inp${fi_num}`).val("");
-    $('#add_peri_filters_button').prop('disabled', true);
+    if ($(`#filter_inp${fi_num}`).val() !== "") {
+      $(`#filter_inp${fi_num}`).val("");
+      $('#add_peri_filters_button').prop('disabled', true);
+      updatePeriFilters();
+    }
   });
   $('#add_peri_filters_button').click(function(e){
-    const x = peri_filter_count;
-    if (x > 0) {
-      peri_filters.push($(`#filter_sel${x}`).val());
-      $(`#filter_sel${x}`).prop('disabled', true);
-      $(`#filter_inp${x}`).prop('disabled', true);
-    }
-    peri_filter_count++;
-    const y = peri_filter_count;
-    $('#peri_filters').append(`<div id='filter_div${y}'><br><select id='filter_sel${y}' class='text_input filter_select'>${availFilters()}</select>
-      <input id='filter_inp${y}' type='text' name='product' class='text_input filter_input' list='' autocomplete='off'>
-      <input id='delete_peri_filter_button${y}' type='button' value='-' class='delete_peri'></div>`);
-    $('#add_peri_filters_button').prop('disabled', true);
+    addPeri();
   });
   $('#apply_filters_button').click(function(e){
-    updateFilters();
+    updatePeriFilters();
     unlockMainLayer();
   });
   $(document).scroll(function() {
@@ -381,7 +375,11 @@ function refreshLayout() {
 }
 
 function removeFilter(index = -1) {
-  if (index > -1) api_filters[index].set("");
+  if (index > -1) {
+    let filter = api_filters[index];
+    filter.set("");
+    if (filter.item) deletePeriFromItem(filter.item);
+  }
   else {
     for (index = 0; index < api_filters.length; index++) api_filters[index].set("");
   }
@@ -649,6 +647,20 @@ function unlockMainLayer() {
   }
 }
 
+function addPeri() {
+  const x = peri_filter_count;
+  if (x > 0) {
+    peri_filters.push($(`#filter_sel${x}`).val());
+    $(`#filter_sel${x}`).prop('disabled', true);
+    $(`#filter_inp${x}`).prop('disabled', true);
+  }
+  peri_filter_count++;
+  const y = peri_filter_count;
+  $('#peri_filters').append(`<div id='filter_div${y}'><br><select id='filter_sel${y}' class='text_input filter_select'>${availFilters()}</select>
+    <input id='filter_inp${y}' type='text' name='product' class='text_input filter_input' list='' autocomplete='off'>
+    <input id='delete_peri_filter_button${y}' type='button' value='-' class='delete_peri'></div>`);
+  $('#add_peri_filters_button').prop('disabled', true);
+}
 function deletePeri(peri) {
   $(`#filter_div${peri}`).remove();
   let j;
@@ -683,18 +695,33 @@ function deletePeri(peri) {
     peri_filter_count = 0;
   }
 }
-function availFilters() {
+function deletePeriFromItem(item) {
+  for (let i = 1; i <= peri_filter_count; i++) {
+    if ($(`#filter_sel${i}`).val() === item) {
+      deletePeri(i);
+      if (peri_filter_count === 0) addPeri();
+    }
+  }
+}
+function unusedFilters() {
   const toRemove = new Set(peri_filters);
-  const avail = peri_filters_avail.filter( x => !toRemove.has(x) );
+  return peri_filters_avail.filter( x => !toRemove.has(x) );
+}
+function availFilters() {
+  const avail = unusedFilters();
   let s = "";
   for (i = 0; i < avail.length; i++) {
     s += `<option value='${avail[i]}'>${getOptionFromItem(avail[i]).string}</option>`
   }
   return s;
 }
-function updateFilters() {
+function updatePeriFilters() {
   let filter;
   let value;
+  const avail = unusedFilters();
+  for (i = 0; i < avail.length; i++) {
+    api_params[getOptionFromItem(avail[i]).param] = "";
+  }
   for (i = 1; i <= peri_filter_count; i++) {
     filter = $(`#filter_sel${i}`).val();
     value = $(`#filter_inp${i}`).val();
@@ -702,6 +729,11 @@ function updateFilters() {
   }
   updateFilterList();
   getNewList();
+}
+function clearPeriFilters() {
+  for (i = 0; i < peri_filters_avail.length; i++) {
+    api_params[getOptionFromItem(filter).param] = "";
+  }
 }
 
 function startNameSearch(str) {
@@ -774,17 +806,21 @@ const api_filters = [ //there's probably a cleaner way to do this
     string: function() { return  `${this.get()} eDPI Max.` },
     set: (x)=> { api_params.max_edpi = x } },
   { name: 'Mouse', get: ()=> { return api_params.mouse},
+    item: 'mice',
     string: function() { return `"${this.get()}"` },
     set: (x)=> { api_params.mouse = x } },
   { name: 'Mousepad',
+    item: 'mousepads',
     get: ()=> { return api_params.mousepad },
     string: function() { return `"${this.get()}"` },
     set: (x)=> { api_params.mousepad = x } },
   { name: 'Keyboard',
+    item: 'keyboards',
     get: ()=> { return api_params.keyboard },
     string: function() { return `"${this.get()}"` },
     set: (x)=> { api_params.keyboard = x } },
     { name: 'KB Switch',
+    item: 'switches',
     get: ()=> { return api_params.switch },
     string: function() { return `"${this.get()}"` },
     set: (x)=> { api_params.switch = x } },
