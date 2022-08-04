@@ -1,6 +1,7 @@
 let players = [];
 const items = { mice: [], mousepads: [], keyboards: [], switches: [], tablets: [] };
 let datalist_items = {};
+let browser = "";
 let reader;
 let mouse_pos;
 let hover_header = "";
@@ -324,11 +325,23 @@ function parseIndex(s) { //ids 5 chars + int
 }
 
 function init() {
+  browser = getBrowser();
   loadHeaderOptions();
   refreshHeaders();
   getNewList();
   getItems();
   //getItem('mice');
+}
+function getBrowser() {
+  const ua = navigator.userAgent;
+  console.log(ua);
+  if((ua.indexOf("Opera") || ua.indexOf('OPR')) != -1 ) return 'Opera';
+  else if(ua.indexOf("Edg") != -1 ) return 'Edge';
+  else if(ua.indexOf("Chrome") != -1 ) return 'Chrome';
+  else if(ua.indexOf("Safari") != -1) return 'Safari';
+  else if(ua.indexOf("Firefox") != -1 ) return 'Firefox';
+  else if((ua.indexOf("MSIE") != -1 ) || (!!document.documentMode == true )) return 'IE';
+  else return '';
 }
 
 function loadHeaderOptions() {
@@ -427,7 +440,7 @@ function linkOnClick(url) {
   let params = new URLSearchParams(window.location.search);
   params.set('backed', true);
   window.history.replaceState(null, null, `${url}?${params.toString()}`);*/
-  if (navigator.userAgent.indexOf('Safari') >= 0) {
+  if (browser === 'Safari') {
     return true;
   }
   else {
@@ -640,7 +653,8 @@ function lockMainLayer(frame) {
 function unlockMainLayer() {
   $('#div_lock').addClass('hidden');
   $('body').css('overflow-x', 'scroll');
-  $('body').css('overflow-y', 'overlay');
+  if (browser === 'Firefox') $('body').css('overflow-y', 'auto');
+  else $('body').css('overflow-y', 'overlay');
   if (active_frame) {
     $(active_frame).addClass('hidden');
     active_frame = "";
