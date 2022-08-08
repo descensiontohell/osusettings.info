@@ -65,19 +65,22 @@
             <div class="tab_text">Test Tab 2</div>
         </div>
         <div id="div_lock" class="hidden">
+            
             <div id="filters_frame" class="hidden frame">
-                <input id="close_filters_button" type="button" value="Close" class="close_frame">
+                <input type="button" value="Close" class="close_frame">
+                <select id="playstyle_select" class="text_input"></select>
                 <div id="peri_filters">
                     <div id="filter_div1"><br>
                         <select id="filter_sel1" class="text_input filter_select"></select>
-                        <input id="filter_inp1" type="text" name="product" class="text_input filter_input" list="" autocomplete="off">
+                        <input id="filter_inp1" type="text" name="filter_inp" class="text_input filter_input" list="" autocomplete="off">
                         <input id="delete_peri_filter_button1" type="button" value="-" class="delete_peri">
                     </div>
                 </div><br>
                 <input id="add_peri_filters_button" type="button" value="+" disabled>
             </div>
             <div id="profile_frame" class="hidden frame">
-                <input id="close_profile_button" type="button" value="Close" class="close_frame">
+                <input type="button" value="Close" class="close_frame">
+                <iframe id="iframe" src="user.html" name="profile_iFrame" frameBorder="0"></iframe>
             </div>
         </div>
         <div id="shhh"></div>

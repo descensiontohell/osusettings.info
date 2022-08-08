@@ -189,10 +189,10 @@ HTML EVENT LISTENER SHIT
 
 $(document).ready(function() {
   init();
-  $("#column_apply_button").click(function() {
+  $('#column_apply_button').click(function() {
     applyColumns();
   });
-  $("#column_default_button").click(function() {
+  $('#column_default_button').click(function() {
     defaultColumns();
   });
   $('.tab').hover(function(e){
@@ -200,7 +200,7 @@ $(document).ready(function() {
     }, function(e) {
     $('#'+e.target.closest('div[class=tab]').id).stop(true, false).animate({ top: "-80px" }, 250);
   });
-  $("#list").mouseover(function(e) {
+  $('#list').mouseover(function(e) {
     if (e.target.closest('td')) {
       if (hover_row !== e.target.closest('tr').id) {
         hover_row = e.target.closest('tr').id;
@@ -213,25 +213,34 @@ $(document).ready(function() {
       }
     }
   });
+  $('#list').click(function(e) {
+    if (e.target.closest('tr')) {
+      if (!e.target.closest('a')) {
+        const id = parseIndex(e.target.closest('tr').id);
+        console.log(players[id].osu_id);
+        lockMainLayer('#profile_frame');
+      }
+    }
+  });
   $('#list').mouseenter(function(e) {
     headerHandler('list');
   });
-  $("#top_container").mouseenter(function(e) {
+  $('#top_container').mouseenter(function(e) {
     headerHandler('main');
   });
-  $("#headers").mouseenter(function(e) {
+  $('#headers').mouseenter(function(e) {
     headerHandler('headers');
   });
-  $("#note_container").hover(function(e) {
+  $('#note_container').hover(function(e) {
     $('#note_container').addClass('hidden');
   });
-  $("#headers").mouseover(function(e) {
+  $('#headers').mouseover(function(e) {
     if (e.target.closest('div').id !== hover_header) { //this mouse event shit is a fucking mess
       hover_header = e.target.closest('div').id;
       headerNameHandler(hover_header);
     }
   });
-  $("#headers").click(function(e) {
+  $('#headers').click(function(e) {
     if (e.target.closest('a')) {
       //when a header is clicked and not resized
       let id = e.target.closest('div').id;
@@ -275,6 +284,15 @@ $(document).ready(function() {
       typing_timer = setTimeout(startNameSearch, 750, s);
     }
   });
+  $('#playstyle_select').change(function() {
+    const current = $('#playstyle_select').val();
+    if (current !== '0') api_params.playstyle = current;
+    else api_params.playstyle = "";
+    updateFilterList();
+    getNewList();
+    const color = $('#playstyle_select option:selected').css('color');
+    $('#playstyle_select').css('color', color);
+ }); 
   $('#peri_filters').on('keyup', 'input[type=text]', function(e){
     let fi_num = $(this).attr('id').slice(-1);
     let fs_dl = $(`#filter_sel${fi_num}`).val() + "Datalist";
@@ -334,13 +352,12 @@ function init() {
 }
 function getBrowser() {
   const ua = navigator.userAgent;
-  console.log(ua);
-  if((ua.indexOf("Opera") || ua.indexOf('OPR')) != -1 ) return 'Opera';
-  else if(ua.indexOf("Edg") != -1 ) return 'Edge';
-  else if(ua.indexOf("Chrome") != -1 ) return 'Chrome';
-  else if(ua.indexOf("Safari") != -1) return 'Safari';
-  else if(ua.indexOf("Firefox") != -1 ) return 'Firefox';
-  else if((ua.indexOf("MSIE") != -1 ) || (!!document.documentMode == true )) return 'IE';
+  if((ua.indexOf('Opera') || ua.indexOf('OPR')) != -1 ) return 'Opera';
+  else if(ua.indexOf('Edg') != -1 ) return 'Edge';
+  else if(ua.indexOf('Chrome') != -1 ) return 'Chrome';
+  else if(ua.indexOf('Safari') != -1) return 'Safari';
+  else if(ua.indexOf('Firefox') != -1 ) return 'Firefox';
+  else if((ua.indexOf('MSIE') != -1 ) || (!!document.documentMode == true )) return 'IE';
   else return '';
 }
 
@@ -360,7 +377,7 @@ function loadHeaderOptions() {
 }
 function applyColumns() {
   let selected = $('#applied_columns').children('input:checked');
-  layout = new Int8Array(locked_layout.length+selected.length);
+  layout = new Int8Array(locked_layout.length + selected.length);
   let i = 0;
   for (i; i < locked_layout.length; i++) layout[i] = locked_layout[i];
   for (let j = 0; j < selected.length; j++) {
@@ -392,6 +409,7 @@ function removeFilter(index = -1) {
     let filter = api_filters[index];
     filter.set("");
     if (filter.item) deletePeriFromItem(filter.item);
+    else if (filter.playstyle) $('#playstyle_select').val('0').change();
   }
   else {
     for (index = 0; index < api_filters.length; index++) api_filters[index].set("");
@@ -471,7 +489,7 @@ function recolor(s, color) {
   return `<span style='color:${color}'>${s}</span>`;
 }
 
-function recolorPlaystyle(s) { //probably temporary shit, maybe not
+function recolorPlaystyle(s, colorOnly = false) { //probably temporary shit, maybe not
   let color;
   switch(s) {
     case ("Mouse/KB"):
@@ -491,7 +509,8 @@ function recolorPlaystyle(s) { //probably temporary shit, maybe not
       color = "#ffffff";
       break;
   }
-  return recolor(s, color);
+  if (colorOnly) return color;
+  else return recolor(s, color);
 }
 
 function recolorOS(player, long = false) {
@@ -670,7 +689,7 @@ function addPeri() {
   if (x > 0) {
     peri_filters.push($(`#filter_sel${x}`).val());
     $(`#filter_sel${x}`).prop('disabled', true);
-    $(`#filter_inp${x}`).prop('disabled', true);
+    //$(`#filter_inp${x}`).prop('disabled', true);
   }
   peri_filter_count++;
   const y = peri_filter_count;
@@ -812,8 +831,13 @@ const api_filters = [ //there's probably a cleaner way to do this
         $('#search_text').val("");
         search_string = "" } } }, //idk if this is the best spot for this
   { name: 'Playstyle',
+    playstyle: true,
     get: ()=> { return api_params.playstyle },
-    string: function() { return `"${this.get()}"` }, //change later
+    string: function() {
+      const id = this.get();
+      const index = items.playstyles.findIndex(o => o.id == id);
+      return `"${items.playstyles[index].name}"`
+    },
     set: (x)=> { api_params.playstyle = x } },
   { name: 'Minimum eDPI',
     get: ()=> { return api_params.min_edpi },
@@ -976,8 +1000,15 @@ function createDatalists() {
       $('#filters_frame').append(`<datalist id='${item}Datalist'>${s}</datalist>`);
       $('#filter_sel1').append(`<option value='${item}'>${obj.string}</option>`);
     }
-    else if (obj.string) {
-      //stuff for playstyle
+    else if (obj.string === 'Playstyle') {
+      const pArr = items[item];
+      s = "<option style='color:#FFF' value='0'>All</option>";
+      for (let j = 0; j < pArr.length; j++) {
+        if (pArr[j].is_mouse){
+          s += `<option style='color:${recolorPlaystyle(pArr[j].name, true)}' value='${pArr[j].id}'>${(pArr[j].name)}</option>` //only works with mouse atm
+        }
+      }
+      $('#playstyle_select').html(s);
     }
   }
 }
