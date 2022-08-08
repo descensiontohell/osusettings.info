@@ -410,6 +410,7 @@ function removeFilter(index = -1) {
     filter.set("");
     if (filter.item) deletePeriFromItem(filter.item);
     else if (filter.playstyle) $('#playstyle_select').val('0').change();
+    getNewList();
   }
   else {
     for (index = 0; index < api_filters.length; index++) api_filters[index].set("");
@@ -417,8 +418,8 @@ function removeFilter(index = -1) {
     peri_filter_count = 0;
     peri_filters = [];
     addPeri();
+    $('#playstyle_select').val('0').change(); //this gets a new list
   }
-  getNewList();
 }
 
 function highlightSelect(highlight, element) {
