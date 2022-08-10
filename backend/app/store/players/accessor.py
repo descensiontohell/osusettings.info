@@ -1,6 +1,7 @@
 import typing
 from typing import Optional
 
+from aiohttp.web_exceptions import HTTPBadRequest
 from osu import AsynchronousClient
 from sqlalchemy import select, or_, desc
 from sqlalchemy.orm import selectinload
@@ -173,3 +174,62 @@ class PlayerAccessor(BaseAccessor):
         }
 
         await self.app.store.auth.add_player(player_stats_dict)
+
+    async def validate_update_player_data(self, data: dict) -> None:
+        items = ["mouse", "mousepad", "tablet", "keyboard", "switch"]
+        keys = list(data)
+        for item in items:
+            # If user provides add_new_mouse field they should also provide mouse field (and vice versa)
+            # Otherwise 400 Bad Request
+            if (f"add_new_{item}" not in keys and item in keys) or (f"add_new_{item}" in keys and item not in keys):
+                raise HTTPBadRequest(text=f"If add_new_{item} field is provided you should also provide {item} field")
+
+            item_content = data.get(item)
+            if not item_content:
+                continue
+
+            # If user provides add_new_mouse field:
+            # If add_new_mouse is True, mouse field should contain mouse name and specs and not id
+            # If add_new_mouse if False, mouse field should only contain id
+            item_keys = list(item_content)
+
+            if data.get(f"add_new_{item}") is True:
+                if "id" in item_keys or not "name" in item_keys:
+                    raise HTTPBadRequest(text=f"If add_new_{item} is True, you should provide {item} specs and not id")
+
+            if data.get(f"add_new_{item}") is False:
+                if item_keys != ["id"]:
+                    raise HTTPBadRequest(text=f"If add_new_{item} is False, you should provide {item} id and not specs")
+
+        if "is_mouse" not in keys:
+            raise HTTPBadRequest(text="Missing is_mouse field. It determines your playstyle and available device fields")
+
+        elif data["is_mouse"] is True:
+            if any([
+                "tablet" in keys,
+                "add_new_tablet" in keys,
+                "tablet_area_height" in keys,
+                "tablet_area_width" in keys,
+            ]):
+                raise HTTPBadRequest(text="Mouse player is not supposed to have tablet, "
+                                          "add_new_tablet, tablet_area_height or tablet_area_width fields")
+
+        elif data["is_mouse"] is False:
+            if any([
+                "mouse" in keys,
+                "add_new_mouse" in keys,
+                "dpi" in keys,
+                "add_new_mousepad" in keys,
+                "mousepad" in keys,
+            ]):
+                raise HTTPBadRequest(text="Tablet player is not supposed to have mouse, add_new_mouse, "
+                                          "dpi, add_new_mousepad or mousepad fields")
+
+        if all(["res_width" in keys, "res_height" in keys, data["res_height"] > data["res_width"]]):
+            raise HTTPBadRequest(text="We expect your monitor resolution height to be less than resolution width")
+
+        if "playstyle" in keys:
+            playstyles = await self.app.store.items.get_playstyles(is_mouse=data["is_mouse"])
+            playstyle_names = [p.name for p in playstyles]
+            if data["playstyle"] not in playstyle_names:
+                raise HTTPBadRequest(text="Specified playstyle does not match given is_mouse parameter")

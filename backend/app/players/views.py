@@ -168,7 +168,14 @@ Sets according osu! stats if the player is added",
     )
     @request_schema(UpdatePlayerSettingsSchema)
     async def patch(self):  # TODO add patch player view
-        ...
+        data = self.request["data"]
+
+        try:
+            await self.store.players.validate_update_player_data(data)
+        except HTTPBadRequest as e:
+            raise HTTPBadRequest(reason=e.text)
+
+        return json_response()
 
 
 class PlayerSettingsHistoryView(View):
