@@ -48,7 +48,6 @@ class RankUpdater:
         return ids_list
 
     async def request_player_stats(self, osu_id: int) -> PlayerStats:
-        self.logger.info(f"Requesting stats {osu_id}")
         try:
             user = await self.osu_api.get_user(user=osu_id, mode="osu")
         except HTTPError:  # api wrapper raises 404 HTTPError if user is restricted
@@ -57,7 +56,6 @@ class RankUpdater:
         name = user.username
         global_rank = user.statistics.global_rank
         performance = round(user.statistics.pp)
-        self.logger.info(f"Stats {osu_id} obtained")
 
         # If player went inactive
         if global_rank is None and performance == 0:
