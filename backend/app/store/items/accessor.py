@@ -51,6 +51,15 @@ class ItemsAccessor(BaseAccessor):
 
         return items_list
 
+    async def get_playstyles(self, is_mouse: bool) -> list[Playstyle]:
+        models = await self.get_items(item_type="playstyles", model=PlaystyleModel)
+        if is_mouse:
+            playstyles = [m for m in models if m and m.is_mouse is True]
+        else:
+            playstyles = [m for m in models if m and m.is_mouse is False]
+
+        return playstyles
+
     async def get_from_cache(self, item_type) -> Optional[list[Union[Keyboard, Mouse, Mousepad, Switch, Tablet]]]:
         if self.app.const.ENABLE_CACHING:
             pickled_items = await self.app.store.redis.get(item_type)
