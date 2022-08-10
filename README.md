@@ -38,4 +38,3 @@ docker-compose down && docker-compose up --build
 ```
 ### Next  tasks:
 - Finish update player endpoint
-- Modify playstyle models & implement playstyle retrieval 
