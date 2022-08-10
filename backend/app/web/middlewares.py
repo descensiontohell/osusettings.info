@@ -74,7 +74,7 @@ async def error_handling_middleware(request: "Request", handler):
     except HTTPNotImplemented as e:
         return error_json_response(
             http_status=405,
-            status="not_implemented",
+            status=HTTP_ERROR_CODES[405],
             message=e.reason,
             data=e.text,
         )
