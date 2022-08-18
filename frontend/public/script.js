@@ -292,7 +292,18 @@ $(document).ready(function() {
     getNewList();
     const color = $('#playstyle_select option:selected').css('color');
     $('#playstyle_select').css('color', color);
- }); 
+ });
+  $('.num_input').on('focusout'/*, 'input[type=text]'*/, function(e){
+    let s = $(this).val();
+    if (/^\d+$/.test(s) || s ==='') {
+      s = s.replace(/^0+/, '');
+      setNumFilterById(this.id, s);
+    }
+    else {
+      alert('Must be a whole number.');
+      $(this).val('');
+    }
+  });
   $('#peri_filters').on('keyup', 'input[type=text]', function(e){
     let fi_num = $(this).attr('id').slice(-1);
     let fs_dl = $(`#filter_sel${fi_num}`).val() + "Datalist";
@@ -309,7 +320,7 @@ $(document).ready(function() {
   });
   $('#peri_filters').on('focusout', 'input[type=text]', function(e){
     $(this).attr('list', "");
-    if ($(this).val() !== "") updatePeriFilters();
+    updatePeriFilters();
   });
   $('#peri_filters').on('click', '.delete_peri', function(e){
     const peri = parseInt($(this).attr('id').slice(-1));
@@ -685,6 +696,17 @@ function unlockMainLayer() {
   }
 }
 
+function setNumFilterById(id, str) {
+  const idArr = id.split('_');
+  let index = api_filters.findIndex(o => o.name === 'Minimum Rank');
+  if (idArr[0] === 'edpi') index = index + 2;
+  else if (idArr[0] !== 'rank') return;
+  if (idArr[2] === 'max') index = index + 1;
+  else if (idArr[2] !== 'min') return;
+  api_filters[index].set(str);
+  updateFilterList();
+  getNewList();
+}
 function addPeri() {
   const x = peri_filter_count;
   if (x > 0) {
@@ -806,9 +828,11 @@ let page_limit = 0; //if last page is reached
 let page_current = 0;
 const page_size = 50;
 const api_path = "http://213.202.238.224:8080/api";
+let currentPath = "";
 const api_params = {
   is_mouse: "true", //bool NECESSARY
   order_by: "pp", //'-pp', 'edpi', '-edpi'
+  min_rank: "", //int, 0 min and default
   max_rank: "", //int, 10k max and default
   playstyle: "", //int
   name: "", //search string
@@ -840,13 +864,21 @@ const api_filters = [ //there's probably a cleaner way to do this
       return `"${items.playstyles[index].name}"`
     },
     set: (x)=> { api_params.playstyle = x } },
+  { name: 'Minimum Rank',
+    get: ()=> { return api_params.min_rank },
+    string: function() { return  `#${this.get()}` },
+    set: (x)=> { api_params.min_rank = x } },
+  { name: 'Maximum Rank',
+    get: ()=> { return api_params.max_rank },
+    string: function() { return  `#${this.get()}` },
+    set: (x)=> { api_params.max_rank = x } },
   { name: 'Minimum eDPI',
     get: ()=> { return api_params.min_edpi },
     string: function() { return  `${this.get()} eDPI Min.` },
     set: (x)=> { api_params.min_edpi = x } },
   { name: 'Maximum eDPI',
     get: ()=> { return api_params.max_edpi },
-    string: function() { return  `${this.get()} eDPI Max.` },
+    string: function() { return  `${this.get()} eDPI Max` },
     set: (x)=> { api_params.max_edpi = x } },
   { name: 'Mouse', get: ()=> { return api_params.mouse},
     item: 'mice',
@@ -862,12 +894,12 @@ const api_filters = [ //there's probably a cleaner way to do this
     get: ()=> { return api_params.keyboard },
     string: function() { return `"${this.get()}"` },
     set: (x)=> { api_params.keyboard = x } },
-    { name: 'KB Switch',
+  { name: 'KB Switch',
     item: 'switches',
     get: ()=> { return api_params.switch },
     string: function() { return `"${this.get()}"` },
     set: (x)=> { api_params.switch = x } },
-    { name: 'Tablet', //change later
+  { name: 'Tablet', //change later
     get: ()=> { return "" },
     string: function() { return `"${this.get()}"` },
     set: (x)=> { x } },
@@ -912,13 +944,20 @@ function getApiUrl() {
   return s.slice(0, -1);
 }
 
-async function getNewList() {
+async function getNewList(bypass = false) {
+  const temp_page = api_params.page;
+  api_params.page = "";
+  const urlStr = getApiUrl();
+  if (urlStr === currentPath && !bypass) {
+    api_params.page = temp_page;
+    return;
+  }
+  currentPath = urlStr;
   new_page_queue = true;
   loaded_page = 0;
-  api_params.page = "";
   $("#list").html("");
   setLoadMsg();
-  let response = await getDataAsync(getApiUrl());
+  let response = await getDataAsync(urlStr);
   if (response.status === 'ok') {
     page_last = 0;
     page_limit = false;

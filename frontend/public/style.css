@@ -15,7 +15,7 @@
   background: rgba(0,0,5,0.3);
 }
 ::placeholder {
-  color: #CCC;
+  color: #888;
   opacity: 1;
 }
 
@@ -508,6 +508,12 @@ SUB-MENU SECTION (filters and columns section in header)
 .close_frame {
   position: absolute;
   right: 0;
+}
+.rank_input {
+  width: 94px;
+}
+.edpi_input {
+  width: 57px;
 }
 #filters_frame {
   max-width: 800px;
