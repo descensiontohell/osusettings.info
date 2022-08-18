@@ -418,9 +418,10 @@ function refreshLayout() {
 function removeFilter(index = -1) {
   if (index > -1) {
     let filter = api_filters[index];
-    filter.set("");
+    filter.set('');
     if (filter.item) deletePeriFromItem(filter.item);
     else if (filter.playstyle) $('#playstyle_select').val('0').change();
+    else if (filter.numInput) $('#'+filter.numInput).val('');
     getNewList();
   }
   else {
@@ -865,18 +866,22 @@ const api_filters = [ //there's probably a cleaner way to do this
     },
     set: (x)=> { api_params.playstyle = x } },
   { name: 'Minimum Rank',
+    numInput: 'rank_range_min',
     get: ()=> { return api_params.min_rank },
     string: function() { return  `#${this.get()}` },
     set: (x)=> { api_params.min_rank = x } },
   { name: 'Maximum Rank',
+    numInput: 'rank_range_max',
     get: ()=> { return api_params.max_rank },
     string: function() { return  `#${this.get()}` },
     set: (x)=> { api_params.max_rank = x } },
   { name: 'Minimum eDPI',
+    numInput: 'edpi_range_min',
     get: ()=> { return api_params.min_edpi },
     string: function() { return  `${this.get()} eDPI Min.` },
     set: (x)=> { api_params.min_edpi = x } },
   { name: 'Maximum eDPI',
+    numInput: 'edpi_range_max',
     get: ()=> { return api_params.max_edpi },
     string: function() { return  `${this.get()} eDPI Max` },
     set: (x)=> { api_params.max_edpi = x } },
