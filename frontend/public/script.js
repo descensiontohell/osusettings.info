@@ -189,6 +189,13 @@ HTML EVENT LISTENER SHIT
 
 $(document).ready(function() {
   init();
+  $('#login_button').click( function() {
+
+
+    console.log('code here');
+
+    
+  });
   $('#column_apply_button').click(function() {
     applyColumns();
   });
@@ -293,12 +300,9 @@ $(document).ready(function() {
     const color = $('#playstyle_select option:selected').css('color');
     $('#playstyle_select').css('color', color);
  });
-  $('.num_input').on('focusout'/*, 'input[type=text]'*/, function(e){
+  $('.num_input').on('focusout', function(e){
     let s = $(this).val();
-    if (/^\d+$/.test(s) || s ==='') {
-      s = s.replace(/^0+/, '');
-      setNumFilterById(this.id, s);
-    }
+    if (/^\d+$/.test(s) || s === '') setNumFilterById(this.id, s);
     else {
       alert('Must be a whole number.');
       $(this).val('');
@@ -704,6 +708,7 @@ function setNumFilterById(id, str) {
   else if (idArr[0] !== 'rank') return;
   if (idArr[2] === 'max') index = index + 1;
   else if (idArr[2] !== 'min') return;
+  str = str.replace(/^0+/, '');
   api_filters[index].set(str);
   updateFilterList();
   getNewList();
