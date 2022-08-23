@@ -1,3 +1,4 @@
+let user_data;
 let players = [];
 const items = { mice: [], mousepads: [], keyboards: [], switches: [], tablets: [] };
 let datalist_items = {};
@@ -189,13 +190,11 @@ HTML EVENT LISTENER SHIT
 
 $(document).ready(function() {
   init();
-  //user_data = JSON.parse(user_data);
-  const user_data = '{{ data | tojson | safe }}';
-  console.log(user_data);
   $('#login_button').click( function() {
-
-    window.location = 'https://osu.ppy.sh/oauth/authorize?client_id=15840&redirect_uri=http://213.202.238.224:8080/callback&response_type=code';
-
+    if (!user_data.isEmpty) { //TEMP
+      window.location = `https://osu.ppy.sh/oauth/authorize?client_id=${user_data.client_id}&redirect_uri=http://213.202.238.224:8080/callback&response_type=code`; //TEMP
+    }
+    else console.log('no');
   });
   $('#column_apply_button').click(function() {
     applyColumns();
@@ -365,6 +364,14 @@ function init() {
   getNewList();
   getItems();
   //getItem('mice');
+  if (raw_data !== '{{ data | tojson | safe }}') { //TESTING PURPOSE ONLY
+    user_data = JSON.parse(raw_data);
+    console.log(user_data);
+  }
+  else {
+    user_data = { isEmpty: true, player_name: 'NixX_Test' };
+  }
+  checkJinja();
 }
 function getBrowser() {
   const ua = navigator.userAgent;
@@ -375,6 +382,12 @@ function getBrowser() {
   else if(ua.indexOf('Firefox') != -1 ) return 'Firefox';
   else if((ua.indexOf('MSIE') != -1 ) || (!!document.documentMode == true )) return 'IE';
   else return '';
+}
+function checkJinja() {
+  if (user_data.player_name) {
+    let str = `<div class="tab_text">Welcome ${user_data.player_name}</div>`
+    $('#login_tab').html(str);
+  }
 }
 
 function loadHeaderOptions() {
