@@ -2,6 +2,6 @@
 .venv
 data.sql
 /pgdata/
+/logs/nginx
+*.py[cod]
 
-alembic/__pycache__
-alembic/versions/__pycache__
