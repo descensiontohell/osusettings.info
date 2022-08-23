@@ -39,19 +39,19 @@ services:
       - redis
     restart: always
 
-#  nginx:
-#    build:
-#      context: .
-#      dockerfile: Nginxfile
-#    container_name: nginx_osu
-#    ports:
-#      - 80:80
-#    volumes:
-#      #- ./nginx-conf:/etc/nginx/conf.d
-#      - ./logs/nginx:/var/log/nginx
-##      - ./www:/var/www
-#    depends_on:
-#      - app
+  nginx:
+    build:
+      context: .
+      dockerfile: Nginxfile
+    container_name: nginx_osu
+    ports:
+      - 80:80
+    volumes:
+      #- ./nginx-conf:/etc/nginx/conf.d
+      - ./logs/nginx:/var/log/nginx
+      - ./www:/var/www
+    depends_on:
+      - app
 
   db:
     image: postgres:latest
