@@ -79,7 +79,7 @@ body a {
 
 .tab {
   position: fixed;
-  background:rgb(255, 255, 255, 0.80);
+  background:rgb(57, 143, 209);
   top: -80px;
   height: 100px;
   border: 1px solid rgb(44, 44, 44, 0.15);
@@ -90,18 +90,21 @@ body a {
 .tab_text {
   position: absolute;
   width: 100%;
-  color: #000;
+  color: #FFF;
   text-align: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
   cursor: default;
   bottom: 3px;
 }
 #tab1 {
-  right: 113px;
+  right: 163px;
   width: 100px;
 }
 #tab2 {
   right: 10px;
-  width: 100px;
+  width: 150px;
 }
 
 #top_container {
@@ -436,7 +439,7 @@ SUB-MENU SECTION (filters and columns section in header)
 #filters_container {
   position: fixed;
   top: 12px;
-  left: 290px;
+  left: 260px;
   height: 130px;
   width: 200px;
 }
@@ -444,7 +447,7 @@ SUB-MENU SECTION (filters and columns section in header)
 #columns_container{
   position: fixed;
   top: 12px;
-  left: 500px;
+  left: 470px;
   height: 130px;
   width: 200px;
 }

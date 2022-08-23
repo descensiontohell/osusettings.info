@@ -189,11 +189,11 @@ HTML EVENT LISTENER SHIT
 
 $(document).ready(function() {
   init();
-  console.log("jinja:");
-  console.log($('#user_data').data());
+  user_data = JSON.parse(user_data);
+  console.log(user_data);
   $('#login_button').click( function() {
 
-    //window.location = 'https://osu.ppy.sh/oauth/authorize?client_id=15840&redirect_uri=http://213.202.238.224:8080/callback&response_type=code';
+    window.location = 'https://osu.ppy.sh/oauth/authorize?client_id=15840&redirect_uri=http://213.202.238.224:8080/callback&response_type=code';
 
   });
   $('#column_apply_button').click(function() {
