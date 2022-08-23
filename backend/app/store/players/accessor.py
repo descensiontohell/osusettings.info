@@ -194,7 +194,7 @@ class PlayerAccessor(BaseAccessor):
             item_keys = list(item_content)
 
             if data.get(f"add_new_{item}") is True:
-                if "id" in item_keys or not "name" in item_keys:
+                if "id" in item_keys or "name" not in item_keys:
                     raise HTTPBadRequest(text=f"If add_new_{item} is True, you should provide {item} specs and not id")
 
             if data.get(f"add_new_{item}") is False:
