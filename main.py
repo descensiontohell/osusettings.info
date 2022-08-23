@@ -1,7 +1,8 @@
 import os
 
-from backend.app.web.app import setup_app
 from aiohttp.web import run_app
+
+from backend.app.web.app import setup_app
 
 if os.environ.get("IS_IN_DOCKER", False):
     config_name = "config.yml"
