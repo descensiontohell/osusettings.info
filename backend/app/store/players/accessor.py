@@ -233,3 +233,6 @@ class PlayerAccessor(BaseAccessor):
             playstyle_names = [p.name for p in playstyles]
             if data["playstyle"] not in playstyle_names:
                 raise HTTPBadRequest(text="Specified playstyle does not match given is_mouse parameter")
+
+    async def update_player_data(self, data: dict) -> None:
+        ...
