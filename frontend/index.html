@@ -1,19 +1,99 @@
-
-
-
-
-{% if not is_logged_in %}
-<input type="button" onclick="location.href='https://osu.ppy.sh/oauth/authorize?client_id={{client_id}}&redirect_uri={{redirect_uri}}&response_type=code';" value="Login" />
-{% endif %}
-
-{% if is_logged_in %}
-Hello {{ player_name }}
-    {% if is_admin %}
-    Admin
-    {% else %}
-    Not admin
-{% endif %}
-<form action="{{redirect_uri}}" method="post">
-    <input type="submit" value="Logout">
-</form>
-{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="public/style.css" type="text/css">
+        <script src='public/jquery.js' type="text/javascript"></script>
+        <script src='public/script.js' type="text/javascript"></script>
+        <script type="text/javascript"> let user_data = '{{data | safe}}' </script>
+    </head>
+    <body>
+        <div id="top_container">
+            <div id="main_container" class="hidden">
+                <div id="filters_container">
+                    <div id="sub_button_edge_t" class="sub_button_edge"></div>
+                    <div id="sub_button_edge_m" class="sub_button_edge"></div>
+                    <div id="sub_button_edge_b" class="sub_button_edge"></div>
+                    <div id="applied_filters" class="sub_scroll scrollable_div"><span style='color: gray'>&emsp;[none]</span></div>
+                    <input id='filter_add_button' type='button' value='Add' class="sub_button_t sub_button">
+                    <input id='filter_delete_button' type='button' value='Delete' class="sub_button_m sub_button" disabled>
+                    <input id='filter_reset_button' type='button' value='Reset' class="sub_button_b sub_button" disabled>
+                    <div class="border_title">Filters</div>
+                    <div class="cut_border_l"></div>
+                    <div class="cut_border_b"></div>
+                    <div id="border_r_f" class="cut_border_r"></div>
+                </div>
+                <div id="columns_container">
+                    <div id="sub_button_edge_m" class="sub_button_edge"></div>
+                    <div id="sub_button_edge_b" class="sub_button_edge"></div>
+                    <div id="applied_columns" class="sub_scroll scrollable_div"></div>
+                    <input id='column_apply_button' type='button' value='Apply' class="sub_button_m sub_button">
+                    <input id='column_default_button' type='button' value='Default' class="sub_button_b sub_button">
+                    <div class="border_title">Columns</div>  
+                    <div class="cut_border_l"></div>
+                    <div class="cut_border_b"></div>
+                    <div id="border_r_c" class="cut_border_r"></div>
+                </div>
+                <div id="menu_group">
+                    <input id="search_text" type="input" class="text_input" placeholder="Search for Username..." id='name' autocomplete="off">
+                </div>
+            </div>
+            <div id ="profile_container" class="hidden">
+                <img id="avatar_container" onload="avatarFadeIn()" style="display: none"></img>
+                <div id="username_container"></div>
+                <div id="settings_rank"></div>
+                <div id="settings_container_left"></div>
+                <div id="settings_container_right"></div>
+            </div>
+            <div id="header_container" class="hidden">
+                <div id="header_name"></div>
+            </div>
+        </div>
+        <div id="table_container">
+            <table cellpadding="0" cellspacing="0" width="100%" class="scroll_table">
+                <thead class="fixed_header">
+                    <tr id="headers" class="header_row">
+                    </tr>
+                </thead>
+                <tbody id ="list" class="scroll_body">
+                </tbody>
+            </table>
+            <div id="note_container" class="hidden"></div>
+        </div>
+        <div id="loading_text" class="hidden">Loading...</div>
+        <div id="tab1" class="tab">woa
+            <div class="tab_text">Test Tab 1</div>
+        </div>
+        <div id="tab2" class="tab"><a id="login_button">Login</a>
+            <div class="tab_text">Connect osu! Profile</div>
+        </div>
+        <div id="div_lock" class="hidden">
+            
+            <div id="filters_frame" class="hidden frame">
+                <input type="button" value="Close" class="close_frame">
+                <div id="rank_range_div">
+                    #<input id="rank_range_min" type="text" class="text_input num_input rank_input" placeholder="0" maxlength="10" autocomplete="off"> to 
+                    #<input id="rank_range_max" type="text" class="text_input num_input rank_input" placeholder="10000" maxlength="10" autocomplete="off">
+                </div>
+                <div id="edpi_range_div">
+                    <input id="edpi_range_min" type="text" class="text_input num_input edpi_input" placeholder="0" maxlength="5" autocomplete="off"> to 
+                    <input id="edpi_range_max" type="text" class="text_input num_input edpi_input" placeholder="∞" maxlength="5" autocomplete="off">
+                </div>
+                <select id="playstyle_select" class="text_input"></select>
+                <div id="peri_filters">
+                    <div id="filter_div1"><br>
+                        <select id="filter_sel1" class="text_input filter_select"></select>
+                        <input id="filter_inp1" type="text" name="filter_inp" class="text_input filter_input" list="" autocomplete="off">
+                        <input id="delete_peri_filter_button1" type="button" value="-" class="delete_peri">
+                    </div>
+                </div><br>
+                <input id="add_peri_filters_button" type="button" value="+" disabled>
+            </div>
+            <div id="profile_frame" class="hidden frame">
+                <input type="button" value="Close" class="close_frame">
+                <iframe id="iframe" src="user.html" name="profile_iFrame" frameBorder="0"></iframe>
+            </div>
+        </div>
+        <div id="shhh"></div>
+    </body>
+</html>
