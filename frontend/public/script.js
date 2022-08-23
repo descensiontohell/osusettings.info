@@ -189,7 +189,8 @@ HTML EVENT LISTENER SHIT
 
 $(document).ready(function() {
   init();
-  user_data = JSON.parse(user_data);
+  //user_data = JSON.parse(user_data);
+  const user_data = '{{ data | tojson | safe }}';
   console.log(user_data);
   $('#login_button').click( function() {
 
