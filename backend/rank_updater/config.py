@@ -1,6 +1,6 @@
 from envyaml import EnvYAML
 
-from backend.app.web.config import DatabaseConfig, Config, Credentials, SessionConfig, SuperuserConfig, RedisConfig
+from backend.app.web.config import Config, Credentials, DatabaseConfig, RedisConfig, SessionConfig, SuperuserConfig
 
 
 def get_config(config_path):

@@ -1,12 +1,16 @@
-from aiohttp.web_exceptions import HTTPUnauthorized, HTTPConflict, HTTPNotFound
+from aiohttp.web_exceptions import HTTPConflict, HTTPNotFound, HTTPUnauthorized
 from aiohttp_apispec import request_schema, response_schema
 from aiohttp_session import new_session
 
+from backend.app.service_api.schemas import (
+    ListAdminsSchema,
+    SuperuserLoginRequestSchema,
+    SuperuserLoginResponseSchema,
+    SuperuserManageAdminsSchema,
+)
 from backend.app.web.app import View
 from backend.app.web.mixins import SuperuserRequiredMixin
 from backend.app.web.response import json_response
-from backend.app.service_api.schemas import SuperuserLoginRequestSchema, SuperuserLoginResponseSchema, \
-    SuperuserManageAdminsSchema, ListAdminsSchema
 
 
 class SuperuserLoginView(View):

@@ -1,5 +1,5 @@
-from aiohttp.web_exceptions import HTTPUnauthorized, HTTPFound
-from aiohttp_session import new_session, get_session
+from aiohttp.web_exceptions import HTTPFound, HTTPUnauthorized
+from aiohttp_session import get_session, new_session
 
 from backend.app.web.app import View
 

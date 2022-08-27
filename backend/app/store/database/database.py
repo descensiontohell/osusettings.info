@@ -1,6 +1,7 @@
 import typing
 from typing import Optional
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 if typing.TYPE_CHECKING:
@@ -8,7 +9,6 @@ if typing.TYPE_CHECKING:
 
 
 class Database:
-
     def __init__(self, app: "Application"):
         self.app = app
         self.db = None

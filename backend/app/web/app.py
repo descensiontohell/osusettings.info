@@ -1,25 +1,23 @@
 import os
 from typing import Optional
-from aiohttp.web import (
-    Application as AiohttpApplication,
-    View as AiohttpView,
-    Request as AiohttpRequest,
-)
 
+from aiohttp.web import Application as AiohttpApplication
+from aiohttp.web import Request as AiohttpRequest
+from aiohttp.web import View as AiohttpView
 from aiohttp_apispec import setup_aiohttp_apispec
+from aiohttp_cors import CorsViewMixin
 from aiohttp_session import setup as setup_session
 from aiohttp_session.redis_storage import RedisStorage
-from aiohttp_cors import CorsViewMixin
 
+from backend.app.store import Store, setup_store
+from backend.app.store.database.database import Database
+from backend.app.store.redis.redis import setup_redis
+from backend.app.web.config import Config, setup_config
 from backend.app.web.const import Const
 from backend.app.web.cors import setup_cors
 from backend.app.web.jinja import setup_jinja
-from backend.app.web.middlewares import setup_middlewares
-from backend.app.store.redis.redis import setup_redis
 from backend.app.web.logger import setup_logging
-from backend.app.store import setup_store, Store
-from backend.app.store.database.database import Database
-from backend.app.web.config import Config, setup_config
+from backend.app.web.middlewares import setup_middlewares
 from backend.app.web.routes import setup_routes
 
 
@@ -58,7 +56,7 @@ class View(AiohttpView, CorsViewMixin):
 
 def setup_app(config_path: str = None) -> Application:
     if not config_path:
-        config_path = os.path.join(os.path.abspath("."), 'config.yml')
+        config_path = os.path.join(os.path.abspath("."), "config.yml")
     app = Application()
     setup_logging(app)
     setup_jinja(app)

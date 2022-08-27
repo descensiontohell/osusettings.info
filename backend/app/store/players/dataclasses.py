@@ -1,5 +1,4 @@
 import datetime
-
 from typing import Optional
 
 from attr import dataclass

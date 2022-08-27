@@ -1,11 +1,9 @@
+from sqlalchemy import Boolean, Column, Date, Float, ForeignKey, Integer, MetaData, String
+from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func
 
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, MetaData, Float, Date
-from sqlalchemy.orm import declarative_base, relationship
-
-from backend.app.store.players.dataclasses import Playstyle, Mouse, Tablet, Keyboard, Switch, Player, Settings, Mousepad
-
-from backend.app.store.service_api.dataclasses import Superuser, Admin
+from backend.app.store.players.dataclasses import Keyboard, Mouse, Mousepad, Player, Playstyle, Settings, Switch, Tablet
+from backend.app.store.service_api.dataclasses import Admin, Superuser
 
 meta = MetaData()
 Base = declarative_base(meta)
@@ -85,7 +83,7 @@ class KeyboardModel(Base):
 
 
 class SwitchModel(Base):
-    __tablename__ = 'switch'
+    __tablename__ = "switch"
     id = Column(Integer(), primary_key=True)
     relevance = Column(Integer(), default=0)
     name = Column(String(), nullable=False)
@@ -100,7 +98,7 @@ class SwitchModel(Base):
 
 
 class MousepadModel(Base):
-    __tablename__ = 'mousepad'
+    __tablename__ = "mousepad"
     id = Column(Integer(), primary_key=True)
     relevance = Column(Integer(), default=0)
     name = Column(String(), nullable=False)
@@ -256,6 +254,7 @@ class SettingsModel(Base):
     updated_by = Column(String(), nullable=False)
 
     def to_dc(self):
+        # TODO playstyle = self.plastyle.to_dc().name if self.playstyle else None
         if self.playstyle is not None:
             playstyle = self.playstyle.to_dc().name
         else:

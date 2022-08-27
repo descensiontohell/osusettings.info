@@ -3,8 +3,13 @@ import logging
 import typing
 from datetime import datetime
 
-from aiohttp.web_exceptions import HTTPUnprocessableEntity, HTTPException, HTTPNotImplemented, HTTPUnauthorized, \
-    HTTPFound
+from aiohttp.web_exceptions import (
+    HTTPException,
+    HTTPFound,
+    HTTPNotImplemented,
+    HTTPUnauthorized,
+    HTTPUnprocessableEntity,
+)
 from aiohttp.web_middlewares import middleware
 from aiohttp_apispec import validation_middleware
 from aiohttp_session import get_session
@@ -86,9 +91,7 @@ async def error_handling_middleware(request: "Request", handler):
         )
     except Exception as e:
         request.app.logger.error("Exception", exc_info=e)
-        return error_json_response(
-            http_status=500, status="internal server error", message=str(e)
-        )
+        return error_json_response(http_status=500, status="internal server error", message=str(e))
 
 
 def setup_middlewares(app: "Application"):

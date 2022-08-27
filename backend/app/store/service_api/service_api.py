@@ -2,15 +2,15 @@ import typing
 from hashlib import sha256
 from typing import Optional
 
-from sqlalchemy import select, update, delete
+from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
-from backend.app.store.players.dataclasses import Player
-from backend.app.store.service_api.player_edpi import PlayerEdpi
-from backend.app.store.database.models import PlayerModel, SuperuserModel, AdminModel
 from backend.app.store.base.base_accessor import BaseAccessor
+from backend.app.store.database.models import AdminModel, PlayerModel, SuperuserModel
+from backend.app.store.players.dataclasses import Player
 from backend.app.store.service_api.dataclasses import Superuser
+from backend.app.store.service_api.player_edpi import PlayerEdpi
 
 if typing.TYPE_CHECKING:
     from backend.app.web.app import Application
@@ -92,14 +92,15 @@ class ServiceAccessor(BaseAccessor):
 
     async def get_all_player_models(self) -> list[Player]:
         async with self.session as s:
-            query = (select(PlayerModel)
-                     .options(selectinload(PlayerModel.mousepad))
-                     .options(selectinload(PlayerModel.mouse))
-                     .options(selectinload(PlayerModel.playstyle))
-                     .options(selectinload(PlayerModel.keyboard))
-                     .options(selectinload(PlayerModel.tablet))
-                     .options(selectinload(PlayerModel.switch))
-                     )
+            query = (
+                select(PlayerModel)
+                .options(selectinload(PlayerModel.mousepad))
+                .options(selectinload(PlayerModel.mouse))
+                .options(selectinload(PlayerModel.playstyle))
+                .options(selectinload(PlayerModel.keyboard))
+                .options(selectinload(PlayerModel.tablet))
+                .options(selectinload(PlayerModel.switch))
+            )
             models = (await s.execute(query)).scalars().all()
         return [m.to_dc() for m in models]
 
@@ -110,7 +111,7 @@ class ServiceAccessor(BaseAccessor):
             await session.commit()
 
     def assign_according_edpi(self, player: Player) -> PlayerEdpi:
-        windows_sens_grades = [1/32, 1/16, 1/4, 1/2, 3/4, 1, 1.5, 2, 2.5, 3, 3.5]
+        windows_sens_grades = [1 / 32, 1 / 16, 1 / 4, 1 / 2, 3 / 4, 1, 1.5, 2, 2.5, 3, 3.5]
         edpi = None
         play_area_height = None
         play_area_width = None
@@ -129,7 +130,7 @@ class ServiceAccessor(BaseAccessor):
                 play_area_width = round(play_area_height * 4 / 3)
 
             elif os_sens is not None:
-                os_multiplier = windows_sens_grades[os_sens-1]
+                os_multiplier = windows_sens_grades[os_sens - 1]
                 base_edpi = dpi * sens * os_multiplier
                 res_ratio = 1080 / res_height
                 edpi = base_edpi * res_ratio
@@ -153,7 +154,7 @@ class ServiceAccessor(BaseAccessor):
 
         new_superuser = SuperuserModel(
             name=self.app.config.superuser.login,
-            password=sha256(self.app.config.superuser.password.encode()).hexdigest()
+            password=sha256(self.app.config.superuser.password.encode()).hexdigest(),
         )
         async with self.session as s:
             s.add_all([new_superuser])

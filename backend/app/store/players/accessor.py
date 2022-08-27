@@ -3,13 +3,20 @@ from typing import Optional
 
 from aiohttp.web_exceptions import HTTPBadRequest
 from osu import AsynchronousClient
-from sqlalchemy import select, or_, desc
+from sqlalchemy import desc, or_, select
 from sqlalchemy.orm import selectinload
 
 from backend.app.players.filter import LeaderboardFilter
-from backend.app.store.database.models import PlayerModel, MousepadModel, MouseModel, KeyboardModel, \
-    SwitchModel, TabletModel, SettingsModel
 from backend.app.store.base.base_accessor import BaseAccessor
+from backend.app.store.database.models import (
+    KeyboardModel,
+    MouseModel,
+    MousepadModel,
+    PlayerModel,
+    SettingsModel,
+    SwitchModel,
+    TabletModel,
+)
 from backend.app.store.players.dataclasses import Player, Settings
 
 if typing.TYPE_CHECKING:
@@ -106,29 +113,31 @@ class PlayerAccessor(BaseAccessor):
         if pf.tablet is not None:
             query = query.join(PlayerModel.tablet).filter(TabletModel.name.ilike(f"%{pf.tablet}%"))
 
-        players = (query
-                   .options(selectinload(PlayerModel.mousepad))
-                   .options(selectinload(PlayerModel.mouse))
-                   .options(selectinload(PlayerModel.playstyle))
-                   .options(selectinload(PlayerModel.keyboard))
-                   .options(selectinload(PlayerModel.tablet))
-                   .options(selectinload(PlayerModel.switch))
-                   .order_by(pf.order_by)
-                   .limit(self.page_size)
-                   .offset((pf.page - 1) * self.page_size))
+        players = (
+            query.options(selectinload(PlayerModel.mousepad))
+            .options(selectinload(PlayerModel.mouse))
+            .options(selectinload(PlayerModel.playstyle))
+            .options(selectinload(PlayerModel.keyboard))
+            .options(selectinload(PlayerModel.tablet))
+            .options(selectinload(PlayerModel.switch))
+            .order_by(pf.order_by)
+            .limit(self.page_size)
+            .offset((pf.page - 1) * self.page_size)
+        )
 
         return players
 
     async def get_user_by_osu_id_or_name(self, osu_id: int) -> Optional[Player]:
-        query = (select(PlayerModel)
-                 .filter(PlayerModel.osu_id == osu_id)
-                 .options(selectinload(PlayerModel.mousepad))
-                 .options(selectinload(PlayerModel.mouse))
-                 .options(selectinload(PlayerModel.playstyle))
-                 .options(selectinload(PlayerModel.keyboard))
-                 .options(selectinload(PlayerModel.tablet))
-                 .options(selectinload(PlayerModel.switch))
-                 )
+        query = (
+            select(PlayerModel)
+            .filter(PlayerModel.osu_id == osu_id)
+            .options(selectinload(PlayerModel.mousepad))
+            .options(selectinload(PlayerModel.mouse))
+            .options(selectinload(PlayerModel.playstyle))
+            .options(selectinload(PlayerModel.keyboard))
+            .options(selectinload(PlayerModel.tablet))
+            .options(selectinload(PlayerModel.switch))
+        )
 
         async with self.session_factory() as session:
             models = await session.execute(query)
@@ -138,16 +147,17 @@ class PlayerAccessor(BaseAccessor):
             return result.to_dc()
 
     async def get_settings_history_by_osu_id(self, osu_id: int) -> list[Settings]:
-        query = (select(SettingsModel)
-                 .filter(SettingsModel.osu_id == osu_id)
-                 .options(selectinload(SettingsModel.mousepad))
-                 .options(selectinload(SettingsModel.mouse))
-                 .options(selectinload(SettingsModel.playstyle))
-                 .options(selectinload(SettingsModel.keyboard))
-                 .options(selectinload(SettingsModel.tablet))
-                 .options(selectinload(SettingsModel.switch))
-                 .order_by(desc(SettingsModel.id))
-                 )
+        query = (
+            select(SettingsModel)
+            .filter(SettingsModel.osu_id == osu_id)
+            .options(selectinload(SettingsModel.mousepad))
+            .options(selectinload(SettingsModel.mouse))
+            .options(selectinload(SettingsModel.playstyle))
+            .options(selectinload(SettingsModel.keyboard))
+            .options(selectinload(SettingsModel.tablet))
+            .options(selectinload(SettingsModel.switch))
+            .order_by(desc(SettingsModel.id))
+        )
 
         async with self.session_factory() as session:
             models = await session.execute(query)
@@ -202,28 +212,38 @@ class PlayerAccessor(BaseAccessor):
                     raise HTTPBadRequest(text=f"If add_new_{item} is False, you should provide {item} id and not specs")
 
         if "is_mouse" not in keys:
-            raise HTTPBadRequest(text="Missing is_mouse field. It determines your playstyle and available device fields")
+            raise HTTPBadRequest(
+                text="Missing is_mouse field. It determines your playstyle and available device fields"
+            )
 
         elif data["is_mouse"] is True:
-            if any([
-                "tablet" in keys,
-                "add_new_tablet" in keys,
-                "tablet_area_height" in keys,
-                "tablet_area_width" in keys,
-            ]):
-                raise HTTPBadRequest(text="Mouse player is not supposed to have tablet, "
-                                          "add_new_tablet, tablet_area_height or tablet_area_width fields")
+            if any(
+                [
+                    "tablet" in keys,
+                    "add_new_tablet" in keys,
+                    "tablet_area_height" in keys,
+                    "tablet_area_width" in keys,
+                ]
+            ):
+                raise HTTPBadRequest(
+                    text="Mouse player is not supposed to have tablet, "
+                    "add_new_tablet, tablet_area_height or tablet_area_width fields"
+                )
 
         elif data["is_mouse"] is False:
-            if any([
-                "mouse" in keys,
-                "add_new_mouse" in keys,
-                "dpi" in keys,
-                "add_new_mousepad" in keys,
-                "mousepad" in keys,
-            ]):
-                raise HTTPBadRequest(text="Tablet player is not supposed to have mouse, add_new_mouse, "
-                                          "dpi, add_new_mousepad or mousepad fields")
+            if any(
+                [
+                    "mouse" in keys,
+                    "add_new_mouse" in keys,
+                    "dpi" in keys,
+                    "add_new_mousepad" in keys,
+                    "mousepad" in keys,
+                ]
+            ):
+                raise HTTPBadRequest(
+                    text="Tablet player is not supposed to have mouse, add_new_mouse, "
+                    "dpi, add_new_mousepad or mousepad fields"
+                )
 
         if all(["res_width" in keys, "res_height" in keys, data["res_height"] > data["res_width"]]):
             raise HTTPBadRequest(text="We expect your monitor resolution height to be less than resolution width")

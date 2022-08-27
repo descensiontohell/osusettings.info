@@ -1,4 +1,3 @@
-
 class Const:
     ENABLE_CACHING = True
     CACHE_EX = 300

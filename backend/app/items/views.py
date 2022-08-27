@@ -1,17 +1,34 @@
-from aiohttp.web_exceptions import HTTPNotFound, HTTPUnauthorized, HTTPForbidden, HTTPUnprocessableEntity
+from aiohttp.web_exceptions import HTTPForbidden, HTTPNotFound, HTTPUnauthorized, HTTPUnprocessableEntity
 from aiohttp_apispec import docs, response_schema
 from marshmallow import ValidationError
 
-from backend.app.items.schemas import KeyboardSuggestionsListSchema, MouseSuggestionsListSchema, \
-    MousepadSuggestionsListSchema, SwitchSuggestionsListSchema, TabletSuggestionsListSchema, AllItemsSchema, \
-    PlaystyleSuggestionsListSchema
-from backend.app.players.schemas import SwitchSchema, TabletSchema, MousepadSchema, MouseSchema, KeyboardSchema, \
-    PlaystyleSchema
-from backend.app.store.database.models import SwitchModel, KeyboardModel, MouseModel, MousepadModel, TabletModel, \
-    PlaystyleModel
+from backend.app.items.schemas import (
+    AllItemsSchema,
+    KeyboardSuggestionsListSchema,
+    MousepadSuggestionsListSchema,
+    MouseSuggestionsListSchema,
+    PlaystyleSuggestionsListSchema,
+    SwitchSuggestionsListSchema,
+    TabletSuggestionsListSchema,
+)
+from backend.app.players.schemas import (
+    KeyboardSchema,
+    MousepadSchema,
+    MouseSchema,
+    PlaystyleSchema,
+    SwitchSchema,
+    TabletSchema,
+)
+from backend.app.store.database.models import (
+    KeyboardModel,
+    MouseModel,
+    MousepadModel,
+    PlaystyleModel,
+    SwitchModel,
+    TabletModel,
+)
 from backend.app.web.app import View
 from backend.app.web.response import json_response
-
 
 item_schemas_models = {
     "switches": [SwitchSuggestionsListSchema(), SwitchModel, SwitchSchema()],
@@ -24,7 +41,6 @@ item_schemas_models = {
 
 
 class GetItemListView(View):
-
     @docs(
         tags=["Items"],
         summary="Returns item lists for dropdown suggestions",
@@ -41,7 +57,7 @@ class GetItemListView(View):
         mice
 
         mousepads
-        
+
         playstyles
         """,
         responses={
@@ -51,8 +67,8 @@ class GetItemListView(View):
             "200 - 4": {"description": "Ok. Returns list of switches", "schema": SwitchSuggestionsListSchema},
             "200 - 5": {"description": "Ok. Returns list of tablets", "schema": TabletSuggestionsListSchema},
             "200 - 6": {"description": "Ok. Returns list of playstyles", "schema": PlaystyleSuggestionsListSchema},
-            "404": {"description": "Requested item not found"}
-        }
+            "404": {"description": "Requested item not found"},
+        },
     )
     async def get(self):
         item_type = self.request.match_info["item_type"]
@@ -82,7 +98,7 @@ class GetItemListView(View):
             "401": {"description": "User not authorized"},
             "403": {"description": "User is authorized but is not admin"},
             "404": {"description": "Requested item not found"},
-        }
+        },
     )
     async def post(self):
         if not self.request.player_id:
@@ -121,11 +137,15 @@ class GetAllItemsView(View):
         switches = await self.store.items.get_items(item_type="switches", model=item_schemas_models["switches"][1])
         tablets = await self.store.items.get_items(item_type="tablets", model=item_schemas_models["tablets"][1])
         playstyles = await self.store.items.get_items("playstyles", item_schemas_models["playstyles"][1])
-        return json_response(data=AllItemsSchema().dump({
-            "mice": mice,
-            "mousepads": mousepads,
-            "keyboards": keyboards,
-            "switches": switches,
-            "tablets": tablets,
-            "playstyles": playstyles,
-        }))
+        return json_response(
+            data=AllItemsSchema().dump(
+                {
+                    "mice": mice,
+                    "mousepads": mousepads,
+                    "keyboards": keyboards,
+                    "switches": switches,
+                    "tablets": tablets,
+                    "playstyles": playstyles,
+                }
+            )
+        )

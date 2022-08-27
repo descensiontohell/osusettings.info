@@ -4,13 +4,10 @@ from logging.config import fileConfig
 
 import yaml
 from envyaml import EnvYAML
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-
 from backend.app.web.config import DatabaseConfig
-
 
 if platform.system() == "Windows":
     path = os.path.abspath(os.path.join(os.getcwd()))
@@ -30,7 +27,7 @@ app_config = DatabaseConfig(
     user=co["database.user"],
     password=co["database.password"],
     database=co["database.database"],
-    )
+)
 
 
 def set_sqlalchemy_url(host, user, password, database):
@@ -52,6 +49,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 
 from backend.app.store.database.models import Base
+
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -100,9 +98,7 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

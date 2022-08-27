@@ -5,8 +5,8 @@ def setup_routes(app: Application):
     from backend.app.players.views import (
         ApiLeaderboardView,
         LeaderboardView,
-        SinglePlayerView,
         PlayerSettingsHistoryView,
+        SinglePlayerView,
     )
 
     app.router.add_view("/api/players", ApiLeaderboardView)

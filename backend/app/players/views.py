@@ -1,15 +1,19 @@
 import aiohttp_jinja2
-from aiohttp.web_exceptions import HTTPNotFound, HTTPBadRequest, HTTPUnauthorized, HTTPForbidden, HTTPConflict
-from aiohttp_apispec import response_schema, querystring_schema, docs, request_schema
+from aiohttp.web_exceptions import HTTPBadRequest, HTTPConflict, HTTPForbidden, HTTPNotFound, HTTPUnauthorized
+from aiohttp_apispec import docs, querystring_schema, request_schema, response_schema
 from requests import HTTPError
 from sqlalchemy.exc import IntegrityError
 
 from backend.app.players.filter import LeaderboardFilter
-from backend.app.players.schemas import LeaderboardSchema, GetPlayersQuerySchema, PlayerSchema, SettingsHistorySchema, \
-    UpdatePlayerSettingsSchema
-from backend.app.web.response import json_response
+from backend.app.players.schemas import (
+    GetPlayersQuerySchema,
+    LeaderboardSchema,
+    PlayerSchema,
+    SettingsHistorySchema,
+    UpdatePlayerSettingsSchema,
+)
 from backend.app.web.app import View
-
+from backend.app.web.response import json_response
 
 """
 Users views:
@@ -53,13 +57,15 @@ class LeaderboardView(View):
     async def get(self):
         is_logged_in = True if self.request.player_id else False
         return {
-            "is_logged_in": is_logged_in,
-            "player_id": self.request.player_id,
-            "player_name": self.request.player_name,
-            "is_admin": self.request.is_admin,
-            "redirect_uri": f"{self.request.app.config.credentials.server_name}/callback",
-            "server_name": self.request.app.config.credentials.server_name,
-            "client_id": self.request.app.config.credentials.client_id,
+            "data": {
+                "is_logged_in": is_logged_in,
+                "player_id": self.request.player_id,
+                "player_name": self.request.player_name,
+                "is_admin": self.request.is_admin,
+                "redirect_uri": f"{self.request.app.config.credentials.server_name}/callback",
+                "server_name": self.request.app.config.credentials.server_name,
+                "client_id": self.request.app.config.credentials.client_id,
+            }
         }
 
 
@@ -73,8 +79,8 @@ class ApiLeaderboardView(View):
                     /api/players?is_mouse=true&playstyle=1&playstyle=2&page=2&min_rank=100&name=potato&mouse=razer&order_by=pp
                     """,
         responses={
-            200: {"description": "Ok. Leaderboard returned in response[\"data\"]", "schema": LeaderboardSchema},
-            400: {"description": "Unprocessable Entity. Wrong filters applied"}
+            200: {"description": 'Ok. Leaderboard returned in response["data"]', "schema": LeaderboardSchema},
+            400: {"description": "Unprocessable Entity. Wrong filters applied"},
         },
     )
     @response_schema(LeaderboardSchema, 200)
@@ -85,8 +91,7 @@ class ApiLeaderboardView(View):
 
         is_mouse_list = args.get("is_mouse", True)
         players = await self.store.players.get_players(players_filter)
-        return json_response(
-            data=LeaderboardSchema().dump({"players": players, "is_mouse_list": is_mouse_list}))
+        return json_response(data=LeaderboardSchema().dump({"players": players, "is_mouse_list": is_mouse_list}))
 
 
 class SinglePlayerView(View):
@@ -97,7 +102,7 @@ class SinglePlayerView(View):
         responses={
             200: {"description": "Success", "schema": PlayerSchema},
             400: {"description": "osu_id is not a valid integer"},
-            404: {"description": "Player not found"}
+            404: {"description": "Player not found"},
         },
     )
     @response_schema(PlayerSchema(), 200)
@@ -127,7 +132,7 @@ Sets according osu! stats if the player is added",
             401: {"description": "User not logged in"},
             403: {"description": "User logged in but is not admin"},
             404: {"description": "No user with given osu_id"},
-            409: {"description": "Player already exists"}
+            409: {"description": "Player already exists"},
         },
     )
     async def post(self):

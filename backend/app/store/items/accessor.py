@@ -1,12 +1,19 @@
 import typing
-import _pickle as pickle
-from typing import Union, Optional
+from typing import Optional, Union
 
-from sqlalchemy import select, desc
+import _pickle as pickle
+from sqlalchemy import desc, select
 
 from backend.app.store.base.base_accessor import BaseAccessor
 from backend.app.store.database.models import PlaystyleModel
-from backend.app.store.players.dataclasses import Keyboard, Mouse, Mousepad, Tablet, Switch, Playstyle
+from backend.app.store.players.dataclasses import (
+    Keyboard,
+    Mouse,
+    Mousepad,
+    Playstyle,
+    Switch,
+    Tablet,
+)
 
 if typing.TYPE_CHECKING:
     from backend.app.web.app import Application
@@ -21,9 +28,7 @@ class ItemsAccessor(BaseAccessor):
         self.session_factory = self.app.database.db
 
     async def get_items(
-            self,
-            item_type: str,
-            model
+        self, item_type: str, model
     ) -> list[Union[Keyboard, Mouse, Mousepad, Switch, Tablet, Playstyle]]:
         """
         If cached: returns from cache
@@ -40,7 +45,11 @@ class ItemsAccessor(BaseAccessor):
         if model == PlaystyleModel:
             model_query = query
         else:
-            model_query = query.where(model.relevance > 0).order_by(desc(model.relevance)).order_by(model.name)
+            model_query = (
+                query.where(model.relevance > 0)
+                .order_by(desc(model.relevance))
+                .order_by(model.name)
+            )
 
         async with self.session_factory() as session:
             result = await session.execute(model_query)
@@ -60,7 +69,9 @@ class ItemsAccessor(BaseAccessor):
 
         return playstyles
 
-    async def get_from_cache(self, item_type) -> Optional[list[Union[Keyboard, Mouse, Mousepad, Switch, Tablet]]]:
+    async def get_from_cache(
+        self, item_type
+    ) -> Optional[list[Union[Keyboard, Mouse, Mousepad, Switch, Tablet]]]:
         if self.app.const.ENABLE_CACHING:
             pickled_items = await self.app.store.redis.get(item_type)
             if pickled_items:
@@ -71,7 +82,9 @@ class ItemsAccessor(BaseAccessor):
     async def set_cache(self, items_list, item_type) -> None:
         if self.app.const.ENABLE_CACHING:
             pickled_items = pickle.dumps(items_list)
-            await self.app.store.redis.set(item_type, pickled_items, ex=self.app.const.CACHE_EX)
+            await self.app.store.redis.set(
+                item_type, pickled_items, ex=self.app.const.CACHE_EX
+            )
 
     async def add_item(self, item: dict, model) -> None:
         item["relevance"] = 10
