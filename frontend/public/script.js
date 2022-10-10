@@ -192,7 +192,7 @@ $(document).ready(function() {
   init();
   $('#login_button').click( function() {
     if (!user_data.isEmpty) { //TEMP
-      window.location = `https://osu.ppy.sh/oauth/authorize?client_id=${user_data.client_id}&redirect_uri=http://213.202.238.224:8080/callback&response_type=code`; //TEMP
+      window.location = `https://osu.ppy.sh/oauth/authorize?client_id=${user_data.client_id}&redirect_uri=${user_data.redirect_uri}&response_type=code`; //TEMP
     }
     else console.log('no');
   });
@@ -1209,7 +1209,7 @@ function refreshList(page = -1) {
 }
 
 //currently, $(window).scrollTop for 1 page ranges from 0-1350px, each row is 27px found by $("#list").children()[0].clientHeight
-//should be in a global variable once a proper initializer is created
+//should probably be a global variable once a proper initializer is created
 
 //idk saving this
 //$('body').scrollTop(0);
