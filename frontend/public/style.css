@@ -432,11 +432,11 @@ SUB-MENU SECTION (filters and columns section in header)
   background: rgb(255,255,255,0.7); 
 }
 .scrollable_div::-webkit-scrollbar-track {
-  background: rgb(0,0,0,0); 
+  background: transparent; 
 }
 .sub_scroll {
   position: absolute;
-  background: rgb(0, 0, 0, 0.50);
+  background: rgb(0, 0, 0, 0.39);
   top: 2px;
   left: 2px;
   height: 130px;
