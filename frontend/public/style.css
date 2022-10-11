@@ -353,7 +353,9 @@ SUB-MENU SECTION (filters and columns section in header)
   border-top-left-radius: 14px;
   border-bottom-left-radius: 14px;
   border: 0px;
+  box-sizing: border-box;
   width: 60px;
+  height: 26px;
   text-align: right;
 }
 .sub_button:hover:enabled {
@@ -376,32 +378,33 @@ SUB-MENU SECTION (filters and columns section in header)
 .sub_button_t {
   position: absolute;
   top: 2px;
-  right: 8px;
+  right: 10px;
 }
 .sub_button_m {
   position: absolute;
-  top: 82px;
-  right: 8px;
+  top: 81px;
+  right: 10px;
 }
 .sub_button_b {
   position: absolute;
   top: 107px;
-  right: 8px;
+  right: 10px;
 }
 .sub_button_edge {
   position: absolute;
   /*background-color: #398fd1;*/
   background-color: rgb(23, 54, 62);
-  width: 8px;
+  box-sizing: border-box;
+  width: 10px;
   height: 26px;
   right: 0px;
 }
 #sub_button_edge_t {
-  top: 1px;
+  top: 2px;
   border-top-right-radius: 6px;
 }
 #sub_button_edge_m {
-  top: 82px;
+  top: 81px;
 }
 #sub_button_edge_b {
   top: 107px;
@@ -414,17 +417,19 @@ SUB-MENU SECTION (filters and columns section in header)
 	overflow-x: hidden;
 	overflow-y:auto;
   scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: gray transparent;
   overscroll-behavior: none;
 }
 .scrollable_div::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 .scrollable_div::-webkit-scrollbar-thumb {
-  background: rgb(70, 70, 70);
-  border-radius: 3px;
+  background: rgb(255,255,255,0.4);
+  border-radius: 4px;
 }
 .scrollable_div::-webkit-scrollbar-thumb:hover {
-  background: rgb(204,204,204); 
+  background: rgb(255,255,255,0.7); 
 }
 .scrollable_div::-webkit-scrollbar-track {
   background: rgb(0,0,0,0); 
@@ -495,8 +500,8 @@ SUB-MENU SECTION (filters and columns section in header)
   overflow: hidden;
   width: 10px;
   height: 100%;
-  border-bottom-left-radius: 5px;
-  border-top-left-radius: 5px;
+  border-bottom-left-radius: 6px;
+  border-top-left-radius: 6px;
 }
 .cut_border_r {
   border: solid #FFF;
@@ -507,8 +512,8 @@ SUB-MENU SECTION (filters and columns section in header)
   top: 0px;
   right: 0px;
   height: 130px;
-  border-bottom-right-radius: 5px;
-  border-top-right-radius: 5px;
+  border-bottom-right-radius: 6px;
+  border-top-right-radius: 6px;
 }
 #border_r_f {
   width: 143px;
