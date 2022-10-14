@@ -60,6 +60,10 @@ body a {
   border: 0px none;
   outline: none;
 }
+.text_input:disabled {
+  background-color:rgb(23, 54, 62, 0.5);
+  color: #888;
+}
 #search_text {
   position: relative;
   top: 120px;
@@ -411,6 +415,7 @@ SUB-MENU SECTION (filters and columns section in header)
   border-bottom-right-radius: 6px;
 }
 
+
 .scrollable_div {
   text-overflow: ellipsis;
 	white-space: nowrap;
@@ -542,6 +547,36 @@ SUB-MENU SECTION (filters and columns section in header)
 }
 .edpi_input {
   width: 57px;
+}
+.filter_input {
+  width: 240px;
+}
+.add_corner {
+  border-bottom-right-radius: 0;
+}
+#peri_list {
+  position: absolute;
+  top: 126px;
+  width: 252px;
+  height: 100px;
+  font-size: 12px;
+  color: white;
+  background-color:rgb(23, 54, 62);
+  border: 0px none;
+  border-radius: 0;
+  outline: none;
+  overflow-y: scroll;
+  scrollbar-color: gray #15242B;
+  scroll-behavior: auto;
+}
+#peri_list::-webkit-scrollbar-track {
+  background: #15242B; 
+}
+#peri_list::-webkit-scrollbar-thumb {
+  border-radius: 0;
+}
+#peri_list > option:checked {
+  box-shadow: 0 0 10px 100px rgb(40, 92, 105) inset;
 }
 #filters_frame {
   max-width: 800px;

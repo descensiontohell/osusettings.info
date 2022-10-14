@@ -1,7 +1,7 @@
 let user_data;
 let players = [];
 const items = { mice: [], mousepads: [], keyboards: [], switches: [], tablets: [] };
-let datalist_items = {};
+//let datalist_items = {};
 let browser = "";
 let reader;
 let mouse_pos;
@@ -16,11 +16,8 @@ let typing_timer;
 let scroll_timer;
 let search_string = "";
 let active_frame = "";
-let selected_filter = -1;
-let peri_filter_count = 0;
-let peri_filters = [];
-let peri_filters_avail = [];
-let peri_bypass = false;
+const peri = { current: 0, loaded: 0, list: [], search_arr: [], search_str: [], key: [], init: true, x: 0,
+  all_filters: [], filters: [], filter_count: -1, filter_selected: -1, bypass: false };
 let forced_search = true; //when false, double checks if search string is different from returned list because keyup process is sometimes interrupted
 const column = { //how columns are addressed(string), sized(px), and how it addresses the object(func)
 //column object: must match the player object:
@@ -264,8 +261,8 @@ $(document).ready(function() {
   $('#applied_filters').click(function(e) {
     if (e.target.closest('a')) {
       let filter = e.target.closest('div').id;
-      if (selected_filter > -1) highlightSelect(false, `#filtr${selected_filter}`);
-      selected_filter = parseIndex(filter);
+      if (peri.filter_selected > -1) highlightSelect(false, `#filtr${peri.filter_selected}`);
+      peri.filter_selected = parseIndex(filter);
       highlightSelect(true, `#${filter}`)
       $('#filter_delete_button').prop('disabled', false);
     }
@@ -274,7 +271,7 @@ $(document).ready(function() {
     lockMainLayer('#filters_frame');
   });
   $('#filter_delete_button').click(function(e) {
-    removeFilter(selected_filter);
+    removeFilter(peri.filter_selected);
   });
   $('#filter_reset_button').click(function(e) {
     removeFilter();
@@ -310,45 +307,53 @@ $(document).ready(function() {
     }
   });
   $('#peri_filters').on('keyup', 'input[type=text]', function(e){
-    if (browser !== 'Firefox') {
-      if ($(this).val() !== "") {
-        let fi_num = $(this).attr('id').slice(-1);
-        let fs_dl = $(`#filter_sel${fi_num}`).val() + "Datalist";
-        $(`#filter_inp${fi_num}`).attr('list', fs_dl);
+    const value = $(this).val().toLowerCase();
+    if (value !== "") {
+      let fi_num = $(this).attr('id').slice(-1);
+      let key = peri.key[fi_num];
+      htmlPeri(key, value);
+      if (showPeri(this)) {
         periAddButton();
-        $(this).prop('autocomplete', 'on');
       }
-      else {
-        $('#add_peri_filters_button').prop('disabled', true);
-        $(this).prop('autocomplete', 'off');
-      }
+    }
+    else {
+      $('#add_peri_filters_button').prop('disabled', true);
+      hidePeri(this);
     }
   });
   $('#peri_filters').on('focusin', 'input[type=text]', function(e){
-    if (browser !== 'Firefox' && $(this).val() === "") {
-      let fi_num = $(this).attr('id').slice(-1);
-      $(`#filter_inp${fi_num}`).attr('list', '');
+    if (peri.init) {
+      peri.x = $(`#filter_sel0`)[0].clientWidth;
+      $('#peri_list').css('left', `${$(`#filter_inp0`)[0].offsetLeft + 8}px`);
+      peri.init = false;
+    }
+    let fi_num = $(this).attr('id').slice(-1);
+    let key = peri.key[fi_num];
+    let val = $(this).val();
+    if (fi_num != peri.current) {
+      let filter = $(`#filter_inp${fi_num}`)[0];
+      $('#peri_list').css('top', `${filter.offsetHeight + filter.offsetTop}px`);
+      peri.current = fi_num;
+    }
+    if (val !== "") {
+      htmlPeri(key, val);
+      showPeri(this);
     }
   });
   $('#peri_filters').on('focusout', 'input[type=text]', function(e){
-    if (browser === 'Firefox' && $(this).val() !== "") {
-      periAddButton();
-    }
+    hidePeri(this);
     updatePeriFilters();
   });
   $('#peri_filters').on('click', '.delete_peri', function(e){
-    const peri = parseInt($(this).attr('id').slice(-1));
-    deletePeri(peri);
+    const index = parseInt($(this).attr('id').slice(-1));
+    deletePeri(index);
     updatePeriFilters();
   });
   $('#peri_filters').on('change', '.filter_select', function(e){
     let fi_num = $(this).attr('id').slice(-1);
+    peri.key[fi_num] = peri.all_filters.indexOf($(`#filter_sel${fi_num}`).val());
     if ($(`#filter_inp${fi_num}`).val() !== "") {
       $(`#filter_inp${fi_num}`).val("");
-      if (browser === 'Firefox') {
-        let fs_dl = $(`#filter_sel${fi_num}`).val() + "Datalist";
-        $(`#filter_inp${fi_num}`).attr('list', fs_dl);
-      }
       $('#add_peri_filters_button').prop('disabled', true);
       updatePeriFilters();
     }
@@ -459,8 +464,8 @@ function removeFilter(index = -1) {
   else {
     for (index = 0; index < api_filters.length; index++) api_filters[index].set("");
     $('#peri_filters').html('');
-    peri_filter_count = 0;
-    peri_filters = [];
+    peri.filter_count = -1;
+    peri.filters = [];
     addPeri();
     $('#playstyle_select').val('0').change(); //this gets a new list
   }
@@ -742,77 +747,82 @@ function setNumFilterById(id, str) {
   getNewList();
 }
 function addPeri() {
-  const x = peri_filter_count;
-  if (x > 0) {
-    peri_filters.push($(`#filter_sel${x}`).val());
+  const x = peri.filter_count;
+  if (x > -1) {
+    peri.filters.push($(`#filter_sel${x}`).val());
     $(`#filter_sel${x}`).prop('disabled', true);
-    //$(`#filter_inp${x}`).prop('disabled', true);
   }
-  peri_filter_count++;
-  const y = peri_filter_count;
+  peri.filter_count++;
+  const y = peri.filter_count;
   const avail = availFilters();
-  $('#peri_filters').append(`<div id='filter_div${y}'><br><select id='filter_sel${y}' class='text_input filter_select'>${avail.string}</select>
-    <input id='filter_inp${y}' type='text' name='product' class='text_input filter_input' list='' autocomplete='off'>
+  const style = peri.x > 0 ? ` style="width:${peri.x}px"` : '';
+  $('#peri_filters').append(`<div id='filter_div${y}'><br><select id='filter_sel${y}' class='text_input filter_select'${style}>
+    ${avail.string}</select> <input id='filter_inp${y}' type='text' name='product' class='text_input filter_input' autocomplete='off'>
     <input id='delete_peri_filter_button${y}' type='button' value='-' class='delete_peri'></div>`);
   $('#add_peri_filters_button').prop('disabled', true);
-  console.log(y);
-  let fs_dl = avail.default + "Datalist";
-  $(`#filter_inp${y}`).attr('list', fs_dl);
+  peri.key[y] = peri.all_filters.indexOf(avail.default);
 }
-function deletePeri(peri) {
-  $(`#filter_div${peri}`).remove();
+function deletePeri(index) {
+  $(`#filter_div${index}`).remove();
   let j;
-  for (let i = peri; i < peri_filter_count; i++) {
+  for (let i = index; i < peri.filter_count; i++) {
     j = i+1;
-    console.log("change " + j + " to " + i);
     $(`#filter_div${j}`).prop('id', `filter_div${i}`);
     $(`#filter_sel${j}`).prop('id', `filter_sel${i}`);
     $(`#filter_inp${j}`).prop('id', `filter_inp${i}`);
+    peri.key[i] = peri.key[j];
     $(`#delete_peri_filter_button${j}`).prop('id', `delete_peri_filter_button${i}`);
   }
-  peri_filter_count--;
-  const count = peri_filter_count;
-  if (count > 0) {
-    if (peri <= count) {
-      peri_filters.splice(peri - 1, 1);
+  peri.filter_count--;
+  const count = peri.filter_count;
+  if (count > -1) {
+    if (index <= count) {
+      peri.filters.splice(index, 1);
       const val = $(`#filter_sel${count}`).val();
       $(`#filter_sel${count}`).html(availFilters().string);
       $(`#filter_sel${count}`).val(val);
+      if ($(`#filter_inp${count}`).val() !== "") $('#add_peri_filters_button').prop('disabled', false);
     }
     else {
-      peri_filters.splice(peri_filters.length - 1, 1);
+      peri.filters.splice(peri.filters.length - 1, 1);
       $('#add_peri_filters_button').prop('disabled', false);
     }
     $(`#filter_sel${count}`).prop('disabled', false);
-    $(`#filter_inp${count}`).prop('disabled', false);
+    //$(`#filter_inp${count}`).prop('disabled', false);
   }
   else { 
     $('#add_peri_filters_button').prop('disabled', false);
     $('#peri_filters').html('');
-    peri_filters = [];
-    peri_filter_count = 0;
+    peri.filters = [];
+    peri.filter_count = -1;
+  }
+  if (peri.current == index) {
+    peri.current = -1;
+    peri.loaded = -1;
+  }
+  else if (peri.current > index) {
+    peri.current = peri.current - 1;
+    peri_loaded = peri.loaded - 1;
   }
 }
 function deletePeriFromItem(item) {
-  for (let i = 1; i <= peri_filter_count; i++) {
+  for (let i = 0; i <= peri.filter_count; i++) {
     if ($(`#filter_sel${i}`).val() === item) {
       deletePeri(i);
-      if (peri_filter_count === 0) addPeri();
+      if (peri.filter_count === -1) addPeri();
     }
   }
 }
 function unusedFilters() {
-  const toRemove = new Set(peri_filters);
-  return peri_filters_avail.filter( x => !toRemove.has(x) );
+  const toRemove = new Set(peri.filters);
+  return peri.all_filters.filter( x => !toRemove.has(x) );
 }
 function availFilters() {
   const avail = unusedFilters();
   let s = "";
-  console.log(avail);
   for (i = 0; i < avail.length; i++) {
     s += `<option value='${avail[i]}'>${getOptionFromItem(avail[i]).string}</option>`
   }
-  console.log(s);
   return {default: avail[0], string: s};
 }
 function updatePeriFilters() {
@@ -822,7 +832,7 @@ function updatePeriFilters() {
   for (i = 0; i < avail.length; i++) {
     api_params[getOptionFromItem(avail[i]).param] = "";
   }
-  for (i = 1; i <= peri_filter_count; i++) {
+  for (i = 0; i <= peri.filter_count; i++) {
     filter = $(`#filter_sel${i}`).val();
     value = $(`#filter_inp${i}`).val();
     api_params[getOptionFromItem(filter).param] = value;
@@ -831,12 +841,50 @@ function updatePeriFilters() {
   getNewList();
 }
 function clearPeriFilters() {
-  for (i = 0; i < peri_filters_avail.length; i++) {
+  for (i = 0; i < peri.all_filters.length; i++) {
     api_params[getOptionFromItem(filter).param] = "";
   }
 }
 function periAddButton() {
-  if (peri_filter_count < peri_filters_avail.length) $('#add_peri_filters_button').prop('disabled', false);
+  if (peri.filter_count < peri.all_filters.length - 1) $('#add_peri_filters_button').prop('disabled', false);
+}
+function searchPeri(index, searchStr) {
+  let initArr;
+  const prevSearch = peri.search_str[index];
+  if (searchStr.includes(prevSearch) && prevSearch !== "") {
+    if (prevSearch === searchStr) return -true;
+    else initArr = peri.search_arr[index];
+  }
+  else initArr = peri.list[index];
+  peri.search_arr[index] = initArr.filter(x => x.toLowerCase().includes(searchStr));
+  peri.search_str[index] = searchStr;
+  return false;
+}
+function htmlPeri(key, value) {
+  let noSearch = searchPeri(key, value);
+  if (noSearch && peri.current == peri.loaded) return;
+  let s = "";
+  for (i = 0; i < peri.search_arr[key].length; i++) {
+    s += `<option>${peri.search_arr[key][i]}`
+  }
+  $("#peri_list").html(s);
+  peri.loaded = key;
+}
+function showPeri(inp) {
+  if ($('#peri_list').hasClass('hidden')) {
+    $('#peri_list').removeClass('hidden');
+    $(inp).addClass('add_corner');
+    $('#peri_list').scrollTop(0);
+    return true;
+  }
+  else return false;
+}
+function hidePeri(inp) {
+  if (!$('#peri_list').hasClass('hidden')) {
+    $('#peri_list').addClass('hidden');
+    $(inp).removeClass('add_corner');
+  }
+  else return false;
 }
 
 function startNameSearch(str) {
@@ -971,7 +1019,7 @@ function updateFilterList() {
   else $('#filter_reset_button').prop('disabled', false);
   $('#applied_filters').html(str);
   $('#filter_delete_button').prop('disabled', true);
-  selected_filter = -1;
+  peri.filter_selected = -1;
 }
 
 function setApiPlaystyle(arr) {  //USE THIS TO ADD PLAYSTYLE FILTERS (with playstyle ids in an array)
@@ -1072,6 +1120,7 @@ async function getItem(item) {
 function createDatalists() {
   let arrays = Object.keys(items);
   let item;
+  let itemNames;
   let obj;
   let s;
   for (let i = 0; i < arrays.length; i++) {
@@ -1082,10 +1131,14 @@ function createDatalists() {
       for (let j = 0; j < items[item].length; j++) {
         s += `<option value='${items[item][j].name}'>`;
       }
-      peri_filters_avail.push(item);
-      datalist_items[item] = s;
-      $('#filters_frame').append(`<datalist id='${item}Datalist'>${s}</datalist>`);
-      $('#filter_sel1').append(`<option value='${item}'>${obj.string}</option>`);
+      peri.all_filters.push(item);
+      itemNames = items[item].map(x => x.name);
+      peri.search_str.push("");
+      peri.search_arr.push(itemNames);
+      peri.list.push(itemNames);
+      //datalist_items[item] = s;
+      //$('#filters_frame').append(`<datalist id='${item}Datalist'>${s}</datalist>`);
+      //$('#filter_sel1').append(`<option value='${item}'>${obj.string}</option>`);
     }
     else if (obj.string === 'Playstyle') {
       const pArr = items[item];
