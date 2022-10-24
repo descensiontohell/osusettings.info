@@ -61,33 +61,37 @@
             <div id="note_container" class="hidden"></div>
         </div>
         <div id="loading_text" class="hidden">Loading...</div>
-        <div id="tab1" class="tab">woa
+        <div id="tab1" class="top_tab">woa
             <div class="tab_text">Test Tab 1</div>
         </div>
-        <div id="login_tab" class="tab"><a id="login_button">Login</a>
+        <div id="login_tab" class="top_tab"><a id="login_button">Login</a>
             <div class="tab_text">Connect osu! Profile</div>
         </div>
         <div id="div_lock" class="hidden">
             
             <div id="filters_frame" class="hidden frame">
-                <input type="button" value="Close" class="close_frame">
+                <br><div class="peri_label">[Rank]</div><br>
                 <div id="rank_range_div">
                     #<input id="rank_range_min" type="text" class="text_input num_input rank_input" placeholder="0" maxlength="10" autocomplete="off"> to 
                     #<input id="rank_range_max" type="text" class="text_input num_input rank_input" placeholder="10000" maxlength="10" autocomplete="off">
                 </div>
+                <br><div class="peri_label">[eDPI]</div><br>
                 <div id="edpi_range_div">
-                    <input id="edpi_range_min" type="text" class="text_input num_input edpi_input" placeholder="0" maxlength="5" autocomplete="off"> to 
+                    &emsp;<input id="edpi_range_min" type="text" class="text_input num_input edpi_input" placeholder="0" maxlength="5" autocomplete="off"> to 
                     <input id="edpi_range_max" type="text" class="text_input num_input edpi_input" placeholder="∞" maxlength="5" autocomplete="off">
                 </div>
-                <select id="playstyle_select" class="text_input"></select>
+                <br><div class="peri_label">[Playstyle]</div><br>
+                &emsp;<select id="playstyle_select" class="text_input"></select><br>
+                <br><div class="peri_label">[Peripherals]</div>
                 <div id="peri_filters"></div><br>
-                <input id="add_peri_filters_button" type="button" value="+" disabled>
+                &emsp;<button id="add_peri_filters_button" class="add_peri" disabled><span>+</span></button>
                 <div id="peri_list_container">
                     <select id="peri_list" class="scrollable_div hidden" size="2"></select>
                 </div>
+                <button class="close_frame"><span>✖</span></button>
             </div>
             <div id="profile_frame" class="hidden frame">
-                <input type="button" value="Close" class="close_frame">
+                <button class="close_frame"><span>✖</span></button>
                 <iframe id="iframe" src="user.html" name="profile_iFrame" frameBorder="0"></iframe>
             </div>
         </div>

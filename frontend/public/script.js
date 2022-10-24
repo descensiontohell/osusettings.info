@@ -16,8 +16,8 @@ let typing_timer;
 let scroll_timer;
 let search_string = "";
 let active_frame = "";
-const peri = { current: 0, loaded: 0, list: [], search_arr: [], search_str: [], key: [], init: true, x: 0,
-  all_filters: [], filters: [], filter_count: -1, filter_selected: -1, bypass: false };
+const peri = { current: -1, loaded: -1, list: [], search_arr: [], search_str: [], key: [], init: true, x: 0,
+  all_filters: [], filters: [], filter_count: -1, filter_selected: -1, bypass: false, activeScroll: false };
 let forced_search = true; //when false, double checks if search string is different from returned list because keyup process is sometimes interrupted
 const column = { //how columns are addressed(string), sized(px), and how it addresses the object(func)
 //column object: must match the player object:
@@ -200,10 +200,10 @@ $(document).ready(function() {
   $('#column_default_button').click(function() {
     defaultColumns();
   });
-  $('.tab').hover(function(e){
-    $('#'+e.target.closest('div[class=tab]').id).stop(true, false).animate({ top: "-2px" }, 250);
+  $('.top_tab').hover(function(e){
+    $('#'+e.target.closest('div[class=top_tab]').id).stop(true, false).animate({ top: "-2px" }, 250);
     }, function(e) {
-    $('#'+e.target.closest('div[class=tab]').id).stop(true, false).animate({ top: "-80px" }, 250);
+    $('#'+e.target.closest('div[class=top_tab]').id).stop(true, false).animate({ top: "-80px" }, 250);
   });
   $('#list').mouseover(function(e) {
     if (e.target.closest('td')) {
@@ -306,19 +306,35 @@ $(document).ready(function() {
       $(this).val('');
     }
   });
+  $('#peri_filters').on('keydown', 'input[type=text]', function(e){
+    if (e.keyCode == 13) {
+      if ($('#peri_list')[0].selectedIndex > -1) {
+        $(`#filter_inp${peri.current}`).val($('#peri_list')[0].selectedOptions[0].innerHTML);
+      }
+      $(this).blur();
+    }
+    else if (e.keyCode == 40 || e.keyCode == 38) {
+      e.preventDefault();
+      peri.activeScroll = true;
+      changePeriIndex(e.keyCode);
+    }
+  });
   $('#peri_filters').on('keyup', 'input[type=text]', function(e){
     const value = $(this).val().toLowerCase();
-    if (value !== "") {
+    if (e.keyCode == 40 || e.keyCode == 38) {
+      peri.activeScroll = false;
+    }
+    else if (value !== "") {
       let fi_num = $(this).attr('id').slice(-1);
       let key = peri.key[fi_num];
       htmlPeri(key, value);
-      if (showPeri(this)) {
+      if (showPeri()) {
         periAddButton();
       }
     }
     else {
       $('#add_peri_filters_button').prop('disabled', true);
-      hidePeri(this);
+      hidePeri();
     }
   });
   $('#peri_filters').on('focusin', 'input[type=text]', function(e){
@@ -337,12 +353,15 @@ $(document).ready(function() {
     }
     if (val !== "") {
       htmlPeri(key, val);
-      showPeri(this);
+      showPeri();
     }
   });
   $('#peri_filters').on('focusout', 'input[type=text]', function(e){
-    hidePeri(this);
-    updatePeriFilters();
+    let target = $(e.relatedTarget);
+    if (target.length < 1 || target[0].id !== 'peri_list') {
+      hidePeri();
+      updatePeriFilters();
+    }
   });
   $('#peri_filters').on('click', '.delete_peri', function(e){
     const index = parseInt($(this).attr('id').slice(-1));
@@ -355,6 +374,31 @@ $(document).ready(function() {
     if ($(`#filter_inp${fi_num}`).val() !== "") {
       $(`#filter_inp${fi_num}`).val("");
       $('#add_peri_filters_button').prop('disabled', true);
+      updatePeriFilters();
+    }
+  });
+  $('#peri_list').mouseover(function(e){
+    const mouse = e.originalEvent;
+    //if (e.target.closest('option') && (mouse.screenX != peri.screenX || mouse.screenY != peri.screenY)) { 
+    if (!peri.activeScroll && e.target.closest('option')) { 
+      let index = e.target.closest('option').index;
+      $('#peri_list option')[index].selected = true;
+    }
+  });
+  $('#peri_list').mouseleave(function(e){
+    changePeriIndex();
+  });
+  $('#peri_list').click(function(e){
+    if (e.target.closest('option')) { 
+      let index = e.target.closest('option').index;
+      $(`#filter_inp${peri.current}`).val($(this)[0][index].innerHTML);
+      $(this).focusout();
+    }
+  });
+  $('#peri_list').on('focusout', function(e){
+    let target = $(e.relatedTarget);
+    if (target.length < 1 || target[0].id !== 'peri_filters') {
+      hidePeri();
       updatePeriFilters();
     }
   });
@@ -756,9 +800,9 @@ function addPeri() {
   const y = peri.filter_count;
   const avail = availFilters();
   const style = peri.x > 0 ? ` style="width:${peri.x}px"` : '';
-  $('#peri_filters').append(`<div id='filter_div${y}'><br><select id='filter_sel${y}' class='text_input filter_select'${style}>
+  $('#peri_filters').append(`<div id='filter_div${y}'><br>&emsp;<select id='filter_sel${y}' class='text_input filter_select'${style}>
     ${avail.string}</select> <input id='filter_inp${y}' type='text' name='product' class='text_input filter_input' autocomplete='off'>
-    <input id='delete_peri_filter_button${y}' type='button' value='-' class='delete_peri'></div>`);
+    <button id='delete_peri_filter_button${y}' class='delete_peri'><span>✖</span></button></div>`);
   $('#add_peri_filters_button').prop('disabled', true);
   peri.key[y] = peri.all_filters.indexOf(avail.default);
 }
@@ -870,19 +914,38 @@ function htmlPeri(key, value) {
   $("#peri_list").html(s);
   peri.loaded = key;
 }
-function showPeri(inp) {
-  if ($('#peri_list').hasClass('hidden')) {
-    $('#peri_list').removeClass('hidden');
-    $(inp).addClass('add_corner');
-    $('#peri_list').scrollTop(0);
-    return true;
+function changePeriIndex(keycode = 0) {
+  const pl = $('#peri_list')[0];
+  let index = pl.selectedIndex;
+  if (keycode == 38) index--;
+  else if (keycode == 40) index++;
+  else index = -1;
+  if (index > -2 && index < pl.length) {
+    $('select#peri_list').prop('selectedIndex', index);
   }
-  else return false;
 }
-function hidePeri(inp) {
+function showPeri() {
+  const arr = peri.search_arr[peri.loaded];
+  const inp = $(`#filter_inp${peri.current}`);
+  if (arr.length > 1 || (arr.length == 1 && arr[0].toLowerCase() !== $(inp).val().toLowerCase())) {
+    if ($('#peri_list').hasClass('hidden')) {
+      $('#peri_list').removeClass('hidden');
+      $(`#filter_inp${peri.current}`).addClass('add_corner');
+      $('#peri_list').scrollTop(0);
+      return true;
+    }
+    else return false;
+  }
+  else {
+    hidePeri();
+    return false;
+  }
+}
+function hidePeri() {
   if (!$('#peri_list').hasClass('hidden')) {
     $('#peri_list').addClass('hidden');
-    $(inp).removeClass('add_corner');
+    $(`#filter_inp${peri.current}`).removeClass('add_corner');
+    return true;
   }
   else return false;
 }
