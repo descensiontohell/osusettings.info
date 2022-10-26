@@ -66,7 +66,44 @@ body a {
 }
 #search_text {
   position: relative;
-  top: 120px;
+  top: 92px;
+}
+#order_pp {
+  position: relative;
+  top: 76px;
+  right: 10px;
+}
+#order_pp span {
+  position: relative;
+  left: 8px;
+}
+#order_dpi {
+  position: relative;
+  top: 76px;
+  left: 10px;
+}
+#order_dpi span {
+  position: relative;
+  left: 2px;
+}
+.order_button {
+  border-radius: 10px;
+  width: 60px;
+  height: 20px;
+  border: 0px none;
+  color: #FFF;
+  background-color:rgb(21, 36, 43, 0);
+  text-align: left;
+}
+.order_button:hover {
+  background-color:rgb(23, 54, 62);
+}
+.order_button.active_button {
+  color:rgb(11, 18, 21);
+  background-color: rgb(107, 223, 56);
+}
+.order_button.active_button:hover {
+  background-color:rgb(136, 219, 101);
 }
 
 .hidden {

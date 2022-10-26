@@ -221,8 +221,8 @@ $(document).ready(function() {
   $('#list').click(function(e) {
     if (e.target.closest('tr')) {
       if (!e.target.closest('a')) {
-        const id = parseIndex(e.target.closest('tr').id);
-        console.log(players[id].osu_id);
+        //const id = parseIndex(e.target.closest('tr').id);
+        //console.log(players[id].osu_id);
         lockMainLayer('#profile_frame');
       }
     }
@@ -278,6 +278,9 @@ $(document).ready(function() {
   });
   $('.close_frame').click(function(e) {
     unlockMainLayer();
+  });
+  $('.order_button').click(function(e){
+    changeOrder(this);
   });
   // optional method to allow live search
   $('#search_text').click(function(e){
@@ -378,8 +381,6 @@ $(document).ready(function() {
     }
   });
   $('#peri_list').mouseover(function(e){
-    const mouse = e.originalEvent;
-    //if (e.target.closest('option') && (mouse.screenX != peri.screenX || mouse.screenY != peri.screenY)) { 
     if (!peri.activeScroll && e.target.closest('option')) { 
       let index = e.target.closest('option').index;
       $('#peri_list option')[index].selected = true;
@@ -460,7 +461,7 @@ function loadHeaderOptions() {
     if (!headers[i].locked) {
       let label = `'header_cb${i}'`;
       let checked = layout.includes(i) ? " checked" : "";
-      //let locked = headers[i].locked ? " disabled='disabled'" : "";
+      //let locked = headers[i].locked ? " disabled='disabled'" : ""; i don't even remember what this was for
       cb_string += `<input type='checkbox' id=${label}`+/*${locked}*/`${checked}><label for=${label}>${headers[i].string}</label><br>`;
     }
     else locked_layout.push(i);
@@ -647,10 +648,10 @@ function noteHandler() {
       let header = $('#headers').children()[0].clientHeight;
       $("#note_container").html(mouseProfile(player));
       let pos_max = $(window).outerHeight() - $('#note_container')[0].clientHeight;
-      let x = pos.left - $("#note_container").width() - scrollLeft - 6; //warning: arbitrary number
+      let x = pos.left - $("#note_container").width() - scrollLeft - 6; //arbitrary number
       let y = pos.top - scrollTop + margin;
-      if (x < 0) x = pos.left + $('#'+hover_cell).width() - scrollLeft + 18; //warning: arbitrary number
-      if (y > pos_max - 12) y = pos_max - 14; //12 is scrollbar width, should probably be a constant
+      if (x < 0) x = pos.left + $('#'+hover_cell).width() - scrollLeft + 18; //arbitrary number
+      if (y > pos_max - 10) y = pos_max - 14; //10 is scrollbar width, should probably be a constant
       else if (y < margin + header) y = margin + header;
       $("#note_container").css('left', x); 
       $("#note_container").css('top', y);
@@ -739,7 +740,7 @@ function avatarFadeOut() {
   avatar_visible = false;
   $("#avatar_container").fadeOut(250);
 }
-function avatarFadeIn() {
+function avatarFadeIn() { //this shit ain't perfect
   avatar_visible = true;
   //$("#avatar_container").fadeIn(250, function() { avatar_visible = true; });
   $("#avatar_container").fadeIn(250);
@@ -950,6 +951,39 @@ function hidePeri() {
   else return false;
 }
 
+function changeOrder(elem) {
+  if (elem.id === 'order_pp') {
+    if (api_params.order_by === 'pp') {
+      api_params.order_by = '-pp';
+      $('#order_pp span').html('PP ▲');
+    }
+    else {
+      api_params.order_by = 'pp';
+      $('#order_pp span').html('PP ▼');
+      if (api_params.order_by !== '-pp') {
+        $('#order_dpi span').html('eDPI');
+        $("#order_pp").addClass('active_button');
+        $('#order_dpi').removeClass('active_button');
+      }
+    }
+  }
+  else if (elem.id ==='order_dpi') {
+    if (api_params.order_by === 'edpi') {
+      api_params.order_by = '-edpi';
+      $('#order_dpi span').html('eDPI ▼');
+    }
+    else {
+      api_params.order_by = 'edpi';
+      $('#order_dpi span').html('eDPI ▲');
+      if (api_params.order_by !== '-edpi') {
+        $('#order_pp span').html('PP');
+        $("#order_dpi").addClass('active_button');
+        $('#order_pp').removeClass('active_button');
+      }
+    }
+  }
+  getNewList();
+}
 function startNameSearch(str) {
   search_string = str;
   console.log("searching for "+str);
