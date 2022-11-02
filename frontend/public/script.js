@@ -16,8 +16,16 @@ let typing_timer;
 let scroll_timer;
 let search_string = "";
 let active_frame = "";
+let active_scroll = false;
 const peri = { current: -1, loaded: -1, list: [], search_arr: [], search_str: [], key: [], init: true, x: 0,
-  all_filters: [], filters: [], filter_count: -1, filter_selected: -1, bypass: false, activeScroll: false };
+  all_filters: [], filters: [], filter_count: -1, filter_selected: -1 };
+//sigh
+const countries = { code: [ '','US','RU','DE','CA','PH','PL','FR','JP','BR','GB','ID','AU','TW','CL','MY','KR','UA','TH','MX','AR','SG',
+  'CN','VN','IT','HK','FI','ES','NL','SE','TR','PE','CZ','RO','PT','NO','HU','AT','CO','KZ','BE','BY','NZ','LT','IL','DK','IN','CH','GR',
+  'EE','BG','LV','SK','SA','EC','RS','VE','IE','AE','ZA','HR','UY','CR','SI','MA','EG','DO','MD','PA','DZ','GT','TN','KH','MN','BO','BN',
+  'PR','KW','PY','QA','NP','MM','SV','GE','PK','RE','TT','BD','MO','HN','UZ','JO','LU','BA','KG','MK','CY','BH','IS','GU','IQ','MV','NI',
+  'LB','JM','AZ','OM','LK','MT','AL','LA','IR','PF','GP','PS','MU' ], emoji: [''], name: ['All'], search_default: [0], search_arr:[],
+  search_str: '', highlighted: '', highlighted_index: -1, init: true, default: true, size: 0 };
 let forced_search = true; //when false, double checks if search string is different from returned list because keyup process is sometimes interrupted
 const column = { //how columns are addressed(string), sized(px), and how it addresses the object(func)
 //column object: must match the player object:
@@ -182,6 +190,7 @@ const default_layout = [ 0,1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19 ];
 let locked_layout;
 let layout = default_layout;
 
+
 /*
 HTML EVENT LISTENER SHIT
 */
@@ -309,31 +318,95 @@ $(document).ready(function() {
       $(this).val('');
     }
   });
+  $('#country_input').on('keydown', function(e){
+    if (e.keyCode == 13 || e.keyCode == 39) {
+      /*if ($(this)[0].selectedIndex > -1) {
+        //$(`#peri_inp${peri.current}`).val($('#peri_list')[0].selectedOptions[0].innerHTML);
+        $(this).val($(this)[0].selectedOptions[0].innerHTML);
+      }*/
+      $(this).blur();
+    }
+    else if (e.keyCode == 40 || e.keyCode == 38) {
+      e.preventDefault();
+      active_scroll = true;
+      changeCountryIndex(e.keyCode);
+    }
+  });
+  $('#country_input').on('keyup', function(e){
+    const value = $(this).val().toLowerCase();
+    if (e.keyCode == 40 || e.keyCode == 38) {
+      setTimeout(() => { active_scroll = false }, 15); //was causing mouseover triggering from switching before DOM render?
+    }
+    else {
+      htmlCountry(value);
+      changeCountryIndex(0);
+    }
+  });
+  $('#country_input').on('focusin', function(e){
+    if (countries.init) {
+      //
+    }
+    let val = $(this).val().toLowerCase();
+    htmlCountry(val);
+    changeCountryIndex(0);
+    showCountry();
+  });
+  $('#country_input').on('focusout', function(e){
+    hideCountry();
+    updateCountryFilters();
+  });
+  $('#country_list').mouseover(function(e){
+    if (!active_scroll && e.target.closest('tr')) {
+      const tr = e.target.closest('tr');
+      $(`#cntry${countries.highlighted}`).removeClass('highlight_row');
+      countries.highlighted = tr.id.substring(5);
+      countries.highlighted_index = tr.rowIndex;
+      $(tr).addClass('highlight_row');
+      //let index = e.target.closest('option').index;
+      //$(`#${this.id} option`)[index].selected = true;
+    }
+  });
+  $('#country_list').mouseleave(function(e){
+    if (!countries.default || (countries.default && countries.highlighted_index != 0)) {
+      $(`#cntry${countries.highlighted}`).removeClass('highlight_row');
+      countries.highlighted = '';
+      countries.highlighted_index = -1;
+    }
+    //changePeriIndex();
+  });
+  /*$('#country_list').on('focusout', function(e){
+    let target = $(e.relatedTarget);
+    if (target.length < 1 || target[0].id !== 'country_filters') {
+      //hidePeri();
+      hideCountry();
+      updateCountryFilters();
+    }
+  });*/
   $('#peri_filters').on('keydown', 'input[type=text]', function(e){
     if (e.keyCode == 13) {
-      if ($('#peri_list')[0].selectedIndex > -1) {
-        $(`#filter_inp${peri.current}`).val($('#peri_list')[0].selectedOptions[0].innerHTML);
+      if ($(this)[0].selectedIndex > -1) {
+        //$(`#peri_inp${peri.current}`).val($('#peri_list')[0].selectedOptions[0].innerHTML);
+        $(this).val($(this)[0].selectedOptions[0].innerHTML);
       }
       $(this).blur();
     }
     else if (e.keyCode == 40 || e.keyCode == 38) {
       e.preventDefault();
-      peri.activeScroll = true;
+      active_scroll = true;
       changePeriIndex(e.keyCode);
     }
   });
+  
   $('#peri_filters').on('keyup', 'input[type=text]', function(e){
     const value = $(this).val().toLowerCase();
     if (e.keyCode == 40 || e.keyCode == 38) {
-      peri.activeScroll = false;
+      setTimeout(() => { active_scroll = false }, 15); //was causing mouseover triggering from switching before DOM render?
     }
     else if (value !== "") {
       let fi_num = $(this).attr('id').slice(-1);
       let key = peri.key[fi_num];
       htmlPeri(key, value);
-      if (showPeri()) {
-        periAddButton();
-      }
+      if (showPeri()) periAddButton();
     }
     else {
       $('#add_peri_filters_button').prop('disabled', true);
@@ -342,15 +415,15 @@ $(document).ready(function() {
   });
   $('#peri_filters').on('focusin', 'input[type=text]', function(e){
     if (peri.init) {
-      peri.x = $(`#filter_sel0`)[0].clientWidth;
-      $('#peri_list').css('left', `${$(`#filter_inp0`)[0].offsetLeft + 8}px`);
+      peri.x = $(`#peri_sel0`)[0].clientWidth;
+      $('#peri_list').css('left', `${$(`#peri_inp0`)[0].offsetLeft + 8}px`);
       peri.init = false;
     }
     let fi_num = $(this).attr('id').slice(-1);
     let key = peri.key[fi_num];
     let val = $(this).val();
     if (fi_num != peri.current) {
-      let filter = $(`#filter_inp${fi_num}`)[0];
+      let filter = $(`#peri_inp${fi_num}`)[0];
       $('#peri_list').css('top', `${filter.offsetHeight + filter.offsetTop}px`);
       peri.current = fi_num;
     }
@@ -373,17 +446,17 @@ $(document).ready(function() {
   });
   $('#peri_filters').on('change', '.filter_select', function(e){
     let fi_num = $(this).attr('id').slice(-1);
-    peri.key[fi_num] = peri.all_filters.indexOf($(`#filter_sel${fi_num}`).val());
-    if ($(`#filter_inp${fi_num}`).val() !== "") {
-      $(`#filter_inp${fi_num}`).val("");
+    peri.key[fi_num] = peri.all_filters.indexOf($(`#peri_sel${fi_num}`).val());
+    if ($(`#peri_inp${fi_num}`).val() !== "") {
+      $(`#peri_inp${fi_num}`).val("");
       $('#add_peri_filters_button').prop('disabled', true);
       updatePeriFilters();
     }
   });
   $('#peri_list').mouseover(function(e){
-    if (!peri.activeScroll && e.target.closest('option')) { 
+    if (!active_scroll && e.target.closest('option')) { 
       let index = e.target.closest('option').index;
-      $('#peri_list option')[index].selected = true;
+      $(`#${this.id} option`)[index].selected = true;
     }
   });
   $('#peri_list').mouseleave(function(e){
@@ -392,7 +465,8 @@ $(document).ready(function() {
   $('#peri_list').click(function(e){
     if (e.target.closest('option')) { 
       let index = e.target.closest('option').index;
-      $(`#filter_inp${peri.current}`).val($(this)[0][index].innerHTML);
+      let target = `#peri_inp${peri.current}`;
+      $(target).val($(this)[0][index].innerHTML);
       $(this).focusout();
     }
   });
@@ -424,6 +498,7 @@ function parseIndex(s) { //ids 5 chars + int
 function init() {
   browser = getBrowser();
   loadHeaderOptions();
+  loadCountryFlags();
   refreshHeaders();
   getNewList();
   getItems();
@@ -468,6 +543,19 @@ function loadHeaderOptions() {
   }
   $("#applied_columns").html(cb_string);
 }
+function loadCountryFlags() {
+  let chars;
+  const regionName = new Intl.DisplayNames(['en'], { type: 'region' });
+  for (i = 1; i < countries.code.length; i++) {
+    chars = countries.code[i].split('')
+      .map(char =>  127397 + char.charCodeAt());
+    countries.emoji[i] =  `${chars[0].toString(16)}-${chars[1].toString(16)}`;
+    countries.search_default[i] = i;
+    countries.name[i] = regionName.of(countries.code[i]);
+  }
+  countries.search_arr = countries.search_default;
+  //return `<div class="${flag}" style="background-image: url('https://twemoji.maxcdn.com/v/14.0.2/svg/${file}.svg')"></div>`;
+}
 function applyColumns() {
   let selected = $('#applied_columns').children('input:checked');
   layout = new Int8Array(locked_layout.length + selected.length);
@@ -504,6 +592,7 @@ function removeFilter(index = -1) {
     if (filter.item) deletePeriFromItem(filter.item);
     else if (filter.playstyle) $('#playstyle_select').val('0').change();
     else if (filter.numInput) $('#'+filter.numInput).val('');
+    else if (filter.country) $('#country_input').val('');
     getNewList();
   }
   else {
@@ -566,10 +655,17 @@ function linkOnClick(url) {
   }
 }
 
-function getCountryFlag(player, small = true) {
-  let file;
-  let flag;
-  if (!player.country) file = '1f3f4-200d-2620-fe0f';
+function getCountryFlag(player, small_flag = true) {
+  let index;
+  if (player.country) {
+    index = countries.code.indexOf(player.country);
+    if (index > 0) {
+      return parseCountryString(countries.emoji[index], small_flag)
+    }
+    else parseCountryString('1f3f4-200d-2620-fe0f', small_flag);
+  }
+  return parseCountryString('1f30e', small_flag);
+  /*if (!player.country) file = '1f3f4-200d-2620-fe0f';
   else {
     let chars = player.country.split('')
       .map(char =>  127397 + char.charCodeAt());
@@ -577,7 +673,13 @@ function getCountryFlag(player, small = true) {
   }
   if (small) flag = "flag_small";
   else flag = "flag_medium";
-  return `<div class="${flag}" style="background-image: url('https://twemoji.maxcdn.com/v/14.0.2/svg/${file}.svg')"></div>`;
+  return `<div class="${flag}" style="background-image: url('https://twemoji.maxcdn.com/v/14.0.2/svg/${file}.svg')"></div>`;*/
+}
+function parseCountryString(file, small_flag = true) {
+  let flag;
+  if (small_flag) flag = 'flag_small';
+  else flag = 'flag_medium';
+  return `<div class="${flag}" style="background-image: url('https://twemoji.maxcdn.com/v/14.0.2/svg/${file}.svg')"></div>`
 }
 
 function recolor(s, color) {
@@ -794,27 +896,27 @@ function setNumFilterById(id, str) {
 function addPeri() {
   const x = peri.filter_count;
   if (x > -1) {
-    peri.filters.push($(`#filter_sel${x}`).val());
-    $(`#filter_sel${x}`).prop('disabled', true);
+    peri.filters.push($(`#peri_sel${x}`).val());
+    $(`#peri_sel${x}`).prop('disabled', true);
   }
   peri.filter_count++;
   const y = peri.filter_count;
   const avail = availFilters();
   const style = peri.x > 0 ? ` style="width:${peri.x}px"` : '';
-  $('#peri_filters').append(`<div id='filter_div${y}'><br>&emsp;<select id='filter_sel${y}' class='text_input filter_select'${style}>
-    ${avail.string}</select> <input id='filter_inp${y}' type='text' name='product' class='text_input filter_input' autocomplete='off'>
+  $('#peri_filters').append(`<div id='peri_div${y}'><br>&emsp;<select id='peri_sel${y}' class='text_input filter_select'${style}>
+    ${avail.string}</select> <input id='peri_inp${y}' type='text' class='text_input filter_input' autocomplete='off'>
     <button id='delete_peri_filter_button${y}' class='delete_peri'><span>✖</span></button></div>`);
   $('#add_peri_filters_button').prop('disabled', true);
   peri.key[y] = peri.all_filters.indexOf(avail.default);
 }
 function deletePeri(index) {
-  $(`#filter_div${index}`).remove();
+  $(`#peri_div${index}`).remove();
   let j;
   for (let i = index; i < peri.filter_count; i++) {
     j = i+1;
-    $(`#filter_div${j}`).prop('id', `filter_div${i}`);
-    $(`#filter_sel${j}`).prop('id', `filter_sel${i}`);
-    $(`#filter_inp${j}`).prop('id', `filter_inp${i}`);
+    $(`#peri_div${j}`).prop('id', `peri_div${i}`);
+    $(`#peri_sel${j}`).prop('id', `peri_sel${i}`);
+    $(`#peri_inp${j}`).prop('id', `peri_inp${i}`);
     peri.key[i] = peri.key[j];
     $(`#delete_peri_filter_button${j}`).prop('id', `delete_peri_filter_button${i}`);
   }
@@ -823,17 +925,17 @@ function deletePeri(index) {
   if (count > -1) {
     if (index <= count) {
       peri.filters.splice(index, 1);
-      const val = $(`#filter_sel${count}`).val();
-      $(`#filter_sel${count}`).html(availFilters().string);
-      $(`#filter_sel${count}`).val(val);
-      if ($(`#filter_inp${count}`).val() !== "") $('#add_peri_filters_button').prop('disabled', false);
+      const val = $(`#peri_sel${count}`).val();
+      $(`#peri_sel${count}`).html(availFilters().string);
+      $(`#peri_sel${count}`).val(val);
+      if ($(`#peri_inp${count}`).val() !== "") $('#add_peri_filters_button').prop('disabled', false);
     }
     else {
       peri.filters.splice(peri.filters.length - 1, 1);
       $('#add_peri_filters_button').prop('disabled', false);
     }
-    $(`#filter_sel${count}`).prop('disabled', false);
-    //$(`#filter_inp${count}`).prop('disabled', false);
+    $(`#peri_sel${count}`).prop('disabled', false);
+    //$(`#peri_inp${count}`).prop('disabled', false);
   }
   else { 
     $('#add_peri_filters_button').prop('disabled', false);
@@ -852,7 +954,7 @@ function deletePeri(index) {
 }
 function deletePeriFromItem(item) {
   for (let i = 0; i <= peri.filter_count; i++) {
-    if ($(`#filter_sel${i}`).val() === item) {
+    if ($(`#peri_sel${i}`).val() === item) {
       deletePeri(i);
       if (peri.filter_count === -1) addPeri();
     }
@@ -870,6 +972,14 @@ function availFilters() {
   }
   return {default: avail[0], string: s};
 }
+function updateCountryFilters() {
+  let index = countries.code.indexOf($('#country_input'));
+  if (index > -1) {
+    api_params.country = countries.code[index];
+    updateFilterList();
+    getNewList();
+  }
+}
 function updatePeriFilters() {
   let filter;
   let value;
@@ -878,8 +988,8 @@ function updatePeriFilters() {
     api_params[getOptionFromItem(avail[i]).param] = "";
   }
   for (i = 0; i <= peri.filter_count; i++) {
-    filter = $(`#filter_sel${i}`).val();
-    value = $(`#filter_inp${i}`).val();
+    filter = $(`#peri_sel${i}`).val();
+    value = $(`#peri_inp${i}`).val();
     api_params[getOptionFromItem(filter).param] = value;
   }
   updateFilterList();
@@ -897,7 +1007,7 @@ function searchPeri(index, searchStr) {
   let initArr;
   const prevSearch = peri.search_str[index];
   if (searchStr.includes(prevSearch) && prevSearch !== "") {
-    if (prevSearch === searchStr) return -true;
+    if (prevSearch === searchStr) return true;
     else initArr = peri.search_arr[index];
   }
   else initArr = peri.list[index];
@@ -905,33 +1015,135 @@ function searchPeri(index, searchStr) {
   peri.search_str[index] = searchStr;
   return false;
 }
+function searchCountry(searchStr) {
+  let initArr;
+  const prevSearch = countries.search_str;
+  if (searchStr.includes(prevSearch)) {
+    if (prevSearch === searchStr) return true;
+    else initArr = countries.search_arr;
+  }
+  else initArr = countries.search_default;
+  countries.search_arr = [];
+  let compare;
+  let index;
+  let default_arr = [];
+  let arr = [];
+  for (i = 0; i < initArr.length; i++) {
+    compare = `${countries.name[initArr[i]].toLowerCase()}/${countries.code[initArr[i]].toLowerCase()}`;
+    //if (compare.includes(searchStr)) countries.search_arr.push(initArr[i]);//try indexOf method
+    index = compare.indexOf(searchStr);
+    if (index == 0) default_arr.push(initArr[i]);
+    else if (index > 0) arr.push(initArr[i]);
+  }
+  if (default_arr.length > 0) {
+    countries.default = true;
+    countries.search_arr = default_arr.concat(arr);
+  }
+  else {
+    countries.default = false;
+    countries.search_arr = arr;
+  }
+  //console.log(initArr);
+  countries.search_str = searchStr;
+  return false;
+}
 function htmlPeri(key, value) {
   let noSearch = searchPeri(key, value);
   if (noSearch && peri.current == peri.loaded) return;
   let s = "";
   for (i = 0; i < peri.search_arr[key].length; i++) {
-    s += `<option>${peri.search_arr[key][i]}`
+    s += `<option>${peri.search_arr[key][i]}`;
   }
   $("#peri_list").html(s);
   peri.loaded = key;
 }
+function htmlCountry(value) {
+  let noSearch = searchCountry(value);
+  if (noSearch) {
+    if (!countries.init) return;
+    else countries.init = false;
+  }
+  let s = "";
+  const arr = countries.search_arr;
+  let code;
+  let index;
+  for (i = 0; i < arr.length; i++) {
+    index = arr[i];
+    code = countries.code[index];
+    //s += `<option value="${code}">${getCountryFlag({country: code},true)}${countries.name[index]}`;
+    s += `<tr id="cntry${code}"><td>${getCountryFlag({country: code},true)}</td><td>${countries.name[index]}</td></tr>`;
+  }
+  $('#country_list').html(s);
+  let length = arr.length > 8 ? 8 : arr.length;
+  if (length != countries.size) {
+    let height = 19 * length; //19 is row height
+    //$('#country_list_container').css('height', `${height}px`);
+    $('#country_list_container')[0].offsetHeight = height;
+  }
+}
 function changePeriIndex(keycode = 0) {
-  const pl = $('#peri_list')[0];
-  let index = pl.selectedIndex;
+  let index = changeIndex($('#peri_list')[0].selectedIndex, -1, keycode);
+  if (index > -2 && index < peri.search_arr[peri.current].length) {
+    $(`select#peri_list`).prop('selectedIndex', index);
+  }
+}
+function changeCountryIndex(keycode = 0) {
+  let def = countries.default ? 0 : -1;
+  let index = changeIndex(countries.highlighted_index, def, keycode);
+  if (index > def - 1 && index < countries.search_arr.length) {
+    let code = countries.code[countries.search_arr[index]];
+    //$('#country_list')[0].children[highlighted_index].removeClass('highlight_row');
+    $(`#cntry${countries.highlighted}`).removeClass('highlight_row');
+    countries.highlighted = code;
+    countries.highlighted_index = index;
+    $(`#cntry${code}`).addClass('highlight_row');
+    scrollToHighlight(keycode);
+  }
+  else if (def == -1) countries.highlighted_index = -1;
+}
+function changeIndex(index, min, keycode = 0) {
   if (keycode == 38) index--;
   else if (keycode == 40) index++;
-  else index = -1;
-  if (index > -2 && index < pl.length) {
-    $('select#peri_list').prop('selectedIndex', index);
+  else index = min;
+  return index;
+}
+function scrollToHighlight(keycode) {
+  if (countries.highlighted_index > -1) {
+    let top = $('#country_list_container')[0].scrollTop;
+    let current = $('.highlight_row')[0].offsetTop;
+    if (keycode == 38 && current < top) {
+      $('#country_list_container').scrollTop(current);
+    }
+    else if (keycode == 40 && (current - top) > 121) { //121 = height - row size
+     top = current - 121;
+     $('#country_list_container').scrollTop(top);
+    }
+  }
+}
+function showCountry() {
+  const arr = countries.search_arr;
+  if (arr.length > 0) {
+    if ($('#country_list_container').hasClass('hidden')) {
+      $('#country_list_container').removeClass('hidden');
+      $('#country_input').addClass('add_corner');
+      $('#country_list_container').scrollTop(0);
+      //$('select#country_list').prop('selectedIndex', 0);
+      return true;
+    }
+    else return false;
+  }
+  else {
+    hideCountry();
+    return false;
   }
 }
 function showPeri() {
   const arr = peri.search_arr[peri.loaded];
-  const inp = $(`#filter_inp${peri.current}`);
+  const inp = $(`#peri_inp${peri.current}`);
   if (arr.length > 1 || (arr.length == 1 && arr[0].toLowerCase() !== $(inp).val().toLowerCase())) {
     if ($('#peri_list').hasClass('hidden')) {
       $('#peri_list').removeClass('hidden');
-      $(`#filter_inp${peri.current}`).addClass('add_corner');
+      $(`#peri_inp${peri.current}`).addClass('add_corner');
       $('#peri_list').scrollTop(0);
       return true;
     }
@@ -942,10 +1154,32 @@ function showPeri() {
     return false;
   }
 }
+function hideCountry() {
+  const arr = countries.search_arr;
+  const hi = countries.highlighted_index;
+  const hl = arr[hi];
+  if (!$('#country_list_container').hasClass('hidden')) {
+    if (arr.length > 0 && hi > -1 && countries.code[hl] !== '') {
+      //$('#country_input').val($('#country_list')[0].selectedOptions[0].innerHTML);
+      $('#country_input').val(`${countries.name[hl]}`);
+      api_params.country = countries.code[hl];
+    }
+    else {
+      $('#country_input').val('');
+      api_params.country = '';
+    }
+    updateFilterList();
+    getNewList();
+    $('#country_list_container').addClass('hidden');
+    $('#country_input').removeClass('add_corner');
+    return true;
+  }
+  else return false;
+}
 function hidePeri() {
   if (!$('#peri_list').hasClass('hidden')) {
     $('#peri_list').addClass('hidden');
-    $(`#filter_inp${peri.current}`).removeClass('add_corner');
+    $(`#peri_inp${peri.current}`).removeClass('add_corner');
     return true;
   }
   else return false;
@@ -1097,7 +1331,8 @@ const api_filters = [ //there's probably a cleaner way to do this
     set: (x)=> { x } },
   { name: 'Country',
     get: ()=> { return api_params.country },
-    string: function() { return `"${this.get()}"` }, //change later
+    country: true,
+    string: function() { return ` ${getCountryFlag({country: this.get()})} ${countries.name[countries.code.indexOf(this.get())]}` }, //change later
     set: (x)=> { api_params.country = x } },
 ];
 function chkFilter(obj) {
@@ -1235,7 +1470,7 @@ function createDatalists() {
       peri.list.push(itemNames);
       //datalist_items[item] = s;
       //$('#filters_frame').append(`<datalist id='${item}Datalist'>${s}</datalist>`);
-      //$('#filter_sel1').append(`<option value='${item}'>${obj.string}</option>`);
+      //$('#peri_sel1').append(`<option value='${item}'>${obj.string}</option>`);
     }
     else if (obj.string === 'Playstyle') {
       const pArr = items[item];

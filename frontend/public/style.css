@@ -476,6 +476,7 @@ SUB-MENU SECTION (filters and columns section in header)
 .scrollable_div::-webkit-scrollbar-track {
   background: transparent; 
 }
+
 .sub_scroll {
   position: absolute;
   background: rgb(0, 0, 0, 0.39);
@@ -663,28 +664,61 @@ SUB-MENU SECTION (filters and columns section in header)
   width: 252px;
   height: 100px;
   font-size: 12px;
+}
+.searchable_div {
   color: white;
   background-color:rgb(23, 54, 62);
   border: 0px none;
   border-radius: 0;
+  cursor: pointer;
   outline: none;
+  text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow-x: hidden;
   overflow-y: scroll;
+  scrollbar-width: thin;
   scrollbar-color: gray #15242B;
   scroll-behavior: auto;
+  overscroll-behavior: none;
 }
-#peri_list::-webkit-scrollbar-track {
+.searchable_div::-webkit-scrollbar-track {
   background: #15242B; 
 }
-#peri_list::-webkit-scrollbar-thumb {
+.searchable_div::-webkit-scrollbar-thumb {
   border-radius: 0;
 }
-#peri_list > option:nth-child(odd) {
+.searchable_div > option:nth-child(odd) {
   background-color:rgb(22, 45, 52);
 }
-#peri_list > option:checked {
+.searchable_div tr:nth-child(odd) {
+  background-color:rgb(22, 45, 52);
+}
+.searchable_div > option:checked {
   color: #FFF;
   box-shadow: 0 0 10px 100px rgb(40, 92, 105) inset;
 }
+.searchable_div tr.highlight_row {
+  background-color:rgb(40, 92, 105);
+  text-shadow:0px 0px 1px currentColor, 0px 0px 5px #ccc;
+}
+#country_input {
+  width: 148px;
+}
+#country_list_container {
+  position: absolute;
+  max-height: 140px;
+  top: 258px;
+  left: 22px;
+}
+#country_list_container table {
+  cursor: pointer;
+  table-layout: fixed;
+  width: 148px;
+}
+#country_list_container table td:nth-of-type(1) {
+  width: 18px;
+}
+
 #filters_frame {
   max-width: 800px;
   /*background-color: #000;*/

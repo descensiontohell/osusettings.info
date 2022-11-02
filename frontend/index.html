@@ -82,13 +82,20 @@
                     &emsp;<input id="edpi_range_min" type="text" class="text_input num_input edpi_input" placeholder="0" maxlength="5" autocomplete="off"> to 
                     <input id="edpi_range_max" type="text" class="text_input num_input edpi_input" placeholder="∞" maxlength="5" autocomplete="off">
                 </div>
+                <br><div class="peri_label">[Country]</div><br>
+                &emsp;<input id="country_input" type="text" class="text_input" placeholder="All" autocomplete="off"><br>
                 <br><div class="peri_label">[Playstyle]</div><br>
                 &emsp;<select id="playstyle_select" class="text_input"></select><br>
                 <br><div class="peri_label">[Peripherals]</div>
-                <div id="peri_filters"></div><br>
+                <div id="peri_filters" class="filter_search"></div><br>
                 &emsp;<button id="add_peri_filters_button" class="add_peri" disabled><span>+</span></button>
                 <div id="peri_list_container">
-                    <select id="peri_list" class="scrollable_div hidden" size="2"></select>
+                    <select id="peri_list" class="searchable_div hidden" size="2"></select>
+                </div>
+                <div id="country_list_container" class="searchable_div hidden">
+                    <table border="0" cellpadding="0" cellspacing="0" >
+                        <tbody id="country_list"></tbody>
+                    </table>
                 </div>
                 <button class="close_frame"><span>✖</span></button>
             </div>
